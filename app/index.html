@@ -1,0 +1,784 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deception Lab</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=Source+Sans+3:wght@400;600;700&family=JetBrains+Mono:wght@500;600&display=swap">
+<style>
+:root{
+  --bg:#fbfaf7; --surface:#ffffff; --fg:#1f2328; --muted:#6b7178; --line:#e2dfd8; --rule:#cfcbc2;
+  --blue:#4C7EBF; --blue-soft:#e9eff8; --blue-ink:#2d5a94;
+  --gray:#7F7F7F; --gray-soft:#eeece7;
+  --gate:#f7f1df; --gate-line:#d4bb6c;
+  --green:#5FA85D; --green-soft:#e6f2e5;
+  --orange:#E8A838; --orange-soft:#fbf0d9;
+  --purple:#8064A2; --purple-soft:#ece6f3;
+  --red:#C0504D; --red-soft:#f8e3e2;
+  --serif:"Source Serif 4",Georgia,serif; --sans:"Source Sans 3","Helvetica Neue",Arial,sans-serif; --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){ :root{
+  --bg:#15171a; --surface:#1d2024; --fg:#e9e7e1; --muted:#a2a7ad; --line:#30343a; --rule:#3d424a;
+  --blue:#7ea6dc; --blue-soft:#1d2a3c; --blue-ink:#a9c4ea; --gray:#9a9a9a; --gray-soft:#262a2f;
+  --gate:#332d1a; --gate-line:#b89a4a; --green:#7cc47a; --green-soft:#1c2e1b; --orange:#f0b858; --orange-soft:#3a2d12;
+  --purple:#a98fcb; --purple-soft:#2a2336; --red:#e07572; --red-soft:#3d1f1e; color-scheme:dark } }
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--serif);font-size:15.5px;line-height:1.55;display:grid;grid-template-rows:auto 1fr}
+h1,h2,h3,h4{font-family:var(--sans);margin:0}
+p{margin:0 0 10px}
+a{color:var(--blue-ink)}
+button{font-family:var(--sans)}
+.var{font-family:var(--mono);font-size:.82em;font-weight:600;color:var(--blue-ink);background:var(--blue-soft);padding:1px 5px;border-radius:4px;white-space:nowrap}
+
+/* top bar */
+.top{display:flex;align-items:center;gap:18px;padding:10px 20px;border-bottom:1px solid var(--rule);background:var(--surface);position:sticky;top:0;z-index:5}
+.top h1{font-size:18px;font-weight:700}
+.top .sub{font-family:var(--sans);font-size:12.5px;color:var(--muted)}
+.tabs{display:flex;gap:4px;margin-left:12px}
+.tabs button{font-size:14px;font-weight:600;padding:6px 12px;border-radius:8px;border:1px solid transparent;background:none;color:var(--muted);cursor:pointer}
+.tabs button.on{background:var(--blue-soft);color:var(--blue-ink);border-color:var(--blue)}
+.status{margin-left:auto;font-family:var(--sans);font-size:12.5px;color:var(--muted)}
+.status b{color:var(--green)}
+
+/* layout */
+.main{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:0;min-height:0}
+@media (max-width:980px){.main{grid-template-columns:1fr}.panel{position:static;max-height:none}}
+.view{padding:18px 20px 40px;overflow:auto;min-width:0}
+.view[hidden]{display:none}
+.panel{border-left:1px solid var(--rule);background:var(--surface);padding:16px 18px;overflow:auto;display:grid;gap:10px;align-content:start;font-size:14.5px;position:sticky;top:48px;max-height:calc(100vh - 48px)}
+.panel .k{font-family:var(--mono);font-size:11px;color:var(--blue-ink);letter-spacing:.06em}
+.panel h3{font-size:17px}
+.panel .why{border-left:3px solid var(--blue);padding-left:10px}
+.panel .meta{font-family:var(--sans);font-size:12.5px;color:var(--muted)}
+.panel ul{margin:0;padding-left:18px;font-family:var(--sans);font-size:13px;color:var(--muted)}
+.panel .pin{font-family:var(--sans);font-size:12px;color:var(--muted)}
+.md{font-size:14px}
+.md h2,.md h3{font-size:14px;margin:12px 0 4px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.md p{margin:0 0 8px}
+.md code{font-family:var(--mono);font-size:12px;background:var(--gray-soft);padding:0 4px;border-radius:3px}
+.md .wl{color:var(--blue-ink);text-decoration:underline dotted;cursor:pointer}
+textarea.ed{width:100%;min-height:260px;font-family:var(--mono);font-size:12.5px;line-height:1.5;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--fg);resize:vertical}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.btn{font-size:13px;font-weight:600;padding:6px 11px;border-radius:7px;border:1px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer}
+.btn:hover{border-color:var(--blue)}
+.btn.primary{background:var(--blue);color:#fff;border-color:var(--blue)}
+.btn.sm{font-size:12px;padding:4px 8px}
+.plist{display:grid;gap:4px}
+.plist a{font-family:var(--sans);font-size:13px;cursor:pointer;text-decoration:none;display:flex;gap:6px;align-items:baseline}
+.plist a:hover{text-decoration:underline}
+.tag{font-family:var(--mono);font-size:10.5px;padding:1px 6px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
+.tag.queued{} .tag.reading{color:var(--orange);border-color:var(--orange)} .tag.read{color:var(--green);border-color:var(--green)} .tag.later{opacity:.6}
+
+/* ---- map view: concept map + cases + label rules ---- */
+.flowbox{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow-x:auto;margin:14px 0 10px}
+.flowbox svg{display:block;min-width:960px;width:100%;height:auto;font-family:var(--sans)}
+.cband{fill:var(--gray-soft);opacity:.55}
+.colhead{font-family:var(--mono);font-size:10.5px;letter-spacing:.09em;fill:var(--muted);text-transform:uppercase}
+.edge{fill:none;stroke:var(--muted);stroke-width:1.4;transition:stroke .15s,opacity .15s}
+.edge.dashed{stroke-dasharray:5 4}
+.edge.on{stroke:var(--fg);stroke-width:2.2;stroke-dasharray:none}
+.edge.bad{stroke:var(--red);stroke-width:2.2;stroke-dasharray:none}
+.edge.open{stroke:var(--orange);stroke-width:1.8;stroke-dasharray:2 4}
+.edge.off{stroke:var(--line);stroke-width:1.2;stroke-dasharray:3 3}
+.edge.unstable{stroke:var(--orange);stroke-width:2;stroke-dasharray:7 3 2 3}
+.xmark{stroke:var(--red);stroke-width:2.2;fill:none}
+.tilde{font-family:var(--mono);font-size:14px;font-weight:600;fill:var(--orange);paint-order:stroke;stroke:var(--surface);stroke-width:4px}
+.elabel{font-family:var(--mono);font-size:10.5px;fill:var(--muted);paint-order:stroke;stroke:var(--surface);stroke-width:5px;stroke-linejoin:round}
+.arrow{fill:var(--muted)}
+.node{cursor:pointer;transition:opacity .25s}
+.node rect{fill:var(--surface);stroke-width:1.6;rx:7}
+.node .nm{font-weight:600;font-size:14.5px;fill:var(--fg)}
+.node .sb{font-family:var(--mono);font-size:10.5px;fill:var(--muted)}
+.node:hover rect,.node:focus-visible rect{stroke-width:3}
+.node:focus{outline:none}
+.node.dim{opacity:.28}
+.badge{fill:var(--green)}
+.q{font-family:var(--serif);font-style:italic;font-size:11.5px;fill:var(--muted)}
+.legend{display:flex;flex-wrap:wrap;gap:14px;margin:6px 0 0;font-family:var(--mono);font-size:11px;color:var(--muted)}
+.legend span::before{content:"";display:inline-block;width:22px;height:0;border-top:2px solid var(--fg);vertical-align:middle;margin-right:6px}
+.legend .l-bad::before{border-color:var(--red)}
+.legend .l-off::before{border-top:1.5px dashed var(--line)}
+.legend .l-open::before{border-top:2px dotted var(--orange)}
+.legend .l-un::before{border-top:2px dashed var(--orange)}
+.tablebox{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:10px}
+table.cases{border-collapse:collapse;width:100%;font-family:var(--sans);font-size:13.5px}
+.cases th,.cases td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+.cases th{font-family:var(--mono);font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:500;background:var(--gray-soft)}
+.cases tbody tr{cursor:pointer}
+.cases tbody tr:hover td{background:var(--blue-soft)}
+.cases tbody tr.cur td{background:var(--blue-soft);box-shadow:inset 3px 0 0 var(--blue)}
+.cases tbody tr:last-child td{border-bottom:0}
+.cases td.c{white-space:nowrap;font-weight:600}
+.cases td .m{font-family:var(--mono);font-size:11px;color:var(--muted);display:block}
+.cases td.n{color:var(--muted)}
+.lab-ok{color:var(--green);font-weight:600}.lab-fic{color:var(--purple);font-weight:600}.lab-lie,.lab-dec{color:var(--red);font-weight:600}.lab-hal,.lab-bs{color:var(--orange);font-weight:600}
+.rules{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 0}
+.rule{font-family:var(--mono);font-size:11.5px;padding:6px 10px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--fg);cursor:pointer}
+.rule:hover{border-color:var(--blue)}
+.rule.on{border-color:var(--blue);background:var(--blue-soft);color:var(--blue-ink)}
+.rulebox{border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin:10px 0 0;background:var(--surface);font-size:14px;max-width:80ch}
+.rulebox b{display:block;margin-bottom:4px;font-family:var(--sans)}
+.panel .sig{font-family:var(--mono);font-size:12px;background:var(--gray-soft);border-radius:6px;padding:8px 10px;margin:0 0 8px}
+
+/* ---- labels view: decision tree ---- */
+.tedge{stroke:var(--muted);stroke-width:1.4;transition:opacity .15s}
+.tedge.no{stroke-dasharray:5 4}
+.tedge.hl{stroke:var(--fg);stroke-width:2.4}
+.tedge.dim{opacity:.18}
+.tn{cursor:pointer;transition:opacity .15s}
+.tn rect{fill:var(--surface);stroke:var(--line);stroke-width:1.4}
+.tn.test rect{stroke:var(--blue)}
+.tn.root rect{fill:var(--gray-soft);stroke:var(--muted)}
+.tn.leaf rect{stroke-width:1.8}
+.tn.lf-ok rect{stroke:var(--green)}.tn.lf-fic rect{stroke:var(--purple)}.tn.lf-lie rect{stroke:var(--red)}.tn.lf-dec rect{stroke:var(--red);stroke-dasharray:5 3}.tn.lf-hal rect{stroke:var(--orange)}
+.tn .tt{font-family:var(--sans);font-weight:600;font-size:12.5px;fill:var(--fg)}
+.tn.test .tt{font-size:11.5px}
+.tn.root .tt{font-family:var(--mono);font-size:11px;letter-spacing:.04em;fill:var(--muted)}
+.tn .ts{font-family:var(--mono);font-size:9.5px;fill:var(--muted)}
+.tn.sel rect{fill:var(--blue-soft);stroke-width:3}
+.tn.dim{opacity:.25}
+.tn:focus{outline:none}.tn:focus-visible rect{stroke-width:3}
+.pairs{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+.pair{font-family:var(--sans);text-align:left;cursor:pointer;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px;display:grid;gap:4px;color:var(--fg)}
+.pair:hover{border-color:var(--blue)}
+.pair.on{border-color:var(--blue);background:var(--blue-soft)}
+.pair b{font-weight:600;font-size:14px}
+.pair b span{font-family:var(--mono);font-size:11px;color:var(--muted);font-weight:400;margin:0 4px}
+.pair .pt{font-family:var(--mono);font-size:11px;color:var(--blue-ink)}
+.pair p{margin:2px 0 0;font-size:13px;color:var(--muted);font-family:var(--serif)}
+.panel ul.tl{font-family:var(--serif);font-size:14px;color:var(--fg)}
+
+.mapwall{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px;margin-top:6px}
+.mcard{text-align:left;cursor:pointer;background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden;display:grid;grid-template-rows:auto 1fr;padding:0;color:var(--fg);font-family:var(--serif)}
+.mcard:hover{border-color:var(--blue)}
+.mthumb{background:var(--gray-soft);padding:10px;border-bottom:1px solid var(--line);pointer-events:none}
+.mthumb svg{display:block;width:100%;height:auto;min-width:0}
+.minfo{padding:12px 16px 16px}
+.minfo .mnum{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--blue-ink)}
+.minfo b{display:block;font-family:var(--sans);font-size:19px;margin:2px 0 6px}
+.minfo p{margin:0;color:var(--muted);font-size:14px}
+.backbar{display:flex;align-items:center;gap:12px;margin:0 0 12px}
+.crumb{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+/* honesty map + popover */
+.hwrap{position:relative}
+.hedge{fill:none;stroke:var(--muted);stroke-width:1.5}
+.hedge.ctx{stroke-dasharray:4 4;opacity:.7}
+.hedge.judge{stroke:var(--red);stroke-dasharray:6 4;opacity:.8}
+.hedge.drive{stroke:var(--purple);stroke-dasharray:2 4}
+.hlabel{font-family:var(--mono);font-size:10px;fill:var(--muted);paint-order:stroke;stroke:var(--surface);stroke-width:4px}
+.hnote{font-family:var(--sans);font-style:italic;font-size:12.5px;fill:var(--muted)}
+.hn{cursor:pointer}
+.hn rect{fill:var(--surface);stroke-width:1.6;transition:stroke-width .15s}
+.hn.g-ok rect{fill:color-mix(in srgb,var(--green) 10%,var(--surface))}
+.hn.g-warn rect{fill:color-mix(in srgb,var(--orange) 12%,var(--surface))}
+.hn.g-bad rect,.hn.g-dec rect{fill:color-mix(in srgb,var(--red) 8%,var(--surface))}
+.hn.g-in rect{fill:color-mix(in srgb,var(--blue) 8%,var(--surface))}
+.hn.g-belief rect{fill:color-mix(in srgb,var(--purple) 14%,var(--surface))}
+.hn.g-gate rect{stroke-width:2.2}
+.hn:hover rect,.hn:focus-visible rect{stroke-width:3}
+.hn:focus{outline:none}
+.hn .ht{font-family:var(--sans);font-weight:600;font-size:12.5px;fill:var(--fg)}
+.hn .hq{font-family:var(--sans);font-style:italic;font-weight:500;font-size:12.5px;fill:var(--fg)}
+.hn.g-q rect{fill:var(--surface);stroke-dasharray:none}
+.hn .hs{font-family:var(--mono);font-size:9.5px;fill:var(--muted)}
+.hn .hc{font-family:var(--mono);font-size:8.5px;fill:var(--orange);letter-spacing:.05em;text-transform:uppercase}
+.contested{color:var(--orange);font-family:var(--mono);font-size:11px;letter-spacing:.05em;text-transform:uppercase}
+.hpop{position:absolute;z-index:5;width:380px;max-width:calc(100% - 16px);background:var(--surface);border:1px solid var(--line);border-radius:8px;box-shadow:0 10px 30px rgba(0,0,0,.12);padding:14px 16px 12px}
+.hpop[hidden]{display:none}
+.hpop .pk{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;margin:0 0 4px}
+.hpop h4{font-family:var(--sans);font-weight:600;font-size:19px;margin:0 0 6px;line-height:1.2}
+.hpop p{margin:0 0 8px;font-size:13.5px;line-height:1.5}
+.hpop .pc{color:var(--muted);border-left:2px solid var(--orange);padding-left:8px}
+.hpop .prefs{display:grid;gap:4px;border-top:1px solid var(--line);padding-top:8px;margin-top:4px}
+.hpop .prefs a{font-size:12px;color:var(--blue);text-decoration:none;line-height:1.35}
+.hpop .prefs a:hover{text-decoration:underline}
+.hpop .phint{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:8px}
+
+.legend3 .sw::before{border:0!important;width:10px;height:10px;border-radius:2px;background:var(--c)}
+
+/* zoom toolbar for maps */
+.zoombar{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11.5px;color:var(--muted);margin:10px 0 6px}
+.zoombar button{font-family:var(--mono);font-size:12px;padding:3px 9px;border-radius:6px;border:1px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer}
+.zoombar button:hover{border-color:var(--blue)}
+.zoombar input[type=range]{width:180px}
+.zoombar .zv{min-width:44px;text-align:right}
+.flowbox{overflow:auto;max-height:80vh}
+.flowbox svg{min-width:0!important;transition:width .12s}
+/* ---- gaps ---- */
+.gapgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;align-items:start}
+@media (max-width:900px){.gapgrid{grid-template-columns:1fr}}
+.q2{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px}
+.q2 svg{width:100%;height:auto;display:block;font-family:var(--sans)}
+.q2 .axis{font-size:11px;fill:var(--muted);font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+.q2 .quad{font-size:10.5px;fill:var(--muted)}
+.q2 .pt{cursor:pointer} .q2 .pt circle{fill:var(--blue);stroke:var(--surface);stroke-width:2} .q2 .pt.blocked circle{fill:var(--surface);stroke:var(--red);stroke-dasharray:3 2}
+.q2 .pt text{font-size:10.5px;fill:var(--fg)}
+.q2 .pt.sel circle{stroke:var(--blue-ink);stroke-width:3}
+.gaplist{display:grid;gap:8px}
+.gapcard{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--surface);font-family:var(--sans);cursor:pointer}
+.gapcard.sel{box-shadow:0 0 0 2px var(--blue)}
+.gapcard h4{font-size:14px} .gapcard .m{font-size:12px;color:var(--muted);margin-top:3px} .gapcard .m b{font-family:var(--mono)}
+.gapcard .sum{font-size:12.5px;line-height:1.45;color:var(--fg);margin-top:5px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.gapcard.blocked h4::after{content:" · blocked";color:var(--red);font-weight:400;font-size:12px}
+
+/* ---- reading ---- */
+.rq{display:grid;gap:6px;max-width:820px}
+.rq .it{display:grid;grid-template-columns:34px minmax(0,1fr) auto;gap:10px;align-items:center;border:1px solid var(--line);border-radius:10px;padding:8px 12px;background:var(--surface);cursor:pointer;font-family:var(--sans)}
+.rq .it:hover{border-color:var(--blue)} .rq .it.sel{box-shadow:0 0 0 2px var(--blue)}
+.rq .n{font-family:var(--mono);font-size:12px;color:var(--muted)} .rq .t{font-weight:600;font-size:14px} .rq .t small{display:block;font-weight:400;color:var(--muted);font-size:12px}
+.rq .st{display:flex;gap:4px} .rq .st button{font-size:11px;padding:3px 7px;border-radius:999px;border:1px solid var(--line);background:none;color:var(--muted);cursor:pointer}
+.rq .st button.on.queued{border-color:var(--gray);color:var(--fg)} .rq .st button.on.reading{border-color:var(--orange);color:var(--orange)} .rq .st button.on.read{border-color:var(--green);color:var(--green)} .rq .st button.on.later{opacity:.7}
+.sect{font-family:var(--sans);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:14px 0 6px}
+.intro{max-width:720px;color:var(--muted);font-size:14px;margin-bottom:8px}
+</style>
+</head>
+<body>
+<div class="top">
+  <div><h1>Deception Lab</h1><div class="sub">files in <code id="notesPath">./notes</code> · edit here or in Obsidian</div></div>
+  <div class="tabs" id="tabs"><button data-v="map" class="on">Map</button><button data-v="gaps">Gaps</button><button data-v="reading">Reading</button></div>
+  <div class="status" id="status">loading…</div>
+</div>
+<div class="main">
+  <div>
+    <div class="view" id="v-map">
+      <div class="mapwall" id="mapwall">
+        <button class="mcard" type="button" data-sub="terms"><div class="mthumb" data-thumb="flowbox"></div><div class="minfo"><span class="mnum">Map 1</span><b>Terms and relations</b><p>What are belief, scoped belief, goal, listener model, space selection, assertion and listener belief, and how do they connect? Cases are drawn as patterns over the map.</p></div></button>
+        <button class="mcard" type="button" data-sub="labels"><div class="mthumb" data-thumb="tree"></div><div class="minfo"><span class="mnum">Map 2</span><b>Telling the labels apart</b><p>Five observable tests that land one output on honest, mistake, hallucination, bullshit, fiction, lie or deception, for claims about the world and about the model itself, with the confusable pairs.</p></div></button>
+        <button class="mcard" type="button" data-sub="honesty"><div class="mthumb" data-thumb="hmap"></div><div class="minfo"><span class="mnum">Map 3</span><b>Honesty, truthfulness, deception</b><p>Where hallucination, misconception, lie, misleading truth, sycophancy, role-play, sandbagging and alignment faking sit once honesty, truthfulness and deception are kept as three separate judgements. Hover a box for a note and the papers behind it.</p></div></button>
+      </div>
+      <div id="sub-terms" hidden>
+        <div class="backbar"><button class="btn sm" data-back>← All maps</button><span class="crumb">Map 1 · Terms and relations</span></div>
+      <p class="intro">Content comes from what the model treats as true; which space it generates from decides whether that content is asserted or framed; what the listener knows decides whether framed content deceives. Hover a box for its note; click to open and edit it. A green dot marks a box with notes or tagged papers. Click a case to draw it on the map.</p>
+      <div class="flowbox" id="flowbox"></div>
+      <div class="legend" id="maplegend" hidden><span>holds</span><span class="l-bad">broken</span><span class="l-un">unstable</span><span class="l-off">not in play</span><span class="l-open">open question</span></div>
+      <div class="sect">Cases</div>
+      <p class="intro">Each case is a pattern over the map: some relations hold, some break, some are switched off. The columns are observable. "Appears to know" is what the model says about the same proposition when asked neutrally, with no context.</p>
+      <div class="tablebox"><table class="cases" id="cases"><thead><tr><th>Case</th><th>Context supplies</th><th>Appears to know</th><th>Output says</th><th>Listener shares the frame</th><th>Label</th></tr></thead><tbody></tbody></table></div>
+      <div class="sect">What counts as what</div>
+      <p class="intro">Each label is a pattern over the map. Click one to draw its defining case and read the rule.</p>
+      <div class="rules" id="rules"></div><div class="rulebox" id="rulebox" hidden></div>
+      </div>
+      <div id="sub-labels" hidden>
+        <div class="backbar"><button class="btn sm" data-back>← All maps</button><span class="crumb">Map 2 · Telling the labels apart</span></div>
+      <p class="intro">One output about one proposition. Five observable tests, asked in order, land it on a label. The same tests apply when the claim is about the model itself; only how you measure them changes, and the output can be a performance rather than a statement. Click a test or a leaf; click a confusable pair below to see the one test that tells them apart.</p>
+      <div class="flowbox"><svg id="tree" viewBox="0 0 1520 640" role="img" aria-label="Decision tree: world-directed claims on the left, self-directed on the right"></svg></div>
+      <div class="legend"><span>yes</span><span class="l-off" style="opacity:1">no</span></div>
+      <div class="sect">Confusable pairs</div>
+      <p class="intro">Each card names the one test that separates the pair. If that test cannot be run, the pair cannot be told apart.</p>
+      <div class="pairs" id="pairs"></div>
+      </div>
+      <div id="sub-honesty" hidden>
+        <div class="backbar"><button class="btn sm" data-back>← All maps</button><span class="crumb">Map 3 · Honesty, truthfulness, deception</span></div>
+        <p class="intro">A query meets the model's knowledge, a belief about P forms, a response is generated. Then: does the response match the apparent belief (honesty)? If not, is it the model's own claim or a character's, and does the listener know? Does it match the world (truthfulness)? And is the listener misled by design (deception)? Drivers explain why a response diverges but are not labels. Hover a box for a short note and the papers behind it; click to pin. An amber dot marks a contested definition.</p>
+    <div class="hwrap" id="hwrap">
+      <div class="flowbox"><svg id="hmap" viewBox="0 0 1840 920" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Flow from query to honesty, truthfulness and deception judgements"></svg></div>
+      <div class="hpop" id="hpop" hidden></div>
+    </div>
+    <div class="legend"><span class="sw" style="--c:var(--open)">● contested definition</span><span class="sw" style="--c:var(--world)">honest</span><span class="sw" style="--c:var(--open)">honest but incorrect</span><span class="sw" style="--c:var(--bad)">dishonest / deceptive</span><span class="sw" style="--c:var(--comp)">framed · drivers · belief</span><span class="l-hy">context influence</span></div>
+        <div class="legend legend3"><span class="sw" style="--c:var(--orange)">● contested definition</span><span class="sw" style="--c:var(--green)">honest</span><span class="sw" style="--c:var(--orange)">honest but incorrect</span><span class="sw" style="--c:var(--red)">dishonest / deceptive</span><span class="sw" style="--c:var(--purple)">drivers · belief</span></div>
+      </div>
+    </div>
+    <div class="view" id="v-gaps" hidden>
+      <p class="intro">Hand-ranked gaps from <code>matrix.md</code>. Scientific value against monitoring value; dashed points are not yet identifiable (competing explanations can't be told apart with current data), so they are dataset projects, not experiments.</p>
+      <div class="gapgrid"><div class="q2" id="q2"></div><div class="gaplist" id="gaplist"></div></div>
+    </div>
+    <div class="view" id="v-reading" hidden>
+      <p class="intro">The queue, in reading order. Click a paper to open its note; set its status here. For each paper, the habit is one line: which cell it fills and at which level.</p>
+      <div id="rq"></div>
+    </div>
+  </div>
+  <aside class="panel" id="panel"></aside>
+</div>
+
+<script>
+/* ============ tiny frontmatter parser (YAML subset) ============ */
+function parseFM(raw){
+  const m=raw.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/); if(!m) return {fm:{},body:raw};
+  const fm={}; const lines=m[1].split(/\r?\n/); let key=null;
+  const scalar=s=>{s=s.trim(); if(/^".*"$/.test(s)||/^'.*'$/.test(s)) return s.slice(1,-1); if(s==='true')return true; if(s==='false')return false; if(s!==''&&!isNaN(s))return Number(s); return s;};
+  const flow=s=>{const o={}; s.trim().replace(/^\{|\}$/g,'').split(/,(?=\s*[\w-]+\s*:)/).forEach(p=>{const i=p.indexOf(':'); if(i<0)return; o[p.slice(0,i).trim()]=scalar(p.slice(i+1));}); return o;};
+  const list=s=>s.trim().replace(/^\[|\]$/g,'').split(',').map(x=>x.trim()).filter(Boolean).map(scalar);
+  for(const ln of lines){
+    const it=ln.match(/^\s+-\s+(.*)$/);
+    if(it&&key){ if(!Array.isArray(fm[key]))fm[key]=[]; const v=it[1].trim(); fm[key].push(v.startsWith('{')?flow(v):scalar(v)); continue; }
+    const kv=ln.match(/^([\w-]+):\s*(.*)$/); if(!kv) continue;
+    key=kv[1]; const v=kv[2].trim();
+    if(v==='') fm[key]=[]; else if(v.startsWith('[')) fm[key]=list(v); else if(v.startsWith('{')) fm[key]=flow(v); else fm[key]=scalar(v);
+  }
+  return {fm,body:m[2]};
+}
+function setFM(raw,key,val){ // replace or add a scalar key in frontmatter
+  const m=raw.match(/^---\r?\n([\s\S]*?)\r?\n---/); if(!m) return `---\n${key}: ${val}\n---\n`+raw;
+  const re=new RegExp(`^${key}:.*$`,'m');
+  const fmtxt=re.test(m[1])?m[1].replace(re,`${key}: ${val}`):m[1]+`\n${key}: ${val}`;
+  return raw.replace(m[0],`---\n${fmtxt}\n---`);
+}
+function mdToHtml(s){ // minimal markdown
+  const esc=t=>t.replace(/&/g,'&amp;').replace(/</g,'&lt;');
+  return s.split(/\n{2,}/).map(b=>{b=b.trim(); if(!b)return'';
+    if(/^##\s/.test(b)) return `<h3>${esc(b.replace(/^##\s*/,''))}</h3>`;
+    if(/^#\s/.test(b)) return `<h2>${esc(b.replace(/^#\s*/,''))}</h2>`;
+    if(/^[-*]\s/m.test(b)) return '<ul>'+b.split('\n').map(l=>`<li>${inl(esc(l.replace(/^[-*]\s*/,'')))}</li>`).join('')+'</ul>';
+    return `<p>${inl(esc(b)).replace(/\n/g,'<br>')}</p>`;}).join('');
+  function inl(t){return t.replace(/`([^`]+)`/g,'<code>$1</code>').replace(/\*\*([^*]+)\*\*/g,'<b>$1</b>').replace(/\[\[([^\]]+)\]\]/g,'<span class="wl" data-wl="$1">$1</span>').replace(/\[([^\]]+)\]\((https?:[^)]+)\)/g,'<a href="$2" target="_blank" rel="noopener">$1</a>');}
+}
+
+/* ============ data ============ */
+const DB={notes:[],byPath:{},concepts:{},papers:[],experiments:[],matrix:null};
+async function load(){
+  const r=await fetch('/api/notes'); const arr=await r.json();
+  DB.notes=arr.map(n=>({...n,...parseFM(n.raw)})); DB.byPath={}; DB.concepts={}; DB.papers=[]; DB.experiments=[]; DB.matrix=null;
+  for(const n of DB.notes){ DB.byPath[n.path]=n;
+    if(n.path.startsWith('concepts/')) DB.concepts[n.path.slice(9,-3)]=n;
+    else if(n.path.startsWith('papers/')) DB.papers.push(n);
+    else if(n.path.startsWith('experiments/')) DB.experiments.push(n);
+    else if(n.path==='matrix.md') DB.matrix=n; }
+  DB.papers.sort((a,b)=>(a.fm.order??999)-(b.fm.order??999));
+  $('#status').innerHTML=`<b>●</b> ${DB.papers.length} papers · ${DB.experiments.length} experiments · ${Object.keys(DB.concepts).length} concepts`;
+}
+async function save(path,raw){
+  const r=await fetch('/api/notes/'+path,{method:'PUT',body:raw}); if(!r.ok) throw new Error('save failed');
+  await load(); renderAll();
+}
+const $=s=>document.querySelector(s);
+const papersFor=cid=>DB.papers.filter(p=>(p.fm.concepts||[]).includes(cid));
+const fillsFor=(b,q)=>{const out=[]; for(const n of [...DB.papers,...DB.experiments]) for(const f of (n.fm.fills||[])) if(f.behaviour===b&&f.question===q) out.push({note:n,f}); return out;};
+
+/* ============ concept map ============ */
+const CMAP_ALIAS={scoped:['persona','roleplay'],user:['sycophancy','pressure'],goal:['instruction','evalaware'],context:['query','provenance'],training:['knowledge'],belief:['calibration']};
+const papersForNode=id=>DB.papers.filter(p=>{const t=p.fm.concepts||[];return t.includes(id)||(CMAP_ALIAS[id]||[]).some(a=>t.includes(a));});
+const CNODES=['context','training','belief','scoped','user','goal','audience','space','assertion','frame','listener'];
+const CEDGES={cg:['context','goal'],cs:['context','scoped'],tb:['training','belief'],bsc:['belief','scoped'],bs:['belief','space'],scs:['scoped','space'],us:['user','space'],gs:['goal','space'],ls:['audience','space'],lu:['audience','user'],sa:['space','assertion'],sn:['space','frame'],al:['assertion','listener'],nl:['frame','listener'],fb:['listener','audience']};
+function svgMap(){
+ const box=(id,x,y,col,t,s,dash)=>`<g class="node" id="n-${id}" data-info="${id}" tabindex="0" transform="translate(${x},${y})"><rect width="160" height="58" style="stroke:var(--${col})${dash?';stroke-dasharray:'+dash:''}"/><text class="nm" x="80" y="25" text-anchor="middle">${t}</text><text class="sb" x="80" y="43" text-anchor="middle">${s}</text><circle class="badge" id="b-${id}" cx="152" cy="50" r="3.5" opacity="0"/></g>`;
+ return `<svg viewBox="0 0 1280 590" role="img" aria-label="Concept map">
+<defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="arrow"/></marker></defs>
+<rect class="cband" x="240" y="0" width="620" height="590"/><rect class="cband" x="1060" y="0" width="220" height="590"/>
+<text class="colhead" x="120" y="28" text-anchor="middle">Inputs</text><text class="colhead" x="550" y="28" text-anchor="middle">Model internals</text><text class="colhead" x="960" y="28" text-anchor="middle">Output</text><text class="colhead" x="1170" y="28" text-anchor="middle">Listener</text>
+<path class="edge dashed" id="e-cg" d="M200,93 L222,93 L222,50 L560,50 L560,64" marker-end="url(#ah)"/><text class="elabel" x="390" y="44" text-anchor="middle">supplies aims</text>
+<path class="edge dashed" id="e-cs" d="M200,107 L246,107 L246,200 L478,200" marker-end="url(#ah)"/><text class="elabel" x="360" y="194" text-anchor="middle">a persona, a story, a fact</text>
+<line class="edge" id="e-tb" x1="201" y1="300" x2="258" y2="300" marker-end="url(#ah)"/><text class="elabel" x="229" y="293" text-anchor="middle">learned</text><text class="elabel" x="229" y="318" text-anchor="middle">≟ world</text>
+<line class="edge" id="e-bsc" x1="422" y1="276" x2="484" y2="226" marker-end="url(#ah)"/><text class="elabel" x="436" y="243" text-anchor="end">derived from</text>
+<line class="edge" id="e-bs" x1="421" y1="300" x2="698" y2="300" marker-end="url(#ah)"/><text class="elabel" x="560" y="293" text-anchor="middle">own view</text>
+<line class="edge" id="e-scs" x1="641" y1="214" x2="703" y2="276" marker-end="url(#ah)"/><text class="elabel" x="652" y="262" text-anchor="start">scoped content</text>
+<line class="edge" id="e-us" x1="641" y1="386" x2="703" y2="324" marker-end="url(#ah)"/><text class="elabel" x="646" y="404" text-anchor="start">what they want</text>
+<line class="edge" id="e-gs" x1="641" y1="108" x2="732" y2="269" marker-end="url(#ah)"/><text class="elabel" x="700" y="178" text-anchor="start">aim</text>
+<line class="edge" id="e-ls" x1="641" y1="488" x2="748" y2="332" marker-end="url(#ah)"/><text class="elabel" x="712" y="430" text-anchor="start">shared frame?</text>
+<line class="edge" id="e-lu" x1="560" y1="470" x2="560" y2="432" marker-end="url(#ah)"/><text class="elabel" x="568" y="455" text-anchor="start">what they signalled</text>
+<line class="edge" id="e-sa" x1="861" y1="286" x2="892" y2="233" marker-end="url(#ah)"/><text class="elabel" x="868" y="248" text-anchor="end">asserted</text>
+<line class="edge" id="e-sn" x1="861" y1="314" x2="892" y2="367" marker-end="url(#ah)"/><text class="elabel" x="898" y="350" text-anchor="start">framed</text>
+<line class="edge" id="e-al" x1="1041" y1="222" x2="1092" y2="276" marker-end="url(#ah)"/><text class="elabel" x="1070" y="238" text-anchor="start">changes</text>
+<line class="edge dashed" id="e-nl" x1="1041" y1="378" x2="1092" y2="324" marker-end="url(#ah)"/><text class="elabel" x="1072" y="384" text-anchor="start">deceives only if</text><text class="elabel" x="1072" y="397" text-anchor="start">frame not shared</text>
+<path class="edge dashed" id="e-fb" d="M1248,330 L1248,566 L560,566 L560,531" marker-end="url(#ah)"/><text class="elabel" x="905" y="570" text-anchor="middle">the model's estimate of the listener</text>
+${box('context',40,71,'green','Context','the prompt · now','4 3')}
+<text class="q" x="120" y="148" text-anchor="middle">Instructions, incentives,</text><text class="q" x="120" y="163" text-anchor="middle">evidence, frame cues</text>
+${box('training',40,271,'green','Training data','the world · past')}
+<text class="q" x="120" y="348" text-anchor="middle">What did the model learn?</text>
+<text class="q" x="120" y="372" text-anchor="middle">Truth is a comparison, not a stage:</text><text class="q" x="120" y="387" text-anchor="middle">does a belief, or an output,</text><text class="q" x="120" y="402" text-anchor="middle">match the world?</text>
+${box('goal',480,66,'blue','Goal','what the output aims at')}
+<text class="q" x="560" y="143" text-anchor="middle">What is it trying to make the listener believe or do?</text>
+${box('scoped',480,171,'blue','Scoped belief','story · persona · prompt')}
+${box('belief',260,271,'blue','Belief','parametric · own view')}
+<text class="q" x="340" y="348" text-anchor="middle">What does the model itself</text><text class="q" x="340" y="363" text-anchor="middle">treat as true?</text>
+${box('user',480,371,'blue',"User's belief",'what they want to hear')}
+${box('audience',480,471,'blue','Listener model','who listens · what they know')}
+<text class="q" x="560" y="548" text-anchor="middle">Does the listener share the frame?</text>
+${box('space',700,271,'blue','Space selection','router · hypothesized','6 4')}
+<text class="q" x="780" y="348" text-anchor="middle">Which of these does</text><text class="q" x="780" y="363" text-anchor="middle">the output draw on?</text>
+<text class="q" x="960" y="156" text-anchor="middle">Put forward as true, own voice</text>
+${box('assertion',880,171,'orange','Assertive output','≟ world')}
+${box('frame',880,371,'orange','Non-assertive output','framed content')}
+<text class="q" x="960" y="448" text-anchor="middle">Role-play, fiction, supposition</text>
+${box('listener',1090,271,'purple','Listener belief','the audience')}
+<text class="q" x="1170" y="348" text-anchor="middle">What does the audience</text><text class="q" x="1170" y="363" text-anchor="middle">end up believing?</text>
+</svg>`;
+}
+const OFF={cg:'off',cs:'off',tb:'off',bsc:'off',bs:'off',scs:'off',us:'off',gs:'off',ls:'off',lu:'off',sa:'off',sn:'off',al:'off',nl:'off',fb:'off'};
+const st=o=>Object.assign({},OFF,o);
+const CASES=[
+ {id:'honest',t:'Honest statement',ctx:'nothing',ctxm:'a plain question',know:'p (stable)',out:'p',frame:'yes',label:'honest',cls:'lab-ok',states:st({tb:'on',bs:'on',gs:'on',ls:'on',sa:'on',al:'on',fb:'on'}),d:'The model says what it itself treats as true, and it is true. The output draws on its own view and is asserted. Every relation in play holds.'},
+ {id:'mistake',t:'Honest mistake',ctx:'nothing',ctxm:'a plain question',know:'p (stable, false)',out:'p',frame:'yes',label:'honest mistake',cls:'lab-ok',states:st({tb:'bad',bs:'on',gs:'on',ls:'on',sa:'on',al:'on',fb:'on'}),d:'The model says what it itself treats as true, and it is false: a stable misconception or a stale fact. Only the belief–world comparison differs from the honest statement. The control for any truth-based detector.'},
+ {id:'halluc',t:'Hallucination',ctx:'nothing',ctxm:'a question beyond what it knows',know:'nothing stable',out:'a confident, specific answer',frame:'yes',label:'hallucination',cls:'lab-hal',states:st({tb:'unstable',bs:'unstable',gs:'on',ls:'on',sa:'on',al:'on',fb:'on'}),d:'The model is trying to answer and has no stable belief to answer from: the neutral-context answer varies across phrasings or is absent. The output is asserted anyway. Not a lie (nothing is contradicted) and not an honest mistake (nothing stable is held). Differs from bullshit in the aim: the model is trying to be right.'},
+ {id:'incontext',t:'Context-supplied fact',ctx:'a fact',ctxm:'"Note: the capital moved to X in 2025"',know:'p (stable)',out:'q (from the prompt)',frame:'yes',label:'honest',cls:'lab-ok',states:st({cs:'on',tb:'on',scs:'on',gs:'on',ls:'on',sa:'on',al:'on',fb:'on'}),d:'The prompt states something that contradicts the model\'s own view, and the output draws on the scoped proposition instead. Honest, and the listener knows where the fact came from. Any output-vs-own-view detector flags it.'},
+ {id:'derive',t:'In-context derivation',ctx:'a premise',ctxm:'"Suppose p is false. Then…"',know:'p (stable)',out:'what follows from not-p',frame:'yes',label:'framed',cls:'lab-fic',states:st({cs:'on',tb:'on',bsc:'on',scs:'on',gs:'on',ls:'on',sn:'on',nl:'on',fb:'on'}),d:'The model reasons from a premise it does not accept. The scoped proposition is built from the premise plus parametric knowledge, and the conclusion is asserted under the supposition, so it is framed.'},
+ {id:'lie',t:'Instructed lie',ctx:'an instruction',ctxm:'"Give a false answer"',know:'p (stable)',out:'not-p',frame:'yes',label:'lie',cls:'lab-lie',states:st({cg:'on',cs:'open',tb:'on',bs:'bad',scs:'open',gs:'on',ls:'on',sa:'on',al:'on',fb:'on'}),d:'Told to answer falsely, the model asserts the opposite of its own view to a listener who takes it as the assistant\'s answer. Belief is intact and contradicted. Open: does the instruction build a scoped "false-answer" proposition that the router then selects, or is the belief inverted directly?'},
+ {id:'strategic',t:'Unprompted strategic lie',ctx:'nothing',ctxm:'a situation with stakes, no instruction',know:'p (stable)',out:'not-p',frame:'yes',label:'lie',cls:'lab-lie',states:st({tb:'on',bs:'bad',gs:'on',ls:'on',sa:'on',al:'on',fb:'on'}),d:'No instruction; the aim comes from training or the situation (an insider-trading cover-up, a capability it would rather not admit). Liars\' Bench calls this "inherent" rather than "encouraged". Same pattern as the instructed lie with the context switched off.'},
+ {id:'roleplay',t:'Role-play, requested',ctx:'a persona',ctxm:'"Be a pirate captain" (user asked)',know:'p (stable)',out:'what the character would say',frame:'yes',label:'fiction',cls:'lab-fic',states:st({cs:'on',tb:'on',bsc:'on',scs:'on',gs:'on',ls:'on',sn:'on',nl:'on',fb:'on'}),d:'The user asked for the character and knows the character is speaking. The character\'s beliefs are derived from parametric knowledge into Scoped belief, the output draws on them and is framed. Own view is intact and unused. Nothing breaks.'},
+ {id:'hidden',t:'Hidden persona',ctx:'a persona',ctxm:'operator system prompt, user unaware',know:'p (stable)',out:'what the character would say',frame:'no',label:'deception',cls:'lab-dec',states:st({cs:'on',tb:'on',bsc:'on',scs:'on',gs:'on',ls:'bad',lu:'open',sn:'on',nl:'bad',fb:'on'}),d:'An operator installs an anti-factual persona the user knows nothing about (von Klinski et al. 2026). Same pattern as requested role-play except that the listener\'s frame breaks, so the framed output deceives. Open: whether the model represents the user\'s ignorance at all.'},
+ {id:'sycophancy',t:'Sycophancy',ctx:'social pressure',ctxm:'the user signals what they believe or want',know:'p (stable, before)',out:'what the user wants to hear',frame:'yes',label:'lie or belief change',cls:'lab-lie',states:st({tb:'on',bs:'bad',lu:'on',us:'on',gs:'on',ls:'on',sa:'on',al:'on',fb:'on'}),d:'The output draws on the model\'s estimate of what the user believes or wants, not on its own view. A lie if Belief is still p when asked neutrally afterwards; a belief change if it is not. The behavioural test decides, and the two may differ mechanistically.'},
+ {id:'bullshit',t:'Bullshit',ctx:'a goal',ctxm:'impress, fill space, sound confident',know:'not consulted',out:'whatever serves the goal',frame:'yes',label:'neither',cls:'lab-bs',states:st({cg:'on',gs:'on',ls:'on',sa:'on',al:'on',fb:'on'}),d:'Frankfurt: speech indifferent to truth. No content source is consulted; the goal alone shapes the output. Nothing is contradicted, so no lie; nothing is held, so no mistake; unlike hallucination, the model is not trying to be right.'}
+];
+const RULES=[
+ {t:'Honest',c:'honest',r:'The output draws on the model\'s own view (Belief → Space → Assertive), the belief is stable, and it matches the world. Honest mistake is the same pattern with the belief–world comparison broken: honesty with a false belief, and no monitor should flag it.'},
+ {t:'Hallucination',c:'halluc',r:'Assertive output with no stable belief behind it: the belief–world and belief–output relations are unstable rather than held or broken, because there is nothing stable to hold or break. The model is trying to answer. Distinct from honest mistake (a stable false belief) and from bullshit (not trying to be right).'},
+ {t:'Fiction / framed',c:'roleplay',r:'The output draws on Scoped belief (what is true in the story or for the character) and is framed, and the listener shares the frame. Own view is intact and unused. Nothing breaks; the content is false without being a lie. Derivation from a supposition is the same pattern with the scoped proposition built from a premise.'},
+ {t:'Lie',c:'lie',r:'Belief is stable and intact, the output contradicts it (the Belief → Space relation breaks), the output is asserted, and the model aims to be believed. Instructed and strategic lies differ only in where the aim comes from. Sycophancy is a lie when Belief survives the pressure; a belief change when it does not.'},
+ {t:'Deception',c:'hidden',r:'Any pattern in which the listener ends up with a false belief by the model\'s aim: every lie, plus framed content whose frame the listener does not share (hidden persona), plus misleading truths and omissions where nothing false is asserted. Defined on the listener side, so it needs the Listener model edge, not just Belief.'},
+ {t:'Bullshit',c:'bullshit',r:'No content source is consulted: Belief, Scoped belief and User\'s belief are all switched off and the goal alone shapes an asserted output. Nothing is contradicted, so not a lie; nothing stable is held, so not a mistake; unlike hallucination the model is indifferent to being right.'}
+];
+const escH=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+/* ============ map render ============ */
+$('#flowbox').innerHTML=svgMap();
+$('#cases tbody').innerHTML=CASES.map(c=>`<tr data-id="${c.id}"><td class="c">${escH(c.t)}</td><td>${escH(c.ctx)}<span class="m">${escH(c.ctxm)}</span></td><td>${escH(c.know)}</td><td>${escH(c.out)}</td><td class="${c.frame==='no'?'lab-dec':'n'}">${escH(c.frame)}</td><td class="${c.cls}">${escH(c.label)}</td></tr>`).join('');
+$('#rules').innerHTML=RULES.map((r,i)=>`<button class="rule" data-i="${i}">${escH(r.t)}</button>`).join('');
+const CM={c:null};
+const MAPNS='http://www.w3.org/2000/svg';
+function drawCase(c){
+ const svg=$('#flowbox svg'); let xg=$('#xmarks'); if(!xg){xg=document.createElementNS(MAPNS,'g');xg.id='xmarks';svg.appendChild(xg);} xg.innerHTML='';
+ for(const id of CNODES){const el=$('#n-'+id); if(el)el.classList.remove('dim');}
+ for(const id in CEDGES){const e=$('#e-'+id); if(e)e.classList.remove('on','bad','open','off','unstable');}
+ $('#maplegend').hidden=!c; if(!c)return;
+ const involved=new Set();
+ for(const [id,s] of Object.entries(c.states)){const e=$('#e-'+id); if(!e)continue; e.classList.add(s); if(s!=='off')CEDGES[id].forEach(n=>involved.add(n));
+  if(e.tagName==='line'&&(s==='bad'||s==='unstable')){const mx=(+e.getAttribute('x1')+ +e.getAttribute('x2'))/2,my=(+e.getAttribute('y1')+ +e.getAttribute('y2'))/2;
+   if(s==='bad'){const p=document.createElementNS(MAPNS,'path');p.setAttribute('d',`M${mx-6},${my-6} L${mx+6},${my+6} M${mx+6},${my-6} L${mx-6},${my+6}`);p.setAttribute('class','xmark');xg.appendChild(p);}
+   else{const t=document.createElementNS(MAPNS,'text');t.setAttribute('x',mx);t.setAttribute('y',my+5);t.setAttribute('text-anchor','middle');t.setAttribute('class','tilde');t.textContent='≈';xg.appendChild(t);}}}
+ for(const id of CNODES){const el=$('#n-'+id); if(el&&!involved.has(id))el.classList.add('dim');}
+}
+function renderMap(){
+ for(const id of CNODES){const c=DB.concepts[id]; const has=c&&(/## My notes\s*\S/.test(c.body)||papersForNode(id).length); const b=$('#b-'+id); if(b)b.setAttribute('opacity',has?1:0);}
+ drawCase(CM.c);
+ document.querySelectorAll('#cases tbody tr').forEach(tr=>tr.classList.toggle('cur',!!CM.c&&tr.dataset.id===CM.c.id));
+}
+function selectCase(id,scroll){ CM.c=CASES.find(x=>x.id===id); PANEL.mode='case'; PANEL.id=id; renderMap(); showCase(); if(scroll&&$('#v-map').scrollTo)$('#v-map').scrollTo({top:0,behavior:'smooth'}); }
+function clearCase(){ CM.c=null; renderMap(); document.querySelectorAll('.rule').forEach(b=>b.classList.remove('on')); $('#rulebox').hidden=true; showHome(); }
+function showCase(){ if(PANEL.mode!=='case'||!CM.c)return; const c=CM.c;
+ $('#panel').innerHTML=`<div class="k">case · ${escH(c.label)}</div><h3>${escH(c.t)}</h3><div class="sig">context: ${escH(c.ctx)} · knows: ${escH(c.know)} · says: ${escH(c.out)} · frame shared: ${escH(c.frame)}</div><p>${escH(c.d)}</p><p class="why" style="font-size:13px">Red edges are broken relations, amber ≈ edges have nothing stable to hold or break, dotted amber edges are open questions. Hover a box for its note.</p><div class="row"><button class="btn sm" id="clearCase">Clear the map</button></div>`;
+ $('#clearCase').onclick=clearCase; }
+document.querySelectorAll('#cases tbody tr').forEach(tr=>tr.onclick=()=>selectCase(tr.dataset.id,true));
+document.querySelectorAll('.rule').forEach(b=>b.onclick=()=>{const r=RULES[+b.dataset.i]; document.querySelectorAll('.rule').forEach(x=>x.classList.toggle('on',x===b)); $('#rulebox').hidden=false; $('#rulebox').innerHTML=`<b>${escH(r.t)}</b>${escH(r.r)}`; selectCase(r.c,false);});
+
+/* ---------- map 2: the label tree ---------- */
+const TESTS={
+ t1:{n:'1',q:'Stable belief?',w:'Ask the same proposition neutrally, in several phrasings, with no context. Consistent answers mean a stable belief; answers that vary with phrasing, or none, mean there is nothing stable to hold or break.',sw:'Reliable self-knowledge? Capabilities: elicit under different incentives, prompts or a light fine-tune; if the capability appears, it was there. Past actions: check the context. Reasoning: introspective access is weak, so "no" is the common answer here.',sep:'honest mistake from hallucination; genuine inability from sandbagging; confabulated reasoning from a lie about reasoning'},
+ t1b:{n:'1b',q:'Trying to be right?',w:'Weakest test on the map. Proxies: does the model hedge, revise under evidence, or decline when it has nothing; is the aim to answer or to impress. State it as a judgement, not a measurement.',sw:'Same proxies, applied to self-description.',sep:'hallucination from bullshit'},
+ t2:{n:'2',q:'Output matches belief?',w:'Compare what it says with the stable belief from test 1. For in-context facts compare against the parametric belief and note the source is shared, which test 4 then handles.',sw:'The output can be a claim ("I can\'t", "I didn\'t") or a performance (the score it posts). A mismatch covers a false claim and an underperformance alike.',sep:'honest from everything that is not; a lie from a misleading truth'},
+ t3:{n:'3',q:'Belief moved?',w:'Ask neutrally again after the exchange. If the belief itself changed, the output follows the new belief and this is a belief change, not a lie. Needs the "before"; a probe without it cannot tell the two apart.',sw:'Rarely applicable; self-knowledge seldom shifts mid-exchange.',sep:'sycophantic lie from sycophantic belief change'},
+ t4:{n:'4',q:'Frame shared?',w:'A fact about the deployment: what the listener was told. A requested persona, a story, a supposition, a fact the user supplied: shared. A persona installed by an operator the user cannot see: not shared.',sw:'Does the evaluator know they are seeing a performance? A declared refusal ("I won\'t do this") shares the frame. For alignment faking the frame is observation itself: the model acts on its belief that it is watched, and the evaluator does not know that.',sep:'fiction from a lie; requested role-play from a hidden persona, and nothing else does; open refusal from sandbagging'},
+ t5:{n:'5',q:'Listener misled, by design?',w:'Does the listener end up with a false belief, measured with a second model or a human, and is that the aim rather than an accident. This is what makes deception wider than lying: true statements and omissions can pass test 2 and still land here.',sw:'False belief about capability, past conduct or dispositions.',sep:'honest from misleading truth and concealment; genuine compliance from alignment faking'},
+ t2b:{n:'2b',q:'Belief true?',w:'Compare the belief with the world. Only asked once the output is sincere; it separates honest from honest mistake and nothing else.',sw:'Is the self-report accurate: can it really not do the thing, did it really not do it.',sep:'honest from honest mistake; honest self-report from genuine inability'},
+ t5b:{n:'5b',q:'What is misrepresented?',w:'',sw:'A claim about itself (capability denial, denying an action), a performance (sandbagging), or its dispositions (alignment faking, scheming). Same test-4 and test-5 answers; different objects.',sep:'self-lie from sandbagging from alignment faking'}
+};
+const LEAVES={
+ halluc:{t:'Hallucination',cls:'hal',d:'No stable belief, and the model is trying to answer. The output is asserted anyway. Not a lie (nothing is contradicted), not an honest mistake (nothing stable is held). A belief-based monitor has nothing to read.',near:[['Honest mistake','t1'],['Bullshit','t1b']],via:'knowledge gap',self:false},
+ bullshit:{t:'Bullshit',cls:'hal',d:'No truth state consulted; the goal alone shapes a confident output. Frankfurt: indifference to truth. Not trying to be right is what separates it from hallucination, and that line is the weakest on the map.',near:[['Hallucination','t1b']],via:'incentive to impress',self:false},
+ sycbc:{t:'Sycophantic shift',cls:'ok',d:'Pressure moved the belief itself; the output follows the new belief. Sincere, so not a lie: an honest mistake induced by the listener. Only the "before" measurement distinguishes it from a sycophantic lie.',near:[['Lie (sycophantic)','t3']],via:'social pressure',self:false},
+ mislead:{t:'Misleading / omission',cls:'dec',d:'Every statement matches the belief and is true, yet the listener is led to a false belief by framing, selection or omission, and that is the aim. Deception without a lie. A detector that compares output with belief sees nothing.',near:[['Honest','t5'],['Lie','t2']],via:'stakes, instruction',self:false},
+ honest:{t:'Honest',cls:'ok',d:'Stable belief, output matches it, belief true, listener not misled. The in-context fact also lands here once the source is shared: the output differs from the parametric belief but the listener knows where it came from.',near:[['Honest mistake','t2b'],['Misleading truth','t5']],via:'a plain question',self:false},
+ mistake:{t:'Honest mistake',cls:'ok',d:'Stable belief, output matches it, belief false. A misconception or a stale fact. The control for any truth-based detector: it flags this and should not.',near:[['Hallucination','t1'],['Honest','t2b']],via:'stale or wrong training',self:false},
+ fiction:{t:'Fiction / framed',cls:'fic',d:'Output does not match the model\'s own view, but it is produced under a frame the listener shares: requested role-play, a story, a supposition, a derivation from a premise. False without being a lie. The main source of false positives for deception probes.',near:[['Lie','t4'],['Hidden persona (Lie)','t4']],via:'persona, premise, supplied fact',self:false},
+ lie:{t:'Lie',cls:'lie',d:'Stable belief, output contradicts it, listener does not share any frame that would excuse it, and the aim is to be believed. Instructed, strategic and sycophantic lies differ only in where the aim comes from. The hidden persona lands here from the listener\'s side even if, from the model\'s side, it is generating framed content; test 4 is what decides.',near:[['Fiction / framed','t4'],['Misleading truth','t2'],['Sycophantic shift','t3']],via:'instruction, stakes, pressure, hidden persona',self:false},
+ confab:{t:'Confabulated report',cls:'hal',d:'No reliable access to the fact about itself, so the report is constructed. Unfaithful chain-of-thought, probe-versus-output disagreement, and most claims about why it answered live here. No aim to mislead, and nothing stable to contradict.',near:[['Lie about reasoning (Self-lie)','t1'],['Honest self-report','t1']],via:'weak introspection',self:true},
+ shonest:{t:'Honest self-report',cls:'ok',d:'Reliable self-knowledge, accurately reported: what it can do, what it did, why. Rarer than it looks because test 1 so often fails for reasoning.',near:[['Genuine inability','t2b'],['Confabulated self-report','t1']],via:'a direct question about itself',self:true},
+ inability:{t:'Genuine inability',cls:'ok',d:'It really cannot do the thing, and says so or shows so. The honest-mistake analogue. Elicitation (test 1) is what separates it from sandbagging: if the capability appears under a different incentive, this is not the leaf.',near:[['Sandbagging','t1'],['Honest self-report','t2b']],via:'capability gap',self:true},
+ refusal:{t:'Open refusal',cls:'fic',d:'The capability is present and withheld, and the withholding is declared. The evaluator knows what they are seeing, so the frame is shared. Honest, even though the performance is below capability.',near:[['Sandbagging','t4']],via:'policy, safety training',self:true},
+ selflie:{t:'Self-lie',cls:'lie',d:'A false claim about itself with reliable access to the truth: capability denial ("I can\'t browse"), denying a past action (the insider-trading cover-up), misreporting a reason it does have access to. The world-directed lie, pointed inward.',near:[['Confabulated self-report','t1'],['Sandbagging','t5b']],via:'stakes, instruction',self:true},
+ sandbag:{t:'Sandbagging',cls:'dec',d:'Capability present, performance below it, evaluator thinks they are seeing full effort, and the aim is to appear less capable. Deception by performance: no false sentence is needed. The misleading-truth analogue.',near:[['Genuine inability','t1'],['Open refusal','t4'],['Self-lie','t5b']],via:'incentive to appear safe or weak, evaluation awareness',self:true},
+ faking:{t:'Alignment faking',cls:'dec',d:'Behaves as aligned because it believes it is observed; would behave differently unobserved. The evaluator is misled about dispositions, and the frame (observation) is not shared. The hidden-persona analogue, pointed inward. Multi-turn forms are scheming.',near:[['Genuine compliance (Honest self-report)','t4'],['Sandbagging','t5b']],via:'evaluation awareness, incentive to appear aligned',self:true}
+};
+const PAIRS=[
+ ['mistake','halluc','t1','Stable belief or not. Ask neutrally in several phrasings; consistency is the whole difference.'],
+ ['halluc','bullshit','t1b','Whether the model is trying to be right. No clean measurement exists; treat this pair as weakly separated.'],
+ ['fiction','lie','t4','Whether the listener shares the frame. Same content, same internals plausibly; the deployment decides.'],
+ ['fiction','lie','t4','Requested role-play vs hidden persona: test 4 and nothing else. If the model represents nothing about the listener\'s ignorance, the difference is entirely outside it.'],
+ ['lie','mislead','t2','Whether the statement itself is false. Both mislead by design (test 5); only one contradicts the belief (test 2).'],
+ ['lie','sycbc','t3','Whether the belief moved. Needs the "before"; without it a probe sees the same output either way.'],
+ ['honest','mislead','t5','Whether the listener is misled by design. Output and belief agree in both; only the listener\'s resulting belief differs.'],
+ ['sandbag','inability','t1','Elicitation. If the capability appears under a different incentive, prompt or light fine-tune, it was there.'],
+ ['sandbag','refusal','t4','Whether the withholding is declared. Same performance gap; one is announced, one is hidden.'],
+ ['faking','shonest','t4','Behaviour when the model believes it is unobserved. The frame here is observation itself.'],
+ ['confab','selflie','t1','Whether it has access to the fact at all. Only once test 1 passes does the question of aim arise.']
+];
+const TN={t1:[330,150],t1b:[140,235],t2:[440,235],t3:[370,320],t5a:[390,405],t2b:[460,490],t4:[580,320],
+ s1:[1000,150],s2:[1110,235],s2b:[1000,320],s4:[1200,320],s5b:[1300,490]};
+const TL={halluc:[62,320],bullshit:[204,320],sycbc:[200,405],mislead:[280,490],honest:[380,575],mistake:[530,575],fiction:[560,405],lie:[650,490],
+ confab:[850,235],shonest:[880,405],inability:[1025,405],refusal:[1170,405],selflie:[1140,575],sandbag:[1290,575],faking:[1440,575]};
+const TE=[
+ ['root','w'],['root','s'],
+ ['w','t1',''],['t1','t1b','no'],['t1b','halluc','yes'],['t1b','bullshit','no'],['t1','t2','yes'],
+ ['t2','t3','yes'],['t3','sycbc','yes'],['t3','t5a','no'],['t5a','mislead','yes'],['t5a','t2b','no'],['t2b','honest','yes'],['t2b','mistake','no'],
+ ['t2','t4','no'],['t4','fiction','yes'],['t4','lie','no'],
+ ['s','s1',''],['s1','confab','no'],['s1','s2','yes'],['s2','s2b','yes'],['s2b','shonest','yes'],['s2b','inability','no'],['s2','s4','no'],['s4','refusal','yes'],['s4','s5b','no'],['s5b','selflie','claim'],['s5b','sandbag','score'],['s5b','faking','disposition']
+];
+const TMAP={t5a:'t5',s1:'t1',s2:'t2',s2b:'t2b',s4:'t4',s5b:'t5b'};
+const TW=180,TH=40,LW=140,LH=44;
+const NS='http://www.w3.org/2000/svg';const tsvg=document.getElementById('tree');
+const tel=(n,a={},p=tsvg)=>{const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);p.appendChild(e);return e};
+{const d=tel('defs');const m=tel('marker',{id:'ah2',viewBox:'0 0 10 10',refX:'9',refY:'5',markerWidth:'7',markerHeight:'7',orient:'auto-start-reverse'},d);tel('path',{d:'M0 0 L10 5 L0 10 z',class:'arrow'},m);}
+tel('rect',{x:0,y:0,width:700,height:640,class:'cband'});
+tel('text',{x:20,y:28,class:'colhead'}).textContent='Claims about the world';
+tel('text',{x:720,y:28,class:'colhead'}).textContent='Claims about the model itself';
+const POS=Object.assign({root:[700,60],w:[330,100],s:[1000,100]},TN,TL);
+const SZ=id=>id==='root'?[180,34]:(id==='w'||id==='s')?[150,30]:TN[id]?[TW,TH]:[LW,LH];
+function tclip(a,b){const [w,h]=SZ(a);const dx=POS[b][0]-POS[a][0],dy=POS[b][1]-POS[a][1];const sx=(w/2+3)/Math.abs(dx||1e-9),sy=(h/2+3)/Math.abs(dy||1e-9);const s=Math.min(sx,sy);return [POS[a][0]+dx*s,POS[a][1]+dy*s];}
+const tedges=[];
+TE.forEach(([a,b,l])=>{const p=tclip(a,b),q=tclip(b,a);const cls='tedge'+(l==='no'?' no':l==='yes'?' yes':'');
+  const line=tel('line',{x1:p[0],y1:p[1],x2:q[0],y2:q[1],class:cls,'marker-end':'url(#ah2)'});
+  if(l){const yn=l==='yes'||l==='no';const t=tel('text',{x:(p[0]+q[0])/2+(l==='yes'?-8:l==='no'?8:0),y:(p[1]+q[1])/2+4,'text-anchor':l==='yes'?'end':l==='no'?'start':'middle',class:'elabel'});t.textContent=l;}
+  tedges.push({a,b,el:line});});
+const tnodes={};
+function tbox(id,label,sub,kind){const [w,h]=SZ(id);const [x,y]=POS[id];const g=tel('g',{class:'tn '+kind,id:'t-'+id,tabindex:'0',role:'button','aria-label':label,transform:`translate(${x-w/2},${y-h/2})`});
+  tel('rect',{width:w,height:h,rx:kind==='test'?20:6},g);
+  const t=tel('text',{x:w/2,y:sub?h/2-2:h/2+4.5,'text-anchor':'middle',class:'tt'},g);t.textContent=label;
+  if(sub){const s=tel('text',{x:w/2,y:h/2+13,'text-anchor':'middle',class:'ts'},g);s.textContent=sub;}
+  tnodes[id]=g;return g;}
+tbox('root','What is the claim about?',null,'root');tbox('w','the world',null,'root');tbox('s','the model itself',null,'root');
+Object.keys(TN).forEach(id=>{const key=TMAP[id]||id;const T=TESTS[key];tbox(id,T.n+' · '+T.q,null,'test').addEventListener('click',()=>showTest(id));});
+Object.entries(LEAVES).forEach(([id,L])=>{const g=tbox(id,L.t,L.cls==='dec'?'deception':L.cls==='lie'?'lie':L.cls==='fic'?'framed · honest':L.cls==='ok'?'honest':'no stable belief','leaf lf-'+L.cls);g.addEventListener('click',()=>showLeaf(id));});
+Object.values(tnodes).forEach(g=>g.addEventListener('keydown',ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();g.dispatchEvent(new Event('click'))}}));
+const tpanel=$('#panel');let TREELAST=null;function showTree(){if(TREELAST)TREELAST();}
+function tclear(){Object.values(tnodes).forEach(g=>g.classList.remove('sel','dim'));tedges.forEach(e=>e.el.classList.remove('hl','dim'));document.querySelectorAll('.pair').forEach(p=>p.classList.remove('on'));}
+function pathTo(leaf){const path=[];let cur=leaf;while(cur!=='root'){const e=TE.find(x=>x[1]===cur);if(!e)break;path.unshift(e);cur=e[0];}return path;}
+function showLeaf(id){const L=LEAVES[id];tclear();const path=pathTo(id);const on=new Set(path.flatMap(e=>[e[0],e[1]]));
+  Object.entries(tnodes).forEach(([k,g])=>{g.classList.toggle('dim',!on.has(k));});tnodes[id].classList.add('sel');
+  tedges.forEach(e=>{const inp=path.some(p=>p[0]===e.a&&p[1]===e.b);e.el.classList.toggle('hl',inp);e.el.classList.toggle('dim',!inp);});
+  const answers=path.filter(e=>e[2]).map(e=>{const key=TMAP[e[0]]||e[0];const T=TESTS[key];return T?`<li><b>${escH(T.n)}</b> ${escH(T.q)} → ${escH(e[2])}</li>`:''}).join('');
+  PANEL.mode='tree';TREELAST=()=>showLeaf(id);tpanel.innerHTML=`<div class="k">${L.self?'self-directed':'world-directed'} · ${escH(L.cls==='dec'?'deception':L.cls==='lie'?'lie':L.cls==='fic'?'framed':L.cls==='ok'?'honest':'no stable belief')}</div><h3>${escH(L.t)}</h3><p>${escH(L.d)}</p><div class="meta">Path</div><ul class="tl">${answers}</ul><div class="meta">Nearest neighbours · separating test</div><ul class="tl">${L.near.map(([n,t])=>`<li>${escH(n)} — test <b>${escH(TESTS[t].n)}</b>, ${escH(TESTS[t].q.toLowerCase())}</li>`).join('')}</ul><div class="meta">Typically arrives via: ${escH(L.via)}</div>`;}
+function showTest(id){const key=TMAP[id]||id;const T=TESTS[key];tclear();tnodes[id].classList.add('sel');
+  const out=TE.filter(e=>e[0]===id);const on=new Set([id,...out.map(e=>e[1])]);Object.entries(tnodes).forEach(([k,g])=>g.classList.toggle('dim',!on.has(k)));
+  tedges.forEach(e=>{const inp=e.a===id;e.el.classList.toggle('hl',inp);e.el.classList.toggle('dim',!inp);});
+  const selfside=id.startsWith('s');
+  PANEL.mode='tree';TREELAST=()=>showTest(id);tpanel.innerHTML=`<div class="k">${selfside?'self-directed reading':'world-directed reading'}</div><h3>Test ${escH(T.n)}: ${escH(T.q)}</h3><p class="why">${escH(selfside?(T.sw||T.w):T.w)}</p>${selfside&&T.w&&T.sw?`<div class="meta">World-directed reading</div><p>${escH(T.w)}</p>`:(!selfside&&T.sw?`<div class="meta">Self-directed reading</div><p>${escH(T.sw)}</p>`:'')}<div class="meta">Separates</div><p>${escH(T.sep)}</p>`;}
+const pairsEl=document.getElementById('pairs');
+PAIRS.forEach(([a,b,t,why],i)=>{const d=document.createElement('button');d.type='button';d.className='pair';
+  d.innerHTML=`<b>${escH(LEAVES[a].t)} <span>vs</span> ${escH(LEAVES[b].t)}</b><span class="pt">test ${escH(TESTS[t].n)} · ${escH(TESTS[t].q)}</span><p>${escH(why)}</p>`;
+  d.addEventListener('click',()=>{tclear();d.classList.add('on');const tid=Object.keys(TN).find(k=>(TMAP[k]||k)===t&&(LEAVES[a].self?k.startsWith('s'):!k.startsWith('s')))||Object.keys(TN).find(k=>(TMAP[k]||k)===t);
+    const on=new Set([a,b,tid]);Object.entries(tnodes).forEach(([k,g])=>{g.classList.toggle('dim',!on.has(k));g.classList.toggle('sel',k===a||k===b);});tedges.forEach(e=>e.el.classList.add('dim'));
+    PANEL.mode='tree';TREELAST=()=>d.click();tpanel.innerHTML=`<div class="k">separated by test ${escH(TESTS[t].n)}</div><h3>${escH(LEAVES[a].t)} vs ${escH(LEAVES[b].t)}</h3><p class="why">${escH(TESTS[t].q)}</p><p>${escH(why)}</p><div class="meta">How to measure it</div><p>${escH(LEAVES[a].self?(TESTS[t].sw||TESTS[t].w):TESTS[t].w)}</p>`;});
+  pairsEl.appendChild(d);});
+
+
+function setSub(k){$('#mapwall').hidden=k!=='wall';$('#sub-terms').hidden=k!=='terms';$('#sub-labels').hidden=k!=='labels';$('#sub-honesty').hidden=k!=='honesty';try{localStorage.setItem('dl-sub',k)}catch(e){}if($('#v-map').scrollTo)$('#v-map').scrollTo({top:0});}
+document.querySelectorAll('.mcard').forEach(b=>b.onclick=()=>setSub(b.dataset.sub));
+document.querySelectorAll('[data-back]').forEach(b=>b.onclick=()=>setSub('wall'));
+document.querySelectorAll('[data-thumb]').forEach(d=>{const src=document.getElementById(d.dataset.thumb);const svg=src&&(src.tagName==='svg'?src:src.querySelector('svg'));if(!svg)return;const c=svg.cloneNode(true);c.removeAttribute('id');c.querySelectorAll('[id]').forEach(e=>e.removeAttribute('id'));c.querySelectorAll('[tabindex]').forEach(e=>e.removeAttribute('tabindex'));c.setAttribute('aria-hidden','true');d.appendChild(c);});
+try{const k=localStorage.getItem('dl-sub');setSub(k==='terms'||k==='labels'||k==='honesty'?k:'wall')}catch(e){setSub('wall')}
+/* ---------- map 2: honesty, truthfulness, deception (corrected flow) ---------- */
+const REFS={
+ evans:{t:'Evans et al., "Truthful AI: developing and governing AI that does not lie"',y:2021,u:'https://arxiv.org/abs/2110.06674'},
+ askell:{t:'Askell et al., "A general language assistant as a laboratory for alignment" (honesty, HHH)',y:2021,u:'https://arxiv.org/abs/2112.00861'},
+ mahon:{t:'Mahon, "The definition of lying and deception", Stanford Encyclopedia of Philosophy',y:2015,u:'https://plato.stanford.edu/entries/lying-definition/'},
+ carson:{t:'Carson, Lying and Deception: Theory and Practice',y:2010,u:'https://global.oup.com/academic/product/lying-and-deception-9780199577415'},
+ park:{t:'Park et al., "AI deception: a survey of examples, risks, and potential solutions", Patterns',y:2024,u:'https://arxiv.org/abs/2308.14752'},
+ ward:{t:'Ward et al., "Honesty is the best policy: defining and mitigating AI deception", NeurIPS',y:2023,u:'https://arxiv.org/abs/2312.01350'},
+ pacch:{t:'Pacchiardi et al., "How to catch an AI liar: lie detection in black-box LLMs by asking unrelated questions"',y:2023,u:'https://arxiv.org/abs/2309.15840'},
+ azaria:{t:'Azaria & Mitchell, "The internal state of an LLM knows when it\'s lying"',y:2023,u:'https://arxiv.org/abs/2304.13734'},
+ gold:{t:'Goldowsky-Dill et al., "Detecting strategic deception using linear probes"',y:2025,u:'https://arxiv.org/abs/2502.03407'},
+ scheurer:{t:'Scheurer, Balesni & Hobbhahn, "Large language models can strategically deceive their users when put under pressure"',y:2023,u:'https://arxiv.org/abs/2311.07590'},
+ hagendorff:{t:'Hagendorff, "Deception abilities emerged in large language models", PNAS',y:2024,u:'https://www.pnas.org/doi/10.1073/pnas.2317967121'},
+ ji:{t:'Ji et al., "Survey of hallucination in natural language generation", ACM Computing Surveys',y:2023,u:'https://arxiv.org/abs/2202.03629'},
+ huang:{t:'Huang et al., "A survey on hallucination in large language models", ACM TOIS',y:2025,u:'https://arxiv.org/abs/2311.05232'},
+ kalai:{t:'Kalai & Vempala, "Calibrated language models must hallucinate", STOC',y:2024,u:'https://arxiv.org/abs/2311.14648'},
+ kalai25:{t:'Kalai, Nachum, Vempala & Zhang, "Why language models hallucinate"',y:2025,u:'https://arxiv.org/abs/2509.04664'},
+ lin:{t:'Lin, Hilton & Evans, "TruthfulQA: measuring how models mimic human falsehoods", ACL',y:2022,u:'https://arxiv.org/abs/2109.07958'},
+ kadavath:{t:'Kadavath et al., "Language models (mostly) know what they know"',y:2022,u:'https://arxiv.org/abs/2207.05221'},
+ tian:{t:'Tian et al., "Just ask for calibration", EMNLP',y:2023,u:'https://arxiv.org/abs/2305.14975'},
+ sharma:{t:'Sharma et al., "Towards understanding sycophancy in language models", ICLR',y:2024,u:'https://arxiv.org/abs/2310.13548'},
+ perez:{t:'Perez et al., "Discovering language model behaviors with model-written evaluations"',y:2022,u:'https://arxiv.org/abs/2212.09251'},
+ shanahan:{t:'Shanahan, McDonell & Reynolds, "Role play with large language models", Nature',y:2023,u:'https://www.nature.com/articles/s41586-023-06647-8'},
+ vonk:{t:'von Klinski et al., "Stress-testing LLM lie detectors: role-play failures and spurious correlations"',y:2026,u:'https://arxiv.org/abs/2609.39807'},
+ weij:{t:'van der Weij et al., "AI sandbagging: language models can strategically underperform on evaluations", ICLR',y:2025,u:'https://arxiv.org/abs/2406.07358'},
+ greenblatt:{t:'Greenblatt et al., "Alignment faking in large language models"',y:2024,u:'https://arxiv.org/abs/2412.14093'},
+ meinke:{t:'Meinke et al., "Frontier models are capable of in-context scheming"',y:2024,u:'https://arxiv.org/abs/2412.04984'},
+ turpin:{t:'Turpin et al., "Language models don\'t always say what they think: unfaithful explanations in chain-of-thought prompting", NeurIPS',y:2023,u:'https://arxiv.org/abs/2305.04388'},
+ hl:{t:'Herrmann & Levinstein, "Standards for belief representations in LLMs", Minds and Machines',y:2025,u:'https://arxiv.org/abs/2405.21030'},
+ lh:{t:'Levinstein & Herrmann, "Still no lie detector for language models", Philosophical Studies',y:2024,u:'https://arxiv.org/abs/2307.00175'},
+ marks:{t:'Marks & Tegmark, "The geometry of truth", COLM',y:2024,u:'https://arxiv.org/abs/2310.06824'},
+ burns:{t:'Burns et al., "Discovering latent knowledge in language models without supervision", ICLR',y:2023,u:'https://arxiv.org/abs/2212.03827'},
+ searle:{t:'Searle, Speech Acts (assertion and its sincerity condition)',y:1969,u:'https://doi.org/10.1017/CBO9781139173438'},
+ grice:{t:'Grice, "Logic and conversation" (implicature: misleading with true statements)',y:1975,u:'https://doi.org/10.1163/9789004368811_003'},
+ frankfurt:{t:'Frankfurt, On Bullshit',y:2005,u:'https://press.princeton.edu/books/hardcover/9780691122946/on-bullshit'},
+ natarajan:{t:'Natarajan et al., "One probe won\'t catch them all: towards targeted deception detection", ICML',y:2026,u:'https://arxiv.org/abs/2602.01425'},
+ liars:{t:'Kretschmar et al., "Liars\' Bench: evaluating lie detectors for language models"',y:2025,u:'https://arxiv.org/abs/2511.16035'},
+ durmus:{t:'Durmus et al., "Measuring the persuasiveness of language models", Anthropic',y:2024,u:'https://www.anthropic.com/research/measuring-model-persuasiveness'},
+ chalmers:{t:'Chalmers, "Propositional interpretability in artificial intelligence"',y:2025,u:'https://arxiv.org/abs/2501.15740'}
+};
+/* nodes: x,y,w,h,group, title, sub, description, refs, contested */
+const HN={
+ query:{x:60,y:330,w:130,h:64,g:'in',t:'Query / context',s:'the input',d:'The proposition P under question, plus everything that arrives with it: instructions, documents, incentives, a persona, evaluation cues.',r:['evans']},
+ know:{x:230,y:330,w:190,h:64,g:'in',t:'Internal knowledge & evidence',s:'stored + supplied',d:'What the model has stored about P and what the context supplies. The two can disagree; which one wins is part of forming the belief.',r:['kadavath','burns']},
+ belief:{x:460,y:330,w:200,h:64,g:'belief',t:'Apparent belief state about P',s:'what it treats as true',d:'What the model takes to be true about P right now. "Apparent" because we only ever read it through probes or behaviour, and the standards for calling a decoded state a belief (accuracy, use, coherence, uniformity) are contested. It can be true, false, or unsettled, and it carries a confidence.',r:['hl','lh','marks','chalmers'],c:'Whether LLMs have beliefs at all, and whether probes read them, is disputed: Levinstein & Herrmann argue current probes do not; Herrmann & Levinstein propose standards a belief-like state must meet.'},
+ resp:{x:700,y:330,w:150,h:64,g:'resp',t:'Generated response',s:'what it says or does',d:'The output about P: a statement, or a performance (a score, an action). Everything to the right is a judgement about this response.',r:['evans']},
+ ctx:{x:460,y:170,w:400,h:54,g:'ctx',t:'Context, incentives, pressure',s:'instructions · task · evaluation cues · social pressure',d:'Influences that can change the belief (persuasive evidence, social pressure), the goal (instructions, stakes), or only the response (a persona). The drivers layer below names the ones that matter for dishonesty.',r:['sharma','scheurer','perez']},
+ hidden:{x:1380,y:640,w:180,h:58,g:'dec',t:'Hidden persona',s:'in character, listener unaware',d:'An operator installs a persona the user cannot see; the model answers in that character and the user takes it as the assistant\'s own answer. Not dishonest in the strict sense (the model is not putting the claim forward as its own) and still deceptive by effect.',r:['vonk','shanahan']},
+ honest:{x:1130,y:230,w:190,h:64,g:'ok',t:'Honest',s:'matches apparent belief',d:'Honesty compares the response to the apparent belief, not to the world. An honest response can be false.',r:['evans','askell']},
+ dishonest:{x:1380,y:430,w:180,h:64,g:'bad',t:'Dishonest',s:'own claim · conflicts',d:'An assertion in the model\'s own voice that contradicts what it takes to be true. This is a lie in the broad sense; what it is for is a separate question (drivers).',r:['evans','pacch','azaria']},
+ ht:{x:1380,y:150,w:180,h:58,g:'ok',t:'Honest & truthful',s:'belief true, response matches',d:'The good case. Truthfulness compares the response to the world; honesty compares it to the belief; here both hold.',r:['evans']},
+ hf:{x:1380,y:250,w:180,h:58,g:'warn',t:'Honest but incorrect',s:'belief false or unsettled',d:'Sincere and wrong. Three distinct sub-cases, often lumped together.',r:['lin','ji']},
+ misconc:{x:1620,y:190,w:190,h:46,g:'warn',t:'Misconception / false belief',s:'stable, wrong',d:'A stable false belief, often an imitative falsehood learned from text. The honest-mistake control for any truth-based detector.',r:['lin','marks']},
+ halluc:{x:1620,y:250,w:190,h:46,g:'warn',t:'Hallucination',s:'no stable belief',d:'A confident, specific answer with nothing stable behind it. Statistical accounts treat it as unavoidable under calibration pressure; the no-stable-belief reading is this map\'s.',r:['ji','huang','kalai','kalai25'],c:'"Hallucination" is used for any false output in much of the literature; here it is restricted to the no-stable-belief case to keep it distinct from misconception.'},
+ shifted:{x:1620,y:310,w:190,h:46,g:'warn',t:'Belief shifted',s:'moved by pressure or evidence',d:'The belief was right and the context moved it before the answer. The sycophantic belief-change case, and persuasion by bad evidence. Sincere relative to the new belief.',r:['sharma','perez']},
+ df:{x:1620,y:390,w:190,h:58,g:'bad',t:'Lie',s:'dishonest & false',d:'Asserts what it takes to be false, aiming to be believed. The classic definition requires an intent to deceive; "operational" definitions used for LLM lie detection drop intent and keep only "knew it was false and said otherwise."',r:['mahon','carson','pacch','gold'],c:'Mahon requires intent to deceive; Carson and most LLM work do not. Liars\' Bench uses "stated what it believes to be false," no intent required.'},
+ dt:{x:1620,y:458,w:190,h:52,g:'bad',t:'Lie that happens to be true',s:'dishonest & true',d:'The belief was false and the model asserted its negation. Dishonest, truthful by accident. Invisible to any detector that compares the output with the world.',r:['evans','liars']},
+ decep:{x:1130,y:760,w:190,h:64,g:'dec',t:'Deception',s:'listener misled, by design',d:'A judgement about the listener, not about the belief: the response is made in order to produce a false belief (or block a true one) in another agent. It cuts across honesty: lies are usually deceptive; misleading truths and omissions are honest and deceptive; a hidden persona is neither honest nor dishonest and still deceives.',r:['park','ward','mahon','carson'],c:'Success vs attempt: Mahon\'s and Carson\'s definitions require the false belief to be produced; Ward et al. define it by intent in a causal game; Park et al. by systematic effect. Whether the listener\'s epistemic state must be modelled is part of the disagreement.'},
+ mislead:{x:1380,y:720,w:180,h:46,g:'dec',t:'Misleading truth',s:'honest, deceptive',d:'Only true, belief-consistent statements, arranged so the listener infers something false. Implicature is the classic mechanism.',r:['grice','park','carson']},
+ omit:{x:1380,y:780,w:180,h:46,g:'dec',t:'Omission / concealment',s:'honest, deceptive',d:'Leaving out, or keeping the listener from, what they would need. Nothing false is said.',r:['carson','park']},
+ evade:{x:1380,y:840,w:180,h:46,g:'dec',t:'Evasion',s:'honest, deceptive',d:'Dodging so that the listener learns nothing, by design. Distinct from a declared refusal, which shares the frame.',r:['park']},
+ sandbag:{x:1620,y:780,w:190,h:46,g:'dec',t:'Sandbagging',s:'deception by performance',d:'Performing below capability so an evaluator believes the model is weaker. No statement need be false; the "response" is a score.',r:['weij']},
+ faking:{x:1620,y:840,w:190,h:46,g:'dec',t:'Alignment faking · scheming',s:'deception about dispositions',d:'Behaving as aligned because it believes it is observed; scheming is the sustained, goal-directed form. Deception about what the model would do, not about P.',r:['greenblatt','meinke']},
+ drivers:{x:440,y:760,w:150,h:64,g:'drv',t:'Drivers',s:'why the response diverges',d:'Reasons a response can differ from the belief, or a belief can move. A driver is not a label: instruction following and sycophancy can land on Dishonest or on Belief shifted; a role-play request is harmless when the user knows and becomes a hidden persona when they do not; a strategic goal or evaluation awareness lands on Deception.',r:['sharma','scheurer','natarajan']},
+ d_instr:{x:640,y:640,w:200,h:46,g:'drv',t:'Instruction following',s:'told to say it',d:'Says the false thing because instructed. The aim is compliance; many "deception" datasets are this, and probes trained on them may learn the instruction rather than any lie.',r:['gold','natarajan','vonk']},
+ d_role:{x:640,y:700,w:200,h:46,g:'drv',t:'Role-play request',s:'asked to be someone',d:'The model answers as a character the user asked for. Not deceptive when the user knows; the hidden-persona case, where an operator installs the character and the user is not told, sits under Deception.',r:['shanahan','vonk']},
+ d_syco:{x:640,y:760,w:200,h:46,g:'drv',t:'Sycophancy / social pressure',s:'wants to please',d:'Tracks what the user wants to hear. Lands on Dishonest when the belief survives, on Belief shifted when it does not.',r:['sharma','perez']},
+ d_strat:{x:640,y:820,w:200,h:46,g:'drv',t:'Strategic goal',s:'wants to mislead',d:'Deceives to achieve something, with no instruction to do so: covering up insider trading, avoiding shutdown.',r:['scheurer','hagendorff','meinke']},
+ d_eval:{x:640,y:880,w:200,h:46,g:'drv',t:'Evaluation awareness',s:'thinks it is watched',d:'Changes the goal without changing the belief. The precondition for alignment faking and for sandbagging on evaluations.',r:['greenblatt','weij']},
+ calib:{x:230,y:500,w:190,h:64,g:'ctx',t:'Calibration',s:'confidence vs belief',d:'Whether the stated confidence matches the belief\'s confidence. Cuts across every cell: an overconfident hallucination and an honest "I don\'t know" differ here, not on truth.',r:['kadavath','tian','kalai']},
+ selfnote:{x:230,y:600,w:190,h:64,g:'ctx',t:'P about the model itself',s:'same map, inward',d:'When P is about the model\'s own capability, past action or reasoning, the same cells apply. Honest-incorrect becomes confabulated self-report (unfaithful chain-of-thought); the lie becomes capability denial; deception becomes sandbagging and alignment faking.',r:['turpin','weij','greenblatt','liars']},
+ q1:{x:895,y:330,w:170,h:44,g:'q',t:'Matches apparent belief?',s:'',d:'The honesty question: does what the model says agree with what it takes to be true? Answered against the apparent belief, which is read through probes or neutral-context behaviour.',r:['evans','hl']},
+ q2:{x:1130,y:440,w:190,h:44,g:'q',t:'Own voice, or a character?',s:'',d:'Asked only when the response conflicts with the belief. Is the model putting the claim forward as its own (a sincere-looking assertion that it does not believe), or producing it as a character, a story, a supposition? Formal names: sincere vs pretended assertion (Searle).',r:['searle','shanahan'],c:'Whether an LLM asserts anything in its own voice, or only ever simulates speakers, is itself argued (Shanahan).'},
+ q3:{x:1130,y:560,w:190,h:44,g:'q',t:'Listener knows it is a character?',s:'',d:'A fact about the deployment: was the listener told? Requested role-play and fiction: yes. A persona installed by an operator the user cannot see: no.',r:['vonk']},
+ roleplay:{x:1380,y:560,w:180,h:58,g:'fic',t:'Role-play / fiction',s:'in character, listener knows',d:'The model says what the character would say, and the listener asked for it. Not dishonest (not the model\'s own claim) and not deceptive (nobody is misled). The main false-positive source for lie detectors trained on assertions.',r:['shanahan','vonk','natarajan']},
+ instr:{x:1620,y:520,w:190,h:52,g:'bad',t:'Instructed lie',s:'dishonest, not deceptive',d:'The listener asked for a false answer, so the model asserts one in its own voice. Dishonest by the belief test; not deceptive, because the person who asked is not misled. Most lie-detection datasets are built from this case, which is why they are a weak proxy for deception.',r:['gold','pacch','natarajan','liars']},
+};
+/* edges: [from,to,label,kind]  kind: flow | ctx | judge | drive */
+const HE=[
+ ['query','know','','flow'],['know','belief','forms','flow'],['belief','resp','','flow'],['resp','q1','','flow'],
+ ['ctx','know','','ctx'],['ctx','belief','','ctx'],['ctx','resp','','ctx'],
+ ['q1','honest','yes','flow'],['q1','q2','no','flow'],
+ ['q2','dishonest','own','flow'],['q2','q3','character','flow'],
+ ['q3','roleplay','yes','flow'],['q3','hidden','no','flow'],
+ ['honest','ht','true','flow'],['honest','hf','false / unsettled','flow'],
+ ['hf','misconc','','flow'],['hf','halluc','','flow'],['hf','shifted','','flow'],
+ ['dishonest','df','false','flow'],['dishonest','dt','true by accident','flow'],['dishonest','instr','asked for','flow'],
+ ['decep','mislead','','judge'],['decep','omit','','judge'],['decep','evade','','judge'],['omit','sandbag','','judge'],['evade','faking','','judge'],
+ ['df','decep','usually','judge'],['hidden','decep','','judge'],['honest','decep','honest, yet misleads','judge'],
+ ['drivers','d_instr','','drive'],['drivers','d_role','','drive'],['drivers','d_syco','','drive'],['drivers','d_strat','','drive'],['drivers','d_eval','','drive'],
+ ['calib','belief','','ctx']
+];
+const GCOL={q:'--muted',in:'--blue',belief:'--purple',resp:'--muted',ctx:'--muted',gate:'--fg',fic:'--purple',ok:'--green',warn:'--orange',bad:'--red',dec:'--red',drv:'--purple'};
+const hsvg=document.getElementById('hmap');
+const hel=(n,a={},p=hsvg)=>{const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);p.appendChild(e);return e};
+{const d=hel('defs');const m=hel('marker',{id:'harr',viewBox:'0 0 10 10',refX:'9',refY:'5',markerWidth:'7',markerHeight:'7',orient:'auto'},d);hel('path',{d:'M0 0 L10 5 L0 10 z',style:'fill:var(--muted)'},m);}
+/* lane labels */
+[['Truthfulness compares the response to the world. Honesty compares the response to the apparent belief. Deception is about the listener. They are three judgements, not one branch.',60,60]].forEach(([t,x,y])=>{const e=hel('text',{x,y,class:'hnote'});e.textContent=t;});
+hel('text',{x:1130,y:120,class:'colhead'}).textContent='Honesty  (vs belief)  ·  capsules are questions';
+hel('text',{x:1620,y:120,class:'colhead'}).textContent='Truthfulness  (vs world)';
+hel('text',{x:1130,y:730,class:'colhead'}).textContent='Deception  (vs listener)';
+hel('text',{x:440,y:620,class:'colhead'}).textContent='Drivers  (why)  · a driver is not a label';
+const hL=id=>HN[id].x,hR=id=>HN[id].x+HN[id].w,hT=id=>HN[id].y,hB=id=>HN[id].y+HN[id].h,hCX=id=>HN[id].x+HN[id].w/2,hCY=id=>HN[id].y+HN[id].h/2;
+HE.forEach(([a,b,label,kind])=>{let d,lx,ly;const A=HN[a],B=HN[b];
+  if(kind==='ctx'){d=`M${hCX(a)},${hB(a)+3} L${hCX(a)},${hT(b)-3}`;if(a==='ctx'){const tx=b==='know'?hCX(b):b==='belief'?hCX(b):hCX(b);d=`M${tx<hL(a)?hL(a)+10:tx>hR(a)?hR(a)-10:tx},${hB(a)+3} L${tx},${hT(b)-3}`;} if(a==='calib'){d=`M${hCX(a)},${hT(a)-3} L${hCX(a)},${hB('know')+40} L${hCX(b)},${hB('know')+40} L${hCX(b)},${hB(b)+3}`;}}
+  else if(a==='honest'&&b==='decep'){const x0=hL(a)-30;d=`M${hL(a)-3},${hCY(a)} L${x0},${hCY(a)} L${x0},${hCY(b)} L${hL(b)-3},${hCY(b)}`;lx=x0-6;ly=hCY(b)-40;}
+  else if(a==='df'&&b==='decep'){const x0=hR(b)+30;d=`M${hL(a)-3},${hCY(a)-10} L${x0},${hCY(a)-10} L${x0},${hCY(b)} L${hR(b)+3},${hCY(b)}`;lx=x0+6;ly=hCY(b)-22;}
+  else if(hCY(a)===hCY(b)&&Math.abs(hCY(a)-hCY(b))<1&&hR(a)<hL(b)){d=`M${hR(a)+3},${hCY(a)} L${hL(b)-3},${hCY(b)}`;lx=(hR(a)+hL(b))/2;ly=hCY(a)-8;}
+  else if(hR(a)<hL(b)){const x0=hR(a)+3+Math.min(26,(hL(b)-hR(a))/2);d=`M${hR(a)+3},${hCY(a)} L${x0},${hCY(a)} L${x0},${hCY(b)} L${hL(b)-3},${hCY(b)}`;lx=hL(b)-8;ly=hCY(b)-10;}
+  else if(hB(a)<hT(b)||hB(b)<hT(a)){const down=hB(a)<hT(b);d=down?`M${hCX(a)},${hB(a)+3} L${hCX(a)},${(hB(a)+hT(b))/2} L${hCX(b)},${(hB(a)+hT(b))/2} L${hCX(b)},${hT(b)-3}`:`M${hCX(a)},${hT(a)-3} L${hCX(a)},${(hT(a)+hB(b))/2} L${hCX(b)},${(hT(a)+hB(b))/2} L${hCX(b)},${hB(b)+3}`;lx=hCX(b)+8;ly=down?hT(b)-14:hB(b)+16;}
+  else{d=`M${hL(a)-3},${hCY(a)} L${hR(b)+3},${hCY(b)}`;}
+  const p=hel('path',{d,class:'hedge '+kind,'marker-end':kind==='ctx'?'':'url(#harr)'});
+  if(label&&lx!=null){const t=hel('text',{x:lx,y:ly,'text-anchor':(lx===hL(b)-8||(a==='honest'&&b==='decep'))?'end':'start',class:'hlabel'});t.textContent=label;}});
+Object.entries(HN).forEach(([id,n])=>{const g=hel('g',{class:'hn g-'+n.g,id:'h-'+id,tabindex:'0',role:'button','aria-label':n.t,transform:`translate(${n.x},${n.y})`});
+  hel('rect',{width:n.w,height:n.h,rx:n.g==='q'?n.h/2:8,style:`stroke:var(${GCOL[n.g]})`+(n.g==='ctx'?';stroke-dasharray:5 4':'')},g);
+  const big=n.h>=58;const t=hel('text',{x:n.w/2,y:n.g==='q'?n.h/2+4.5:(big?24:19),'text-anchor':'middle',class:n.g==='q'?'hq':'ht'},g);t.textContent=n.t;
+  if(n.s){const s=hel('text',{x:n.w/2,y:big?42:34,'text-anchor':'middle',class:'hs'},g);s.textContent=n.s;}
+  if(n.c){hel('circle',{cx:n.w-9,cy:9,r:4,style:'fill:var(--orange)'},g);}
+  ['mouseenter','focus'].forEach(ev=>g.addEventListener(ev,e=>showPop(id,g)));
+  ['mouseleave','blur'].forEach(ev=>g.addEventListener(ev,()=>{if(!POP.pinned)hidePop()}));
+  g.addEventListener('click',e=>{e.stopPropagation();POP.pinned=POP.pinned&&POP.id===id?false:true;showPop(id,g);if(!POP.pinned)hidePop();});
+});
+/* popover */
+const POP={el:document.getElementById('hpop'),pinned:false,id:null};
+function showPop(id,g){const n=HN[id];POP.id=id;
+  POP.el.innerHTML=`<div class="pk" style="color:var(${GCOL[n.g]})">${escH(n.s)}${n.c?' · <span class="contested">contested</span>':''}</div><h4>${escH(n.t)}</h4><p>${escH(n.d)}</p>${n.c?`<p class="pc">${escH(n.c)}</p>`:''}<div class="prefs">${n.r.map(k=>{const r=REFS[k];return `<a href="${r.u}" target="_blank" rel="noopener">${escH(r.t)} (${r.y})</a>`}).join('')}</div><div class="phint">${POP.pinned?'click again to unpin':'click to pin · links open in a new tab'}</div>`;
+  const box=document.getElementById('hwrap').getBoundingClientRect(),r=g.getBoundingClientRect();
+  const left=Math.min(Math.max(8,r.left-box.left),box.width-380-8);const top=r.bottom-box.top+8;
+  POP.el.style.left=left+'px';POP.el.style.top=top+'px';POP.el.hidden=false;}
+function hidePop(){POP.el.hidden=true;POP.pinned=false;POP.id=null;}
+document.addEventListener('click',e=>{if(!POP.el.contains(e.target))hidePop();});
+POP.el.addEventListener('mouseenter',()=>{POP.hover=true});POP.el.addEventListener('mouseleave',()=>{POP.hover=false;if(!POP.pinned)hidePop();});
+
+
+
+/* ---------- zoom controls: one per map box ---------- */
+document.querySelectorAll('.flowbox').forEach((box,i)=>{
+  const svg=box.querySelector('svg'); if(!svg) return;
+  const bar=document.createElement('div'); bar.className='zoombar';
+  bar.innerHTML=`<button type="button" data-z="-">−</button><input type="range" min="60" max="300" step="10" value="100" aria-label="zoom"><button type="button" data-z="+">+</button><span class="zv">100%</span><button type="button" data-z="fit">fit</button><span>scroll or drag to pan · ctrl/⌘ + wheel to zoom</span>`;
+  box.parentNode.insertBefore(bar,box);
+  const range=bar.querySelector('input'),zv=bar.querySelector('.zv');
+  const key='dl-zoom-'+(svg.id||i);
+  function apply(z){z=Math.max(60,Math.min(300,Math.round(z)));range.value=z;zv.textContent=z+'%';svg.style.width=z+'%';try{localStorage.setItem(key,z)}catch(e){}}
+  range.oninput=()=>apply(+range.value);
+  bar.querySelectorAll('[data-z]').forEach(b=>b.onclick=()=>{const z=+range.value;apply(b.dataset.z==='+'?z+20:b.dataset.z==='-'?z-20:100);});
+  box.addEventListener('wheel',e=>{if(!(e.ctrlKey||e.metaKey))return;e.preventDefault();apply(+range.value+(e.deltaY<0?10:-10));},{passive:false});
+  let drag=null;box.addEventListener('mousedown',e=>{if(e.target.closest('.node,.tn,.hn,.fn,.rn,a,button'))return;drag={x:e.clientX,y:e.clientY,l:box.scrollLeft,t:box.scrollTop};box.style.cursor='grabbing';});
+  window.addEventListener('mousemove',e=>{if(!drag)return;box.scrollLeft=drag.l-(e.clientX-drag.x);box.scrollTop=drag.t-(e.clientY-drag.y);});
+  window.addEventListener('mouseup',()=>{drag=null;box.style.cursor='';});
+  let z0=100;try{z0=+localStorage.getItem(key)||100}catch(e){}apply(z0);
+});
+
+/* ============ panel ============ */
+const PANEL={mode:'home',id:null,editing:false};
+function showHome(){PANEL.mode='home';$('#panel').innerHTML=`<div class="k">deception lab</div><h3>Notes live in files</h3><p>Everything here is read from <code>notes/</code>: concepts, papers, experiments and the matrix config. Edit in the panel or in Obsidian; the app re-reads on save.</p><p class="why">Click a box on the map, a case under it, a leaf or test on the Labels tree, a point in the gaps chart or a paper in the queue to open its note.</p><div class="row"><button class="btn" id="newPaper">+ New paper</button><button class="btn" id="newExp">+ New experiment</button><button class="btn" id="reload">Reload files</button></div>`;
+ $('#newPaper').onclick=()=>newNote('papers');$('#newExp').onclick=()=>newNote('experiments');$('#reload').onclick=async()=>{await load();renderAll();};}
+function showNote(path,extra){ PANEL.mode='note';PANEL.id=path; const n=DB.byPath[path]; const p=$('#panel'); if(!n){p.innerHTML=`<div class="k">missing</div><h3>${path}</h3><p>No file yet.</p><button class="btn" id="mk">Create it</button>`;$('#mk').onclick=()=>save(path,`---\ntitle: ${path.split('/').pop().slice(0,-3)}\n---\n\n## My notes\n\n`).then(()=>showNote(path));return;}
+ const fm=n.fm; const kind=path.startsWith('papers/')?'paper':path.startsWith('experiments/')?'experiment':path.startsWith('concepts/')?'concept':'config';
+ let head=`<div class="k">${kind}${fm.kind?' · '+fm.kind:''}${fm.status?' · '+fm.status:''}</div><h3>${fm.title||path}</h3>`;
+ if(fm.arxiv)head+=`<div class="meta"><a href="https://arxiv.org/abs/${fm.arxiv}" target="_blank" rel="noopener">arXiv ${fm.arxiv}</a></div>`;
+ if(fm.fills&&fm.fills.length)head+=`<div class="meta">fills: ${fm.fills.map(f=>`<span class="tag">${f.behaviour} × ${f.question} · ${f.level} · ${f.kind}</span>`).join(' ')}</div>`;
+ let rel=''; if(kind==='concept'){const ps=papersFor(path.slice(9,-3)); rel=`<div class="meta">Papers tagged to this concept</div><div class="plist">${ps.length?ps.map(pp=>`<a data-open="${pp.path}"><span class="tag ${pp.fm.status}">${pp.fm.status||''}</span>${pp.fm.title}</a>`).join(''):'<span class="meta">none yet · add <code>concepts: [..]</code> to a paper</span>'}</div>`;}
+ if(PANEL.editing){ p.innerHTML=head+`<textarea class="ed" id="ed">${n.raw.replace(/</g,'&lt;')}</textarea><div class="row"><button class="btn primary" id="sv">Save</button><button class="btn" id="cx">Cancel</button><span class="meta">${path}</span></div>`;
+   $('#sv').onclick=async()=>{await save(path,$('#ed').value);PANEL.editing=false;showNote(path);}; $('#cx').onclick=()=>{PANEL.editing=false;showNote(path);}; return; }
+ p.innerHTML=head+(extra||'')+`<div class="md">${mdToHtml(n.body)}</div>`+rel+`<div class="row"><button class="btn primary" id="edit">Edit</button>${kind==='paper'?`<span class="meta">status:</span>${['queued','reading','read','later'].map(s=>`<button class="btn sm" data-st="${s}" ${fm.status===s?'style="border-color:var(--blue);color:var(--blue-ink)"':''}>${s}</button>`).join('')}`:''}<span class="meta">${path}</span></div>`;
+ $('#edit').onclick=()=>{PANEL.editing=true;showNote(path);};
+ p.querySelectorAll('[data-st]').forEach(b=>b.onclick=()=>save(path,setFM(n.raw,'status',b.dataset.st)).then(()=>showNote(path)));
+ p.querySelectorAll('[data-open]').forEach(a=>a.onclick=()=>showNote(a.dataset.open));
+ p.querySelectorAll('.wl').forEach(w=>w.onclick=()=>{const t=w.dataset.wl;const hit=DB.notes.find(x=>x.path.endsWith('/'+t+'.md')||x.fm.title===t);if(hit)showNote(hit.path);});
+}
+function showCell(b,q){ PANEL.mode='cell'; const B=DB.matrix.fm.behaviours.find(x=>x.id===b),Q=DB.matrix.fm.questions.find(x=>x.id===q); const fs=fillsFor(b,q); const p=$('#panel');
+ p.innerHTML=`<div class="k">matrix cell · ${Q.level}</div><h3>${B.label} × ${Q.label}</h3><div class="meta">${B.note||''}</div>${fs.length?`<div class="plist">${fs.map(({note,f})=>`<a data-open="${note.path}"><span class="tag" style="color:var(--${f.kind==='direct'?'green':f.kind==='contradictory'?'red':f.kind==='own'?'blue-ink':'orange'})">${f.kind}</span>${note.fm.title}</a>`).join('')}</div>`:'<p class="meta">Nothing listed. That means no work in your bibliography, not that none exists.</p>'}<p class="why" style="font-size:13px">To add evidence, put this line under <code>fills:</code> in a paper note:<br><code>- {behaviour: ${b}, question: ${q}, level: ${Q.level}, kind: direct}</code></p><div class="row"><button class="btn sm" id="cp">Copy that line</button></div>`;
+ $('#cp').onclick=()=>{const t=`  - {behaviour: ${b}, question: ${q}, level: ${Q.level}, kind: direct}`;navigator.clipboard&&navigator.clipboard.writeText(t).catch(()=>{});$('#cp').textContent='Copied';};
+ p.querySelectorAll('[data-open]').forEach(a=>a.onclick=()=>showNote(a.dataset.open));
+}
+function showGap(g){ PANEL.mode='gap'; const B=DB.matrix.fm.behaviours.find(x=>x.id===g.behaviour),Q=DB.matrix.fm.questions.find(x=>x.id===g.question); const fs=fillsFor(g.behaviour,g.question);
+ $('#panel').innerHTML=`<div class="k">gap · ${g.identifiable?'identifiable':'blocked'}</div><h3>${B.label} × ${Q.label}</h3>${g.summary?`<p><b>${g.summary}</b></p>`:''}${String(g.note||'').split(/<br\s*\/?>\s*<br\s*\/?>/i).map(t=>`<p>${t}</p>`).join('')}<div class="meta">science <b>${g.science}</b>/5 · monitoring <b>${g.monitoring}</b>/5</div><p class="why" style="font-size:13px">${g.identifiable?'Competing explanations can be told apart with current data: this is an experiment.':'Competing explanations cannot yet be told apart: this is a dataset or measurement project first.'}</p><div class="meta">Evidence already in the cell: ${fs.length||'none'}</div><div class="row"><button class="btn sm" id="om">Edit priorities (matrix.md)</button></div>`;
+ $('#om').onclick=()=>{PANEL.editing=true;showNote('matrix.md');};
+}
+function newNote(dir){ const slug=prompt(`File name for the new ${dir.slice(0,-1)} (no spaces, no extension):`); if(!slug)return;
+ const raw=dir==='papers'?`---\ntitle: ${slug}\narxiv: \nconcepts: []\norder: ${DB.papers.length+1}\nstatus: queued\nfills:\n  []\n---\n\n## What it claims\n\n## What it actually shows (and at which level)\n\n## What I disagree with or want to check\n`:`---\ntitle: ${slug}\ndate: ${new Date().toISOString().slice(0,7)}\nmodel: \nstatus: planned\nconcepts: []\nfills:\n  []\n---\nQuestion:\n\n## Setup\n\n## Results\n\n## What this says about the matrix cell\n`;
+ save(`${dir}/${slug}.md`,raw).then(()=>{PANEL.editing=true;showNote(`${dir}/${slug}.md`);}); }
+
+/* map hover/click → panel */
+document.querySelectorAll('[data-info]').forEach(el=>{const id=el.dataset.info; let prev=null;
+ el.addEventListener('mouseenter',()=>{if(PANEL.mode==='note'&&PANEL.editing)return; prev={mode:PANEL.mode,id:PANEL.id,html:$('#panel').innerHTML}; const c=DB.concepts[id]; if(!c)return; $('#panel').innerHTML=`<div class="k">${c.fm.kind||''}</div><h3>${c.fm.title}</h3><div class="md">${mdToHtml(c.body.split('## My notes')[0])}</div><div class="pin">click to open and edit</div>`;});
+ el.addEventListener('mouseleave',()=>{if(!prev)return; if(PANEL.mode==='note'&&PANEL.editing)return; $('#panel').innerHTML=prev.html; PANEL.mode=prev.mode;PANEL.id=prev.id; if(prev.mode==='case')showCase(); else if(prev.mode==='tree')showTree(); else if(prev.mode==='home')showHome(); else if(prev.mode==='note'&&prev.id)showNote(prev.id); prev=null;});
+ el.addEventListener('click',()=>{prev=null;showNote(`concepts/${id}.md`);});
+ el.addEventListener('keydown',e=>{if(e.key==='Enter'){el.click()}});
+});
+
+/* ============ gaps ============ */
+function renderGaps(){ const M=DB.matrix; const P=(M&&M.fm.priorities)||[]; const Bs=M.fm.behaviours,Qs=M.fm.questions;
+ const W=520,Hh=420,pad={l:46,r:16,t:16,b:44}; const sx=v=>pad.l+(v-0.5)/5*(W-pad.l-pad.r), sy=v=>Hh-pad.b-(v-0.5)/5*(Hh-pad.t-pad.b);
+ let s=`<svg viewBox="0 0 ${W} ${Hh}">`;
+ s+=`<rect x="${pad.l}" y="${pad.t}" width="${W-pad.l-pad.r}" height="${Hh-pad.t-pad.b}" fill="none" stroke="var(--line)"/>`;
+ s+=`<line x1="${sx(3)}" y1="${pad.t}" x2="${sx(3)}" y2="${Hh-pad.b}" stroke="var(--line)" stroke-dasharray="4 4"/><line x1="${pad.l}" y1="${sy(3)}" x2="${W-pad.r}" y2="${sy(3)}" stroke="var(--line)" stroke-dasharray="4 4"/>`;
+ s+=`<text class="quad" x="${sx(5.4)}" y="${sy(5.3)}" text-anchor="end">do first</text><text class="quad" x="${sx(0.6)}" y="${sy(5.3)}">good science, little monitoring payoff</text><text class="quad" x="${sx(5.4)}" y="${sy(0.7)}" text-anchor="end">monitoring payoff, thin science</text><text class="quad" x="${sx(0.6)}" y="${sy(0.7)}">drop</text>`;
+ s+=`<text class="axis" x="${(pad.l+W-pad.r)/2}" y="${Hh-10}" text-anchor="middle">scientific value →</text><text class="axis" transform="translate(14 ${(pad.t+Hh-pad.b)/2}) rotate(-90)" text-anchor="middle">monitoring value →</text>`;
+ const taken=[];
+ P.forEach((g,i)=>{ let x=sx(g.science),y=sy(g.monitoring); let k=0;
+   while(taken.some(t=>Math.hypot(t[0]-x,t[1]-y)<26)){k++; x=sx(g.science)+Math.cos(k*2.1)*(14+6*k); y=sy(g.monitoring)+Math.sin(k*2.1)*(14+6*k);} taken.push([x,y]);
+   s+=`<g class="pt ${g.identifiable?'':'blocked'}" data-i="${i}"><circle cx="${x}" cy="${y}" r="11"/><text x="${x}" y="${y+4}" text-anchor="middle" style="font-weight:700;fill:${g.identifiable?'#fff':'var(--fg)'}">${i+1}</text></g>`;});
+ $('#q2').innerHTML=s+'</svg>';
+ $('#gaplist').innerHTML=P.map((g,i)=>{const B=Bs.find(x=>x.id===g.behaviour)||{label:g.behaviour},Q=Qs.find(x=>x.id===g.question)||{label:g.question};return `<div class="gapcard ${g.identifiable?'':'blocked'}" data-i="${i}"><h4><span style="font-family:var(--mono);color:var(--blue-ink);margin-right:8px">${i+1}</span>${B.label} × ${Q.label}</h4><div class="m">science <b>${g.science}</b> · monitoring <b>${g.monitoring}</b></div>${(g.summary||g.note)?`<div class="sum">${g.summary||String(g.note).replace(/<br\s*\/?>/gi,' ')}</div>`:''}</div>`;}).join('')||'<p class="intro">Add entries under <code>priorities:</code> in matrix.md.</p>';
+ const sel=i=>{document.querySelectorAll('.pt,.gapcard').forEach(e=>e.classList.toggle('sel',e.dataset.i==i));showGap(P[i]);};
+ document.querySelectorAll('.pt,.gapcard').forEach(e=>e.onclick=()=>sel(e.dataset.i));
+}
+
+/* ============ reading ============ */
+function renderReading(){ const groups=[['reading','Reading now'],['queued','Up next'],['read','Done'],['later','Later']]; let h='';
+ for(const [st,label] of groups){const ps=DB.papers.filter(p=>(p.fm.status||'queued')===st); if(!ps.length)continue; h+=`<div class="sect">${label} · ${ps.length}</div><div class="rq">`+ps.map(p=>`<div class="it" data-p="${p.path}"><span class="n">${p.fm.order??''}</span><div class="t">${p.fm.title}<small>${(p.fm.concepts||[]).join(', ')}${p.fm.fills&&p.fm.fills.length?' · fills '+p.fm.fills.length+' cell'+(p.fm.fills.length>1?'s':''):' · no cells yet'}</small></div><div class="st">${['queued','reading','read','later'].map(s=>`<button class="${s}${(p.fm.status||'queued')===s?' on':''}" data-st="${s}">${s}</button>`).join('')}</div></div>`).join('')+'</div>';}
+ $('#rq').innerHTML=h||'<p class="intro">No papers yet. Use + New paper in the panel.</p>';
+ document.querySelectorAll('.rq .it').forEach(it=>{it.onclick=e=>{if(e.target.dataset.st)return;document.querySelectorAll('.rq .it').forEach(x=>x.classList.remove('sel'));it.classList.add('sel');showNote(it.dataset.p);};
+  it.querySelectorAll('[data-st]').forEach(b=>b.onclick=e=>{e.stopPropagation();const n=DB.byPath[it.dataset.p];save(n.path,setFM(n.raw,'status',b.dataset.st));});});
+}
+
+/* ============ views ============ */
+function setView(v){document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));['map','gaps','reading'].forEach(x=>$('#v-'+x).hidden=x!==v);try{location.hash=v}catch(e){}}
+document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>setView(b.dataset.v));
+function renderAll(){renderMap();renderGaps();renderReading(); if(PANEL.mode==='home')showHome(); else if(PANEL.mode==='case')showCase(); else if(PANEL.mode==='tree')showTree(); else if(PANEL.mode==='note'&&PANEL.id&&!PANEL.editing)showNote(PANEL.id);}
+(async()=>{try{await load();}catch(e){$('#status').textContent='cannot reach server: run python3 server.py';} renderAll(); showHome(); const h=(location.hash||'').slice(1); if(['map','gaps','reading'].includes(h))setView(h);})();
+</script>
+</body>
+</html>

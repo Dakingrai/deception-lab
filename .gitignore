@@ -218,3 +218,8 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Deception Lab
+.loi/local.toml
+.claude/settings.local.json
+*.pdf

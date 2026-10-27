@@ -3,7 +3,7 @@ title: Standards for belief representations in LLMs
 arxiv: 2405.21030
 concepts: [belief]
 order: 2
-status: queued
+status: reading
 fills:
   []
 ---

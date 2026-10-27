@@ -21,6 +21,7 @@ To point it at your Obsidian vault instead of `./notes`, symlink: `ln -s ~/vault
 - *(Matrix view removed Oct 25; `matrix.md` is still read for the Gaps view and `fills:` lines are still parsed.)*
 - **Gaps**: the hand-ranked priorities from `notes/matrix.md`, drawn as scientific value × monitoring value. Dashed points are not yet identifiable.
 - **Reading**: the paper queue by status. Status buttons write to the file.
+- **Projects**: work, as opposed to knowledge. One folder per project under `projects/`; `project.md` is the description, other `.md` files beside it are project notes, and `experiments/` holds experiment write-ups (same frontmatter as `notes/experiments/`; their `fills:` count toward matrix cells). Click to open in the panel; `+ New note` / `+ New experiment` create files in the project folder.
 
 ## Files
 
@@ -30,6 +31,10 @@ notes/
   concepts/<id>.md   one per map node or influence chip; id must match the map
   papers/<slug>.md   one per paper
   experiments/<slug>.md
+projects/
+  <slug>/project.md        the project description
+  <slug>/<note>.md         project notes
+  <slug>/experiments/<slug>.md
 ```
 
 Paper frontmatter:

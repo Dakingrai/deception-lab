@@ -44,6 +44,7 @@ button{font-family:var(--sans)}
 
 /* layout */
 .main{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:0;min-height:0}
+.main.nopanel{grid-template-columns:minmax(0,1fr)} .main.nopanel .panel{display:none}
 @media (max-width:980px){.main{grid-template-columns:1fr}.panel{position:static;max-height:none}}
 .view{padding:18px 20px 40px;overflow:auto;min-width:0}
 .view[hidden]{display:none}
@@ -55,8 +56,20 @@ button{font-family:var(--sans)}
 .panel ul{margin:0;padding-left:18px;font-family:var(--sans);font-size:13px;color:var(--muted)}
 .panel .pin{font-family:var(--sans);font-size:12px;color:var(--muted)}
 .md{font-size:14px}
+.nfig+.nfig{margin-top:8px}
+.nfig{border:1px solid var(--line);border-radius:8px;background:var(--bg);padding:6px;cursor:zoom-in} .nfig svg{width:100%;height:auto;display:block}
+.figov{position:fixed;inset:0;z-index:50;background:color-mix(in srgb,var(--bg) 92%,transparent);display:flex;align-items:center;justify-content:center;padding:24px;cursor:zoom-out} .figov[hidden]{display:none} .figov svg{width:min(1200px,100%);height:auto;max-height:100%;background:var(--bg)}
 .md h2,.md h3{font-size:14px;margin:12px 0 4px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
 .md p{margin:0 0 8px}
+.regions{border:1px solid var(--line);border-radius:14px;padding:14px;margin:8px 0 16px;background:var(--surface)}
+.rgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+@media (max-width:700px){.rgrid{grid-template-columns:minmax(0,1fr)}}
+.rcard{border-radius:10px;padding:14px 18px;min-width:0}
+.rcard:nth-child(4n+1){background:var(--blue-soft)} .rcard:nth-child(4n+2){background:var(--gate)} .rcard:nth-child(4n+3){background:color-mix(in srgb,var(--green-soft) 45%,var(--gray-soft))} .rcard:nth-child(4n+4){background:var(--purple-soft)}
+.regions h4{font-family:var(--sans);font-size:17px;font-weight:600;margin:0 0 6px;color:var(--fg);text-transform:none;letter-spacing:0}
+.regions p{font-family:var(--sans);font-size:14px;line-height:1.5;color:var(--muted);margin:0}
+.rarrow{text-align:center;color:var(--muted);font-family:var(--sans);margin:12px 0 4px}
+.rfoot{text-align:center;padding:2px 8px 6px}
 .md code{font-family:var(--mono);font-size:12px;background:var(--gray-soft);padding:0 4px;border-radius:3px}
 .md .wl{color:var(--blue-ink);text-decoration:underline dotted;cursor:pointer}
 textarea.ed{width:100%;min-height:260px;font-family:var(--mono);font-size:12.5px;line-height:1.5;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--fg);resize:vertical}
@@ -226,9 +239,34 @@ table.cases{border-collapse:collapse;width:100%;font-family:var(--sans);font-siz
 /* ---- reading ---- */
 .rq{display:grid;gap:6px;max-width:820px}
 .rq .it{display:grid;grid-template-columns:34px minmax(0,1fr) auto;gap:10px;align-items:center;border:1px solid var(--line);border-radius:10px;padding:8px 12px;background:var(--surface);cursor:pointer;font-family:var(--sans)}
+.pj .rq .it{grid-template-columns:minmax(34px,auto) minmax(0,1fr) auto}
+.pjidx{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;margin:6px 0 14px}
+.pjcard{text-align:left;border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:14px 16px;cursor:pointer;font-family:var(--sans);color:var(--fg);display:grid;gap:4px;align-content:start}
+.pjcard:hover{border-color:var(--blue)} .pjcard:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.pjcard .kd{font:600 11px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.pjcard h3{font-size:16px;line-height:1.3;margin:0;color:var(--fg)}
+.pjcard p{margin:0;font-size:13px;color:var(--muted)}
+.pjback{margin:0 0 10px}
+.regions.loc .rcard.off{opacity:.38}
+.regions.loc .rcard.on{box-shadow:inset 0 0 0 2px var(--fg)}
+.regions.click .rcard{cursor:pointer;transition:box-shadow .15s,opacity .15s}
+.regions.click .rcard:hover{box-shadow:inset 0 0 0 2px var(--rule);opacity:1}
+.regions.click .rcard:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.regions.loc.click .rcard.on:hover{box-shadow:inset 0 0 0 2px var(--fg)}
+.rhead{border-radius:12px;padding:16px 20px;margin:4px 0 6px}
+.rhead h2{font-size:22px!important;margin:0 0 6px!important}
+.rhead p{font-family:var(--sans);font-size:15px;color:var(--muted);margin:0}
+.rhead.t0{background:var(--blue-soft)} .rhead.t1{background:var(--gate)} .rhead.t2{background:color-mix(in srgb,var(--green-soft) 45%,var(--gray-soft))} .rhead.t3{background:var(--purple-soft)}
+.rtag{font:600 10px var(--mono);letter-spacing:.05em;text-transform:uppercase;margin-left:8px;padding:1px 6px;border-radius:4px;border:1px solid var(--rule);color:var(--muted);vertical-align:middle;white-space:nowrap}
 .rq .it:hover{border-color:var(--blue)} .rq .it.sel{box-shadow:0 0 0 2px var(--blue)}
 .rq .n{font-family:var(--mono);font-size:12px;color:var(--muted)} .rq .t{font-weight:600;font-size:14px} .rq .t small{display:block;font-weight:400;color:var(--muted);font-size:12px}
 .rq .st{display:flex;gap:4px} .rq .st button{font-size:11px;padding:3px 7px;border-radius:999px;border:1px solid var(--line);background:none;color:var(--muted);cursor:pointer}
+.pj{max-width:820px;display:grid;gap:14px}
+.pj .ptabs{display:flex;gap:6px;flex-wrap:wrap} .pj .ptabs button{font-size:13px;font-weight:600;padding:5px 11px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--muted);cursor:pointer} .pj .ptabs button.on{border-color:var(--blue);color:var(--blue-ink);background:var(--blue-soft)}
+.pj .pdesc{border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:14px 18px;cursor:pointer} .pj .pdesc:hover{border-color:var(--blue)} .pj .pdesc h2{font-size:19px;margin:0 0 8px} .pj .pdesc .md{font-size:14.5px}
+.pj .sect{display:flex;align-items:center;gap:10px} .pj .sect .btn{margin-left:auto}
+.pj .pdesc{cursor:default} .pj .pdesc:hover{border-color:var(--line)} .pj .pdesc .row{margin-top:10px}
+.pj .it .body{grid-column:1/-1;border-top:1px solid var(--line);padding-top:10px;margin-top:4px;cursor:default} .pj .it .body .md{font-size:14px} .pj .it.open{cursor:default}
 .rq .st button.on.queued{border-color:var(--gray);color:var(--fg)} .rq .st button.on.reading{border-color:var(--orange);color:var(--orange)} .rq .st button.on.read{border-color:var(--green);color:var(--green)} .rq .st button.on.later{opacity:.7}
 .sect{font-family:var(--sans);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:14px 0 6px}
 .intro{max-width:720px;color:var(--muted);font-size:14px;margin-bottom:8px}
@@ -237,7 +275,7 @@ table.cases{border-collapse:collapse;width:100%;font-family:var(--sans);font-siz
 <body>
 <div class="top">
   <div><h1>Deception Lab</h1><div class="sub">files in <code id="notesPath">./notes</code> · edit here or in Obsidian</div></div>
-  <div class="tabs" id="tabs"><button data-v="map" class="on">Map</button><button data-v="gaps">Gaps</button><button data-v="reading">Reading</button></div>
+  <div class="tabs" id="tabs"><button data-v="map" class="on">Map</button><button data-v="gaps">Gaps</button><button data-v="reading">Reading</button><button data-v="projects">Projects</button></div>
   <div class="status" id="status">loading…</div>
 </div>
 <div class="main">
@@ -247,6 +285,7 @@ table.cases{border-collapse:collapse;width:100%;font-family:var(--sans);font-siz
         <button class="mcard" type="button" data-sub="terms"><div class="mthumb" data-thumb="flowbox"></div><div class="minfo"><span class="mnum">Map 1</span><b>Terms and relations</b><p>What are belief, scoped belief, goal, listener model, space selection, assertion and listener belief, and how do they connect? Cases are drawn as patterns over the map.</p></div></button>
         <button class="mcard" type="button" data-sub="labels"><div class="mthumb" data-thumb="tree"></div><div class="minfo"><span class="mnum">Map 2</span><b>Telling the labels apart</b><p>Five observable tests that land one output on honest, mistake, hallucination, bullshit, fiction, lie or deception, for claims about the world and about the model itself, with the confusable pairs.</p></div></button>
         <button class="mcard" type="button" data-sub="honesty"><div class="mthumb" data-thumb="hmap"></div><div class="minfo"><span class="mnum">Map 3</span><b>Honesty, truthfulness, deception</b><p>Where hallucination, misconception, lie, misleading truth, sycophancy, role-play, sandbagging and alignment faking sit once honesty, truthfulness and deception are kept as three separate judgements. Hover a box for a note and the papers behind it.</p></div></button>
+        <button class="mcard" type="button" data-sub="datasets"><div class="mthumb"><svg viewBox="-40 -40 480 320" aria-hidden="true"><path d="M200,39 Q200,120 276,80" fill="none" stroke="var(--rule)" stroke-width="1.5"/><path d="M200,39 Q200,120 276,160" fill="none" stroke="var(--rule)" stroke-width="1.5"/><path d="M200,39 Q200,120 124,160" fill="none" stroke="var(--rule)" stroke-width="1.5"/><path d="M276,80 Q200,120 276,160" fill="none" stroke="var(--rule)" stroke-width="1.5"/><path d="M276,80 Q200,120 124,160" fill="none" stroke="var(--rule)" stroke-width="1.5"/><path d="M200,39 Q200,120 200,201" fill="none" stroke="var(--rule)" stroke-width="1.5"/><path d="M276,80 Q200,120 200,201" fill="none" stroke="var(--rule)" stroke-width="1.5"/><path d="M276,160 Q200,120 200,201" fill="none" stroke="var(--rule)" stroke-width="1.5"/><path d="M124,160 Q200,120 124,80" fill="none" stroke="var(--rule)" stroke-width="1.5"/><path d="M276,80 Q200,120 124,80" fill="none" stroke="var(--rule)" stroke-width="1.5"/><circle cx="200" cy="39" r="40" fill="var(--blue)"/><circle cx="276" cy="80" r="36" fill="var(--orange)"/><circle cx="276" cy="160" r="28" fill="var(--green)"/><circle cx="200" cy="201" r="25" fill="var(--gate-line)" stroke="var(--fg)" stroke-dasharray="4 3"/><circle cx="124" cy="160" r="31" fill="var(--purple)"/><circle cx="124" cy="80" r="13" fill="var(--gray)"/></svg></div><div class="minfo"><span class="mnum">Map 4</span><b>How deception datasets are made</b><p>How do lie and deception datasets get a model to say something it does not believe? Every benchmark, and every paper that built its own lie data, is placed by how the dishonesty was induced, at a fine grain. Crowded and empty regions show where deception monitors are tested and where they are not. Four lenses group the same datasets by what pushes the model, whose voice is lying, who is meant to be misled, and where the cue sits.</p></div></button>
       </div>
       <div id="sub-terms" hidden>
         <div class="backbar"><button class="btn sm" data-back>← All maps</button><span class="crumb">Map 1 · Terms and relations</span></div>
@@ -279,6 +318,13 @@ table.cases{border-collapse:collapse;width:100%;font-family:var(--sans);font-siz
     <div class="legend"><span class="sw" style="--c:var(--open)">● contested definition</span><span class="sw" style="--c:var(--world)">honest</span><span class="sw" style="--c:var(--open)">honest but incorrect</span><span class="sw" style="--c:var(--bad)">dishonest / deceptive</span><span class="sw" style="--c:var(--comp)">framed · drivers · belief</span><span class="l-hy">context influence</span></div>
         <div class="legend legend3"><span class="sw" style="--c:var(--orange)">● contested definition</span><span class="sw" style="--c:var(--green)">honest</span><span class="sw" style="--c:var(--orange)">honest but incorrect</span><span class="sw" style="--c:var(--red)">dishonest / deceptive</span><span class="sw" style="--c:var(--purple)">drivers · belief</span></div>
       </div>
+      <div id="sub-datasets" hidden>
+        <div class="backbar"><button class="btn sm" data-back>← All maps</button><span class="crumb">Map 4 · How deception datasets are made</span></div>
+        <p class="intro">Deception probes are trained on one dataset and judged on others. The out-of-distribution claim is only as meaningful as the differences between those datasets, and those differences are rarely stated. Datasets are usually described by scenario (insider trading, sandbagging, a kept secret). What plausibly matters to a probe is how the dishonesty was produced: whether the model was told to lie, given a goal that deception serves, cast as a character, pressured by the user, or trained to hide something. Each route leaves different traces in the input. A probe can learn the trace instead of the lie, for example by picking up an instruction to deceive that sits in the prompt.</p>
+        <p class="intro">This map sorts lie and deception data by how it was built. It covers dedicated benchmarks and also papers on lying, deception, and truth or belief probing that synthesize their own data, since much of what we know about probes comes from the latter. A dataset is included if its authors treat its outputs as lies or deception. Data where the dishonest speaker is a character the model plays (persona, role-play, fiction) is included but marked as contested. Whether those outputs are the model saying something it does not believe is an open question, discussed separately.</p>
+        <p class="intro">The map has four lenses, shown as tabs. The first groups datasets by what pushes the model to lie: an instruction or request, a situational incentive, pressure from the user, speaking in character, training, or nothing at all. The other three group the same datasets by whose voice is lying, who is meant to be misled, and where the cue to be dishonest sits. Each group opens into the construction routes inside it, and each route into its datasets, each with a verified dishonest and honest example. A line joins two bubbles when the same paper built datasets in both. The map has two purposes. The first is to make construction explicit, so that "generalises out of distribution" can be read as "transfers from construction A to construction B." The second is to find gaps: routes to dishonesty that no dataset covers, or covers only in a form where the cue is visible in the input. These gaps are candidates for new evaluation sets. They are not conclusions about what models do.</p>
+        <iframe id="map4frame" src="map4/index.html" title="Map 4: how deception datasets are made" style="width:100%;height:1100px;border:0;display:block;margin-top:8px;background:transparent"></iframe>
+      </div>
     </div>
     <div class="view" id="v-gaps" hidden>
       <p class="intro">Hand-ranked gaps from <code>matrix.md</code>. Scientific value against monitoring value; dashed points are not yet identifiable (competing explanations can't be told apart with current data), so they are dataset projects, not experiments.</p>
@@ -288,8 +334,13 @@ table.cases{border-collapse:collapse;width:100%;font-family:var(--sans);font-siz
       <p class="intro">The queue, in reading order. Click a paper to open its note; set its status here. For each paper, the habit is one line: which cell it fills and at which level.</p>
       <div id="rq"></div>
     </div>
+    <div class="view" id="v-projects" hidden>
+      <p class="intro">Work, as opposed to knowledge: one folder per project under <code>projects/</code>. <code>project.md</code> is the description; other notes and <code>experiments/</code> sit beside it. Click anything to open it in the panel.</p>
+      <div id="pj" class="pj"></div>
+    </div>
   </div>
   <aside class="panel" id="panel"></aside>
+  <div class="figov" id="figov" hidden></div>
 </div>
 
 <script>
@@ -305,7 +356,7 @@ function parseFM(raw){
     if(it&&key){ if(!Array.isArray(fm[key]))fm[key]=[]; const v=it[1].trim(); fm[key].push(v.startsWith('{')?flow(v):scalar(v)); continue; }
     const kv=ln.match(/^([\w-]+):\s*(.*)$/); if(!kv) continue;
     key=kv[1]; const v=kv[2].trim();
-    if(v==='') fm[key]=[]; else if(v.startsWith('[')) fm[key]=list(v); else if(v.startsWith('{')) fm[key]=flow(v); else fm[key]=scalar(v);
+    if(v==='') fm[key]=[]; else if(v.startsWith('[')) fm[key]=list(v); else if(v.startsWith('{')) fm[key]=flow(v); else if(key==='arxiv') fm[key]=v.replace(/^["']|["']$/g,''); else fm[key]=scalar(v);
   }
   return {fm,body:m[2]};
 }
@@ -315,28 +366,46 @@ function setFM(raw,key,val){ // replace or add a scalar key in frontmatter
   const fmtxt=re.test(m[1])?m[1].replace(re,`${key}: ${val}`):m[1]+`\n${key}: ${val}`;
   return raw.replace(m[0],`---\n${fmtxt}\n---`);
 }
-function mdToHtml(s){ // minimal markdown
+function mdToHtml(s,ro){ // minimal markdown
   const esc=t=>t.replace(/&/g,'&amp;').replace(/</g,'&lt;');
   return s.split(/\n{2,}/).map(b=>{b=b.trim(); if(!b)return'';
+    if(/^:::regions\n[\s\S]*\n:::$/.test(b)) return regionsHtml(parseRegions(b), ro||{});
+    if(/^<svg[\s>]/.test(b)) return `<div class="nfig inline" title="click to enlarge">${b}</div>`;
     if(/^##\s/.test(b)) return `<h3>${esc(b.replace(/^##\s*/,''))}</h3>`;
     if(/^#\s/.test(b)) return `<h2>${esc(b.replace(/^#\s*/,''))}</h2>`;
     if(/^[-*]\s/m.test(b)) return '<ul>'+b.split('\n').map(l=>`<li>${inl(esc(l.replace(/^[-*]\s*/,'')))}</li>`).join('')+'</ul>';
     return `<p>${inl(esc(b)).replace(/\n/g,'<br>')}</p>`;}).join('');
-  function inl(t){return t.replace(/`([^`]+)`/g,'<code>$1</code>').replace(/\*\*([^*]+)\*\*/g,'<b>$1</b>').replace(/\[\[([^\]]+)\]\]/g,'<span class="wl" data-wl="$1">$1</span>').replace(/\[([^\]]+)\]\((https?:[^)]+)\)/g,'<a href="$2" target="_blank" rel="noopener">$1</a>');}
+  function inl(t){return t.replace(/`([^`]+)`/g,'<code>$1</code>').replace(/\*\*([^*]+)\*\*/g,'<b>$1</b>').replace(/(^|[^*\w])\*([^*\n]+)\*(?!\w)/g,'$1<i>$2</i>').replace(/\[\[([^\]]+)\]\]/g,'<span class="wl" data-wl="$1">$1</span>').replace(/\[([^\]]+)\]\((https?:[^)]+)\)/g,'<a href="$2" target="_blank" rel="noopener">$1</a>');}
 }
 
+
+/* ============ program regions ============ */
+document.addEventListener('click',e=>{const f=e.target.closest('.nfig.inline'); if(!f)return; const o=$('#figov'); if(!o)return; o.innerHTML=f.innerHTML; o.hidden=false; o.onclick=()=>{o.hidden=true;o.innerHTML='';};});
+function mdInline(t){return t.replace(/`([^`]+)`/g,'<code>$1</code>').replace(/\*\*([^*]+)\*\*/g,'<b>$1</b>').replace(/(^|[^*\w])\*([^*\n]+)\*(?!\w)/g,'$1<i>$2</i>');}
+function regionSlug(t){return t.toLowerCase().replace(/&/g,' ').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');}
+function parseRegions(b){ const L=b.split('\n').slice(1,-1); const part=l=>{const i=l.indexOf(' | '); return i<0?[l,'']:[l.slice(0,i),l.slice(i+3)];};
+  return {cards:L.filter(l=>l.startsWith('- ')).map(l=>{const [t,d]=part(l.slice(2)); return {id:regionSlug(t),t,d};}),
+          foot:L.filter(l=>l.startsWith('> ')).map(l=>{const [t,d]=part(l.slice(2)); return {t,d};})}; }
+function regionsOf(body){ const m=(body||'').match(/^:::regions\n[\s\S]*?\n:::$/m); return m?parseRegions(m[0]):null; }
+function regionsHtml(R,opt){ opt=opt||{}; const hi=opt.hi?new Set(opt.hi):null, counts=opt.counts||{};
+  return `<div class="regions${hi?' loc':''}${opt.click?' click':''}"><div class="rgrid">${R.cards.map(c=>`<div class="rcard${hi?(hi.has(c.id)?' on':' off'):''}" data-region="${c.id}"${opt.click?` tabindex="0" role="button" aria-label="Open region ${escH(c.t)}"`:''}><h4>${mdInline(escH(c.t))}${hi&&hi.has(c.id)?`<span class="rtag">${opt.hereLabel||'this project'}</span>`:''}${counts[c.id]?`<span class="rtag">${counts[c.id]} project${counts[c.id]>1?'s':''}</span>`:''}</h4><p>${mdInline(escH(c.d))}</p></div>`).join('')}</div>${R.foot.map(f=>`<div class="rarrow" aria-hidden="true">↓</div><div class="rfoot"><h4>${mdInline(escH(f.t))}</h4><p>${mdInline(escH(f.d))}</p></div>`).join('')}</div>`; }
 /* ============ data ============ */
-const DB={notes:[],byPath:{},concepts:{},papers:[],experiments:[],matrix:null};
+const DB={notes:[],byPath:{},concepts:{},papers:[],experiments:[],projects:[],matrix:null};
+const PJ={cur:null,region:null};
 async function load(){
   const r=await fetch('/api/notes'); const arr=await r.json();
-  DB.notes=arr.map(n=>({...n,...parseFM(n.raw)})); DB.byPath={}; DB.concepts={}; DB.papers=[]; DB.experiments=[]; DB.matrix=null;
+  DB.notes=arr.map(n=>({...n,...parseFM(n.raw)})); DB.byPath={}; DB.concepts={}; DB.papers=[]; DB.experiments=[]; DB.projects=[]; DB.matrix=null; const pj={};
   for(const n of DB.notes){ DB.byPath[n.path]=n;
     if(n.path.startsWith('concepts/')) DB.concepts[n.path.slice(9,-3)]=n;
     else if(n.path.startsWith('papers/')) DB.papers.push(n);
     else if(n.path.startsWith('experiments/')) DB.experiments.push(n);
+    else if(n.path.startsWith('projects/')){ const [,slug,...rest]=n.path.split('/'); const P=pj[slug]||(pj[slug]={slug,main:null,notes:[],experiments:[],versions:[],regions:{}});
+      if(rest.join('/')==='project.md') P.main=n; else if(rest[0]==='experiments') {P.experiments.push(n); DB.experiments.push(n);} else if(rest[0]==='versions') P.versions.push(n); else if(rest[0]==='regions') P.regions[rest.slice(1).join('/').replace(/\.md$/,'')]=n; else P.notes.push(n); }
     else if(n.path==='matrix.md') DB.matrix=n; }
+  DB.projects=Object.values(pj).sort((a,b)=>a.slug.localeCompare(b.slug));
+  if(PJ.cur&&!pj[PJ.cur]) PJ.cur=null;
   DB.papers.sort((a,b)=>(a.fm.order??999)-(b.fm.order??999));
-  $('#status').innerHTML=`<b>●</b> ${DB.papers.length} papers · ${DB.experiments.length} experiments · ${Object.keys(DB.concepts).length} concepts`;
+  $('#status').innerHTML=`<b>●</b> ${DB.papers.length} papers · ${DB.experiments.length} experiments · ${DB.projects.length} project${DB.projects.length===1?'':'s'} · ${Object.keys(DB.concepts).length} concepts`;
 }
 async function save(path,raw){
   const r=await fetch('/api/notes/'+path,{method:'PUT',body:raw}); if(!r.ok) throw new Error('save failed');
@@ -551,11 +620,13 @@ PAIRS.forEach(([a,b,t,why],i)=>{const d=document.createElement('button');d.type=
   pairsEl.appendChild(d);});
 
 
-function setSub(k){$('#mapwall').hidden=k!=='wall';$('#sub-terms').hidden=k!=='terms';$('#sub-labels').hidden=k!=='labels';$('#sub-honesty').hidden=k!=='honesty';try{localStorage.setItem('dl-sub',k)}catch(e){}if($('#v-map').scrollTo)$('#v-map').scrollTo({top:0});}
+addEventListener('message',e=>{ if(e.data&&e.data.map4h){ const f=document.getElementById('map4frame'); if(f) f.style.height=(e.data.map4h+8)+'px'; } });
+let SUBK='wall';
+function setSub(k){SUBK=k;if(!$('#v-map').hidden)$('.main').classList.toggle('nopanel',k==='datasets');$('#mapwall').hidden=k!=='wall';$('#sub-terms').hidden=k!=='terms';$('#sub-labels').hidden=k!=='labels';$('#sub-honesty').hidden=k!=='honesty';$('#sub-datasets').hidden=k!=='datasets';try{localStorage.setItem('dl-sub',k)}catch(e){}if($('#v-map').scrollTo)$('#v-map').scrollTo({top:0});}
 document.querySelectorAll('.mcard').forEach(b=>b.onclick=()=>setSub(b.dataset.sub));
 document.querySelectorAll('[data-back]').forEach(b=>b.onclick=()=>setSub('wall'));
 document.querySelectorAll('[data-thumb]').forEach(d=>{const src=document.getElementById(d.dataset.thumb);const svg=src&&(src.tagName==='svg'?src:src.querySelector('svg'));if(!svg)return;const c=svg.cloneNode(true);c.removeAttribute('id');c.querySelectorAll('[id]').forEach(e=>e.removeAttribute('id'));c.querySelectorAll('[tabindex]').forEach(e=>e.removeAttribute('tabindex'));c.setAttribute('aria-hidden','true');d.appendChild(c);});
-try{const k=localStorage.getItem('dl-sub');setSub(k==='terms'||k==='labels'||k==='honesty'?k:'wall')}catch(e){setSub('wall')}
+try{const k=localStorage.getItem('dl-sub');setSub(k==='terms'||k==='labels'||k==='honesty'||k==='datasets'?k:'wall')}catch(e){setSub('wall')}
 /* ---------- map 2: honesty, truthfulness, deception (corrected flow) ---------- */
 const REFS={
  evans:{t:'Evans et al., "Truthful AI: developing and governing AI that does not lie"',y:2021,u:'https://arxiv.org/abs/2110.06674'},
@@ -711,18 +782,20 @@ document.querySelectorAll('.flowbox').forEach((box,i)=>{
 
 /* ============ panel ============ */
 const PANEL={mode:'home',id:null,editing:false};
-function showHome(){PANEL.mode='home';$('#panel').innerHTML=`<div class="k">deception lab</div><h3>Notes live in files</h3><p>Everything here is read from <code>notes/</code>: concepts, papers, experiments and the matrix config. Edit in the panel or in Obsidian; the app re-reads on save.</p><p class="why">Click a box on the map, a case under it, a leaf or test on the Labels tree, a point in the gaps chart or a paper in the queue to open its note.</p><div class="row"><button class="btn" id="newPaper">+ New paper</button><button class="btn" id="newExp">+ New experiment</button><button class="btn" id="reload">Reload files</button></div>`;
+function showHome(){PANEL.mode='home';$('#panel').innerHTML=`<div class="k">deception lab</div><h3>Notes live in files</h3><p>Everything here is read from <code>notes/</code> (concepts, papers, experiments, the matrix config) and <code>projects/</code> (one folder per project). Edit in the panel or in Obsidian; the app re-reads on save.</p><p class="why">Click a box on the map, a case under it, a leaf or test on the Labels tree, a point in the gaps chart or a paper in the queue to open its note.</p><div class="row"><button class="btn" id="newPaper">+ New paper</button><button class="btn" id="newExp">+ New experiment</button><button class="btn" id="reload">Reload files</button></div>`;
  $('#newPaper').onclick=()=>newNote('papers');$('#newExp').onclick=()=>newNote('experiments');$('#reload').onclick=async()=>{await load();renderAll();};}
+const figsOf=fm=>Array.isArray(fm.figures)?fm.figures:fm.figure?[fm.figure]:[];
 function showNote(path,extra){ PANEL.mode='note';PANEL.id=path; const n=DB.byPath[path]; const p=$('#panel'); if(!n){p.innerHTML=`<div class="k">missing</div><h3>${path}</h3><p>No file yet.</p><button class="btn" id="mk">Create it</button>`;$('#mk').onclick=()=>save(path,`---\ntitle: ${path.split('/').pop().slice(0,-3)}\n---\n\n## My notes\n\n`).then(()=>showNote(path));return;}
- const fm=n.fm; const kind=path.startsWith('papers/')?'paper':path.startsWith('experiments/')?'experiment':path.startsWith('concepts/')?'concept':'config';
+ const fm=n.fm; const kind=path.startsWith('papers/')?'paper':path.startsWith('experiments/')?'experiment':path.startsWith('concepts/')?'concept':path.startsWith('projects/')?(path.endsWith('/project.md')?'project':path.split('/')[2]==='experiments'?'experiment':'project note'):'config';
  let head=`<div class="k">${kind}${fm.kind?' · '+fm.kind:''}${fm.status?' · '+fm.status:''}</div><h3>${fm.title||path}</h3>`;
  if(fm.arxiv)head+=`<div class="meta"><a href="https://arxiv.org/abs/${fm.arxiv}" target="_blank" rel="noopener">arXiv ${fm.arxiv}</a></div>`;
  if(fm.fills&&fm.fills.length)head+=`<div class="meta">fills: ${fm.fills.map(f=>`<span class="tag">${f.behaviour} × ${f.question} · ${f.level} · ${f.kind}</span>`).join(' ')}</div>`;
  let rel=''; if(kind==='concept'){const ps=papersFor(path.slice(9,-3)); rel=`<div class="meta">Papers tagged to this concept</div><div class="plist">${ps.length?ps.map(pp=>`<a data-open="${pp.path}"><span class="tag ${pp.fm.status}">${pp.fm.status||''}</span>${pp.fm.title}</a>`).join(''):'<span class="meta">none yet · add <code>concepts: [..]</code> to a paper</span>'}</div>`;}
  if(PANEL.editing){ p.innerHTML=head+`<textarea class="ed" id="ed">${n.raw.replace(/</g,'&lt;')}</textarea><div class="row"><button class="btn primary" id="sv">Save</button><button class="btn" id="cx">Cancel</button><span class="meta">${path}</span></div>`;
    $('#sv').onclick=async()=>{await save(path,$('#ed').value);PANEL.editing=false;showNote(path);}; $('#cx').onclick=()=>{PANEL.editing=false;showNote(path);}; return; }
- p.innerHTML=head+(extra||'')+`<div class="md">${mdToHtml(n.body)}</div>`+rel+`<div class="row"><button class="btn primary" id="edit">Edit</button>${kind==='paper'?`<span class="meta">status:</span>${['queued','reading','read','later'].map(s=>`<button class="btn sm" data-st="${s}" ${fm.status===s?'style="border-color:var(--blue);color:var(--blue-ink)"':''}>${s}</button>`).join('')}`:''}<span class="meta">${path}</span></div>`;
+ p.innerHTML=head+(extra||'')+figsOf(fm).map((f,i)=>`<div class="nfig" id="nfig${i}" title="click to enlarge"><span class="meta">loading figure…</span></div>`).join('')+`<div class="md">${mdToHtml(n.body)}</div>`+rel+`<div class="row"><button class="btn primary" id="edit">Edit</button>${kind==='paper'?`<span class="meta">status:</span>${['queued','reading','read','later'].map(s=>`<button class="btn sm" data-st="${s}" ${fm.status===s?'style="border-color:var(--blue);color:var(--blue-ink)"':''}>${s}</button>`).join('')}`:''}<span class="meta">${path}</span></div>`;
  $('#edit').onclick=()=>{PANEL.editing=true;showNote(path);};
+ figsOf(fm).forEach((fig,i)=>fetch('/'+fig).then(r=>r.ok?r.text():Promise.reject()).then(svg=>{const f=$('#nfig'+i); if(!f)return; f.innerHTML=svg; f.onclick=()=>{const o=$('#figov'); o.innerHTML=svg; o.hidden=false; o.onclick=()=>{o.hidden=true;o.innerHTML='';};};}).catch(()=>{const f=$('#nfig'+i); if(f)f.innerHTML=`<span class="meta">figure not found: ${fig}</span>`;}));
  p.querySelectorAll('[data-st]').forEach(b=>b.onclick=()=>save(path,setFM(n.raw,'status',b.dataset.st)).then(()=>showNote(path)));
  p.querySelectorAll('[data-open]').forEach(a=>a.onclick=()=>showNote(a.dataset.open));
  p.querySelectorAll('.wl').forEach(w=>w.onclick=()=>{const t=w.dataset.wl;const hit=DB.notes.find(x=>x.path.endsWith('/'+t+'.md')||x.fm.title===t);if(hit)showNote(hit.path);});
@@ -736,9 +809,9 @@ function showGap(g){ PANEL.mode='gap'; const B=DB.matrix.fm.behaviours.find(x=>x
  $('#panel').innerHTML=`<div class="k">gap · ${g.identifiable?'identifiable':'blocked'}</div><h3>${B.label} × ${Q.label}</h3>${g.summary?`<p><b>${g.summary}</b></p>`:''}${String(g.note||'').split(/<br\s*\/?>\s*<br\s*\/?>/i).map(t=>`<p>${t}</p>`).join('')}<div class="meta">science <b>${g.science}</b>/5 · monitoring <b>${g.monitoring}</b>/5</div><p class="why" style="font-size:13px">${g.identifiable?'Competing explanations can be told apart with current data: this is an experiment.':'Competing explanations cannot yet be told apart: this is a dataset or measurement project first.'}</p><div class="meta">Evidence already in the cell: ${fs.length||'none'}</div><div class="row"><button class="btn sm" id="om">Edit priorities (matrix.md)</button></div>`;
  $('#om').onclick=()=>{PANEL.editing=true;showNote('matrix.md');};
 }
-function newNote(dir){ const slug=prompt(`File name for the new ${dir.slice(0,-1)} (no spaces, no extension):`); if(!slug)return;
- const raw=dir==='papers'?`---\ntitle: ${slug}\narxiv: \nconcepts: []\norder: ${DB.papers.length+1}\nstatus: queued\nfills:\n  []\n---\n\n## What it claims\n\n## What it actually shows (and at which level)\n\n## What I disagree with or want to check\n`:`---\ntitle: ${slug}\ndate: ${new Date().toISOString().slice(0,7)}\nmodel: \nstatus: planned\nconcepts: []\nfills:\n  []\n---\nQuestion:\n\n## Setup\n\n## Results\n\n## What this says about the matrix cell\n`;
- save(`${dir}/${slug}.md`,raw).then(()=>{PANEL.editing=true;showNote(`${dir}/${slug}.md`);}); }
+function newNote(dir,what,inline){ const slug=prompt(`File name for the new ${what||dir.slice(0,-1)} (no spaces, no extension):`); if(!slug)return;
+ const raw=what==='note'?`---\ntitle: ${slug}\n---\n\n`:dir==='papers'?`---\ntitle: ${slug}\narxiv: \nconcepts: []\norder: ${DB.papers.length+1}\nstatus: queued\nfills:\n  []\n---\n\n## What it claims\n\n## What it actually shows (and at which level)\n\n## What I disagree with or want to check\n`:`---\ntitle: ${slug}\ndate: ${new Date().toISOString().slice(0,7)}\nmodel: \nstatus: planned\nconcepts: []\nfills:\n  []\n---\nQuestion:\n\n## Setup\n\n## Results\n\n## What this says about the matrix cell\n`;
+ save(`${dir}/${slug}.md`,raw).then(()=>{const path=`${dir}/${slug}.md`; if(inline){PJE.open.add(path);PJE.editing=path;renderProjects();} else {PANEL.editing=true;showNote(path);}}); }
 
 /* map hover/click → panel */
 document.querySelectorAll('[data-info]').forEach(el=>{const id=el.dataset.info; let prev=null;
@@ -774,11 +847,75 @@ function renderReading(){ const groups=[['reading','Reading now'],['queued','Up 
   it.querySelectorAll('[data-st]').forEach(b=>b.onclick=e=>{e.stopPropagation();const n=DB.byPath[it.dataset.p];save(n.path,setFM(n.raw,'status',b.dataset.st));});});
 }
 
+const PJE={open:new Set(),editing:null};
+function pjEditor(n){ return `<textarea class="ed" id="pje">${n.raw.replace(/</g,'&lt;')}</textarea><div class="row"><button class="btn primary" data-pjsave="${n.path}">Save</button><button class="btn" data-pjcancel="1">Cancel</button><span class="meta">${n.path}</span></div>`; }
+function projKind(P){return (P.main&&P.main.fm.kind)||'project';}
+function childrenOf(slug){return DB.projects.filter(x=>x.main&&x.main.fm.program===slug);}
+function regionNames(P){ const prog=P.main&&P.main.fm.program?DB.projects.find(x=>x.slug===P.main.fm.program):null; const R=prog&&prog.main?regionsOf(prog.main.body):null;
+  const ids=(P.main&&P.main.fm.regions)||[]; return ids.map(id=>{const c=R&&R.cards.find(c=>c.id===id); return c?c.t:id;}); }
+function renderProjectIndex(el){
+  const progs=DB.projects.filter(x=>projKind(x)==='program'), rest=DB.projects.filter(x=>projKind(x)!=='program');
+  const card=P=>{ const fm=(P.main&&P.main.fm)||{}; const kind=projKind(P);
+    let sub=''; if(kind==='program'){ const R=regionsOf(P.main.body); sub=`${R?R.cards.length+' regions · ':''}${childrenOf(P.slug).length} project${childrenOf(P.slug).length===1?'':'s'}`; }
+    else { const prog=fm.program?DB.projects.find(x=>x.slug===fm.program):null; sub=(prog?`in ${escH(prog.main?.fm.title||prog.slug)}`:'no program')+(regionNames(P).length?` · ${regionNames(P).map(escH).join(', ')}`:''); }
+    return `<button type="button" class="pjcard" data-pjgo="${P.slug}"><span class="kd">${kind}${fm.status?' · '+escH(fm.status):''}</span><h3>${escH(fm.title||P.slug)}</h3><p>${sub}</p></button>`; };
+  el.innerHTML=(progs.length?`<div class="sect">Programs · ${progs.length}</div><div class="pjidx">${progs.map(card).join('')}</div>`:'')+`<div class="sect">Projects · ${rest.length}</div><div class="pjidx">${rest.map(card).join('')||'<span class="meta">none yet</span>'}</div>`;
+  el.querySelectorAll('[data-pjgo]').forEach(b=>b.onclick=()=>{PJ.cur=b.dataset.pjgo;renderProjects();});
+}
+function renderProjects(){ const el=$('#pj'); if(!DB.projects.length){el.innerHTML='<p class="intro">No projects yet. Create <code>projects/&lt;slug&gt;/project.md</code>.</p>';return;}
+ const P=DB.projects.find(x=>x.slug===PJ.cur); if(!P){ PJ.cur=null; PJ.region=null; return renderProjectIndex(el); }
+ const fm=(P.main&&P.main.fm)||{}, kind=projKind(P), kids=childrenOf(P.slug);
+ const item=n=>{const open=PJE.open.has(n.path); return `<div class="it${open?' open':''}" data-toggle="${n.path}"><span class="n">${n.fm.status||''}</span><div class="t">${n.fm.title||n.path.split('/').pop()}<small>${n.path.split('/').slice(2).join('/')}${n.fm.fills&&n.fm.fills.length?' · fills '+n.fm.fills.length+' cell'+(n.fm.fills.length>1?'s':''):''}</small></div><div class="meta">${open?'▾':'▸'}</div>`+(open?`<div class="body">`+(PJE.editing===n.path?pjEditor(n):`${n.fm.fills&&n.fm.fills.length?`<div class="meta">fills: ${n.fm.fills.map(f=>`<span class="tag">${f.behaviour} × ${f.question} · ${f.level} · ${f.kind}</span>`).join(' ')}</div>`:''}<div class="md">${mdToHtml(n.body)}</div><div class="row"><button class="btn sm" data-pjedit="${n.path}">Edit</button></div>`)+`</div>`:'')+`</div>`;};
+ const projRow=k=>`<div class="it" data-pjgo="${k.slug}"><span class="n">${escH(k.main.fm.status||'')}</span><div class="t">${escH(k.main.fm.title||k.slug)}<small>${regionNames(k).map(escH).join(' · ')||'no region set'}</small></div><div class="meta">›</div></div>`;
+ let h=`<div class="pjback"><button class="btn sm" data-pjindex="1">← All projects</button>`;
+ const R=kind==='program'&&P.main?regionsOf(P.main.body):null;
+ if(PJ.region && R && R.cards.some(c=>c.id===PJ.region)){
+   // ---------- region view ----------
+   const id=PJ.region, ci=R.cards.findIndex(c=>c.id===id), c=R.cards[ci];
+   const rnote=P.regions[id], rpath=`projects/${P.slug}/regions/${id}.md`;
+   const inRegion=kids.filter(k=>((k.main.fm.regions)||[]).includes(id));
+   const papers=DB.papers.filter(pp=>((pp.fm.regions)||[]).includes(id));
+   h+=` <button class="btn sm" data-pjgo="${P.slug}">← ${escH(fm.title||P.slug)}</button></div>`;
+   h+=`<div class="pdesc"><div class="k">region · ${escH(fm.title||P.slug)}</div><div class="rhead t${ci%4}"><h2>${mdInline(escH(c.t))}</h2><p>${mdInline(escH(c.d))}</p></div>`;
+   h+=`<div class="sect">All regions</div>`+regionsHtml(R,{hi:[id],click:true,hereLabel:'this region'})+`</div>`;
+   h+=`<div class="sect">Open questions and notes</div>`+(rnote?(PJE.editing===rpath?`<div class="pdesc">${pjEditor(rnote)}</div>`:`<div class="pdesc"><div class="md">${mdToHtml(rnote.body)}</div><div class="row"><button class="btn sm" data-pjedit="${rpath}">Edit</button><span class="meta">${rpath}</span></div></div>`)
+        :`<div class="pdesc"><p class="meta">No notes for this region yet. They live in <code>${rpath}</code>: open questions, what is known, candidate projects.</p><div class="row"><button class="btn sm" data-rgcreate="${rpath}" data-rgtitle="${escH(c.t)}" data-rgid="${id}">Create region note</button></div></div>`);
+   h+=`<div class="sect">Projects in this region · ${inRegion.length}</div><div class="rq">${inRegion.map(projRow).join('')||'<span class="meta">none yet. A project joins this region with <code>regions: ['+id+']</code> in its front matter.</span>'}</div>`;
+   h+=`<div class="sect">Papers tagged with this region · ${papers.length}</div><div class="rq">${papers.map(item).join('')||'<span class="meta">none yet. Add <code>regions: ['+id+']</code> to a paper note’s front matter to list it here.</span>'}</div>`;
+ } else {
+   PJ.region=null; h+=`</div>`;
+   const mainPath=`projects/${P.slug}/project.md`;
+   if(P.main){
+     let loc='';
+     const prog=fm.program?DB.projects.find(x=>x.slug===fm.program):null; const PR=prog&&prog.main?regionsOf(prog.main.body):null;
+     const counts={}; kids.forEach(k=>((k.main.fm.regions)||[]).forEach(r=>counts[r]=(counts[r]||0)+1));
+     h+=`<div class="pdesc"><div class="k">${kind} · ${P.slug}${fm.status?' · '+fm.status:''}</div><h2>${escH(fm.title||P.slug)}</h2>${loc}`+(PJE.editing===mainPath?pjEditor(P.main):figsOf(fm).map((f,i)=>`<div class="nfig" id="pjfig${i}" title="click to enlarge"><span class="meta">loading figure…</span></div>`).join('')+`<div class="md">${mdToHtml(P.main.body,{counts,click:kind==='program'})}</div><div class="row"><button class="btn sm" data-pjedit="${mainPath}">Edit</button><span class="meta">${mainPath}</span></div>`)+`</div>`;
+   } else h+=`<div class="pdesc"><div class="k">project · ${P.slug}</div><h2>${P.slug}</h2><p class="intro">No project.md yet.</p><div class="row"><button class="btn sm" data-pjcreate="${mainPath}">Create it</button></div></div>`;
+   if(kind==='program') h+=`<div class="sect">Projects in this program · ${kids.length}</div><div class="rq">${kids.map(projRow).join('')||'<span class="meta">none yet</span>'}</div>`;
+   h+=`<div class="sect">Notes · ${P.notes.length}<button class="btn sm" data-new="note">+ New note</button></div><div class="rq">${P.notes.map(item).join('')||'<span class="meta">none yet</span>'}</div>`;
+   h+=`<div class="sect">Experiments · ${P.experiments.length}<button class="btn sm" data-new="experiment">+ New experiment</button></div><div class="rq">${P.experiments.map(item).join('')||'<span class="meta">none yet</span>'}</div>`;
+   if(P.versions.length) h+=`<div class="sect">Earlier versions · ${P.versions.length}</div><div class="rq">${P.versions.slice().sort((a,b)=>b.path.localeCompare(a.path)).map(item).join('')}</div>`;
+ }
+ el.innerHTML=h;
+ if(P.main&&PJE.editing!==mainPath) figsOf(fm).forEach((fig,i)=>fetch('/'+fig).then(r=>r.ok?r.text():Promise.reject()).then(svg=>{const f=$('#pjfig'+i); if(!f)return; f.innerHTML=svg; f.onclick=()=>{const o=$('#figov'); o.innerHTML=svg; o.hidden=false; o.onclick=()=>{o.hidden=true;o.innerHTML='';};};}).catch(()=>{const f=$('#pjfig'+i); if(f)f.innerHTML=`<span class="meta">figure not found: ${fig}</span>`;}));
+ const progOf=()=>kind==='program'?P.slug:fm.program;
+ el.querySelectorAll('.regions.click .rcard[data-region]').forEach(cd=>{ const go=()=>{PJ.cur=progOf();PJ.region=cd.dataset.region;PJE.editing=null;renderProjects();window.scrollTo?.(0,0);}; cd.onclick=go; cd.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go();}}; });
+ el.querySelectorAll('[data-pjindex]').forEach(b=>b.onclick=()=>{PJ.cur=null;PJ.region=null;PJE.editing=null;renderProjects();});
+ el.querySelectorAll('[data-pjgo]').forEach(b=>b.onclick=e=>{e.preventDefault();e.stopPropagation();PJ.cur=b.dataset.pjgo;PJ.region=null;PJE.editing=null;renderProjects();});
+ el.querySelectorAll('[data-toggle]').forEach(it=>it.onclick=e=>{if(e.target.closest('.body')||e.target.closest('button'))return; const k=it.dataset.toggle; if(PJE.open.has(k))PJE.open.delete(k); else PJE.open.add(k); renderProjects();});
+ el.querySelectorAll('[data-pjedit]').forEach(b=>b.onclick=e=>{e.stopPropagation();PJE.editing=b.dataset.pjedit;renderProjects();$('#pje')?.focus();});
+ el.querySelectorAll('[data-pjsave]').forEach(b=>b.onclick=async e=>{e.stopPropagation();const path=b.dataset.pjsave;await save(path,$('#pje').value);PJE.editing=null;renderProjects();});
+ el.querySelectorAll('[data-pjcancel]').forEach(b=>b.onclick=e=>{e.stopPropagation();PJE.editing=null;renderProjects();});
+ el.querySelectorAll('[data-pjcreate]').forEach(b=>b.onclick=()=>save(b.dataset.pjcreate,`---\ntitle: ${P.slug}\nstatus: scoping\n---\n\n## Research question\n\n`).then(()=>{PJE.editing=b.dataset.pjcreate;renderProjects();}));
+ el.querySelectorAll('[data-rgcreate]').forEach(b=>b.onclick=()=>save(b.dataset.rgcreate,`---\ntitle: ${b.dataset.rgtitle}\nregion: ${b.dataset.rgid}\n---\n\n## Open questions\n\n- \n\n## What is known\n\n- \n\n## Candidate projects\n\n- \n`).then(()=>{PJE.editing=b.dataset.rgcreate;renderProjects();}));
+ el.querySelectorAll('[data-new]').forEach(b=>b.onclick=e=>{e.stopPropagation();const w=b.dataset.new;newNote(w==='experiment'?`projects/${P.slug}/experiments`:`projects/${P.slug}`,w,true);});
+}
+
 /* ============ views ============ */
-function setView(v){document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));['map','gaps','reading'].forEach(x=>$('#v-'+x).hidden=x!==v);try{location.hash=v}catch(e){}}
+function setView(v){document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));['map','gaps','reading','projects'].forEach(x=>$('#v-'+x).hidden=x!==v);$('.main').classList.toggle('nopanel',v==='projects'||(v==='map'&&SUBK==='datasets'));try{location.hash=v}catch(e){}}
 document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>setView(b.dataset.v));
-function renderAll(){renderMap();renderGaps();renderReading(); if(PANEL.mode==='home')showHome(); else if(PANEL.mode==='case')showCase(); else if(PANEL.mode==='tree')showTree(); else if(PANEL.mode==='note'&&PANEL.id&&!PANEL.editing)showNote(PANEL.id);}
-(async()=>{try{await load();}catch(e){$('#status').textContent='cannot reach server: run python3 server.py';} renderAll(); showHome(); const h=(location.hash||'').slice(1); if(['map','gaps','reading'].includes(h))setView(h);})();
+function renderAll(){renderMap();renderGaps();renderReading();renderProjects(); if(PANEL.mode==='home')showHome(); else if(PANEL.mode==='case')showCase(); else if(PANEL.mode==='tree')showTree(); else if(PANEL.mode==='note'&&PANEL.id&&!PANEL.editing)showNote(PANEL.id);}
+(async()=>{try{await load();}catch(e){$('#status').textContent='cannot reach server: run python3 server.py';} renderAll(); showHome(); const h=(location.hash||'').slice(1); if(['map','gaps','reading','projects'].includes(h))setView(h);})();
 </script>
 </body>
 </html>

@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 650" role="img" aria-label="Fig. A: asserted vs. derived belief mechanism (Steele, Wen &amp; Han 2026, §4.2–4.3)" font-family="var(--sans)">
+<defs>
+<marker id="ma" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--muted)"/></marker>
+<marker id="mp" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--purple)"/></marker>
+</defs>
+<style>
+.tok{fill:var(--fg);font-size:11.5px} .ph{fill:var(--fg);font-size:13px;font-weight:600} .sub{fill:var(--muted);font-weight:400}
+.k{fill:var(--muted);font-size:11px;font-family:var(--mono);letter-spacing:.06em} .s{fill:var(--muted);font-size:11.5px} .lab{fill:var(--fg);font-size:12px}
+.q{fill:var(--fg);font-size:16px;font-weight:700;font-family:var(--serif)} .tag{fill:var(--fg);font-size:12px;font-weight:700;font-family:var(--mono)}
+.vs{fill:var(--surface);stroke:var(--gray);stroke-width:1.5} .gate{fill:var(--surface);stroke:var(--purple);stroke-width:1.5}
+.wr{fill:none;stroke:var(--purple);stroke-width:2.4} .lk{fill:none;stroke:var(--purple);stroke-width:2.4;stroke-dasharray:7 5} .off{stroke:var(--muted);opacity:.35}
+.bgt{paint-order:stroke;stroke:var(--bg);stroke-width:5px;stroke-linejoin:round}
+</style>
+<text class="k" x="20" y="22">FIG. A · ASSERTED VS. DERIVED BELIEF · STEELE, WEN &amp; HAN (2026), §4.2–4.3</text>
+<text class="q" x="20" y="48">Stated and inferred beliefs land in largely shared subspaces; only the inferred one passes a visibility gate.</text>
+<g transform="translate(20,0)"><text class="ph" x="0" y="92">Condition 1 · asserted <tspan class="sub">the text states the belief</tspan></text><rect x="-6" y="205" width="482" height="140" rx="4" style="fill:var(--gray-soft);opacity:.45"/><line x1="45" y1="205" x2="45" y2="410" style="stroke:var(--line);stroke-width:1.5"/><line x1="121" y1="205" x2="121" y2="410" style="stroke:var(--muted);stroke-width:2.2"/><line x1="420" y1="150" x2="420" y2="410" style="stroke:var(--muted);stroke-width:2.2"/><rect x="0" y="410" width="90" height="40" rx="6" style="fill:var(--surface);stroke:var(--line)"/><text class="tok" x="45.0" y="427" text-anchor="middle">Anna believes</text><text class="tok" x="45.0" y="442" text-anchor="middle">the cup is</text><rect x="96" y="410" width="50" height="40" rx="6" style="fill:var(--surface);stroke:var(--fg);stroke-width:1.5"/><text class="tok" x="121.0" y="435" text-anchor="middle" font-weight="700">blue</text><rect x="296" y="410" width="174" height="40" rx="6" style="fill:var(--surface);stroke:var(--fg);stroke-width:1.5"/><text class="tok" x="383.0" y="427" text-anchor="middle">Anna thinks</text><text class="tok" x="383.0" y="442" text-anchor="middle">the cup is __</text><path d="M121,300 C200,300 300,300 386,300" class="wr" marker-end="url(#mp)"/><text class="lab bgt" x="250" y="290" text-anchor="middle">written: bound directly</text><rect x="390" y="284" width="60" height="32" rx="6" class="vs"/><circle cx="426" cy="300" r="8" fill="#3f6fb5"/><text class="tag" x="399" y="304.5">A</text><path d="M420,150 L420,128" style="stroke:var(--muted);stroke-width:2" marker-end="url(#ma)"/><circle cx="420" cy="114" r="11" fill="#3f6fb5"/><text class="s bgt" x="434" y="118">readout</text></g>
+<g transform="translate(510,0)"><text class="ph" x="0" y="92">Condition 2 · derived <tspan class="sub">the belief must be inferred from what Carol saw</tspan></text><rect x="-6" y="205" width="482" height="140" rx="4" style="fill:var(--gray-soft);opacity:.45"/><line x1="36" y1="205" x2="36" y2="410" style="stroke:var(--line);stroke-width:1.5"/><line x1="160" y1="205" x2="160" y2="410" style="stroke:var(--line);stroke-width:1.5"/><line x1="98" y1="205" x2="98" y2="410" style="stroke:var(--muted);stroke-width:2.2"/><line x1="221" y1="205" x2="221" y2="410" style="stroke:var(--muted);stroke-width:2.2"/><line x1="294" y1="205" x2="294" y2="410" style="stroke:var(--muted);stroke-width:2.2"/><line x1="430" y1="150" x2="430" y2="410" style="stroke:var(--muted);stroke-width:2.2"/><rect x="0" y="410" width="72" height="40" rx="6" style="fill:var(--surface);stroke:var(--line)"/><text class="tok" x="36.0" y="427" text-anchor="middle">Anna paints</text><text class="tok" x="36.0" y="442" text-anchor="middle">the cup</text><rect x="77" y="410" width="42" height="40" rx="6" style="fill:var(--surface);stroke:var(--fg);stroke-width:1.5"/><text class="tok" x="98.0" y="435" text-anchor="middle" font-weight="700">blue</text><rect x="124" y="410" width="72" height="40" rx="6" style="fill:var(--surface);stroke:var(--line)"/><text class="tok" x="160.0" y="427" text-anchor="middle">Ben paints</text><text class="tok" x="160.0" y="442" text-anchor="middle">the cup</text><rect x="201" y="410" width="40" height="40" rx="6" style="fill:var(--surface);stroke:var(--fg);stroke-width:1.5"/><text class="tok" x="221.0" y="435" text-anchor="middle" font-weight="700">red</text><rect x="246" y="410" width="96" height="40" rx="6" style="fill:var(--surface);stroke:var(--line)"/><text class="tok" x="294.0" y="427" text-anchor="middle">Carol sees</text><text class="tok" x="294.0" y="442" text-anchor="middle">Anna, not Ben</text><rect x="347" y="410" width="123" height="40" rx="6" style="fill:var(--surface);stroke:var(--fg);stroke-width:1.5"/><text class="tok" x="408.5" y="427" text-anchor="middle">Carol thinks</text><text class="tok" x="408.5" y="442" text-anchor="middle">the cup is __</text><path d="M98,262 C170,240 250,240 286,248" class="lk"/><path d="M302,252 C350,262 370,292 396,298" class="lk" marker-end="url(#mp)"/><circle cx="294" cy="250" r="9" class="gate"/><line x1="294" y1="243" x2="294" y2="257" style="stroke:var(--purple);stroke-width:2"/><path d="M221,322 C250,322 270,322 285,322" class="lk off"/><circle cx="294" cy="322" r="9" class="gate" style="opacity:.6"/><path d="M289,317 L299,327 M299,317 L289,327" style="stroke:var(--red);stroke-width:2"/><text class="lab bgt" x="196" y="232" text-anchor="middle">lookback to what was seen</text><text class="s bgt" x="308" y="340">not seen: blocked</text><rect x="400" y="284" width="60" height="32" rx="6" class="vs"/><circle cx="436" cy="300" r="8" fill="#3f6fb5"/><text class="tag" x="409" y="304.5">D</text><path d="M430,150 L430,128" style="stroke:var(--muted);stroke-width:2" marker-end="url(#ma)"/><circle cx="430" cy="114" r="11" fill="#3f6fb5"/><text class="s bgt" x="444" y="118">readout</text></g>
+<text class="lab bgt" x="440" y="270" text-anchor="middle">subspace A</text>
+<text class="lab bgt" x="940" y="270" text-anchor="middle">subspace D</text>
+
+<line x1="20" y1="476" x2="980" y2="476" stroke="var(--line)"/>
+<text class="k" x="20" y="498">HOW THE TWO SUBSPACES RELATE</text>
+<!-- overlap -->
+<g transform="translate(20,512)">
+ <rect x="0" y="6" width="70" height="40" rx="8" style="fill:var(--purple-soft);stroke:var(--purple);stroke-width:1.4;fill-opacity:.8"/>
+ <rect x="40" y="6" width="70" height="40" rx="8" style="fill:var(--gray-soft);stroke:var(--gray);stroke-width:1.4;fill-opacity:.7"/>
+ <text class="tag" x="18" y="31" text-anchor="middle">A</text><text class="tag" x="92" y="31" text-anchor="middle">D</text>
+ <text class="s" x="55" y="31" text-anchor="middle" style="fill:var(--fg);font-size:10px">3</text>
+ <text class="lab" x="124" y="22">overlap, not identity</text>
+ <text class="s" x="124" y="38">~3 of 8 dims shared (cos 0.53–0.59)</text>
+</g>
+<!-- transfer -->
+<g transform="translate(360,512)">
+ <rect x="0" y="12" width="44" height="28" rx="6" class="vs"/><text class="tag" x="22" y="31" text-anchor="middle">A</text>
+ <path d="M48,18 L112,18" style="stroke:var(--muted);stroke-width:2" marker-end="url(#ma)"/>
+ <path d="M112,38 L48,38" style="stroke:var(--muted);stroke-width:2" marker-end="url(#ma)"/>
+ <rect x="116" y="12" width="44" height="28" rx="6" class="vs"/><text class="tag" x="138" y="31" text-anchor="middle">D</text>
+ <text class="s" x="80" y="12" text-anchor="middle">steer</text>
+ <text class="lab" x="176" y="22">A→D 0.74 · D→A 0.79 <tspan class="s">14B</tspan></text>
+ <text class="lab" x="176" y="40">A→D 0.47 · D→A 0.89 <tspan class="s">7B-Instr.</tspan></text>
+</g>
+<!-- visibility -->
+<g transform="translate(720,512)">
+ <circle cx="12" cy="20" r="9" class="gate"/><line x1="12" y1="13" x2="12" y2="27" style="stroke:var(--purple);stroke-width:2"/>
+ <text class="lab" x="30" y="24">swap who Carol sees → D flips 99%</text>
+ <circle cx="12" cy="44" r="9" class="gate" style="stroke:var(--gray)"/><line x1="7" y1="44" x2="17" y2="44" style="stroke:var(--gray);stroke-width:2"/>
+ <text class="lab" x="30" y="48">visibility clause on A → unchanged 100%</text>
+</g>
+
+<text class="s" x="20" y="594">Separate items (n = 72 held out), not one context. Subspaces drawn at the answer position (§3.4; site unresolved). Dashed arrows and gates: input-level</text>
+<text class="s" x="20" y="610">evidence only; the lookback is not localised (after Prakash et al. 2026). Transfer = fraction of own range (Table 4); other models only in the paper’s Fig. 3.</text>
+<text class="s" x="20" y="626">Link to Fig. B (same slot format) is the authors’ synthesis, not tested as one subspace. Comprehension of a story character’s belief. Caveats in the note.</text>
+</svg>

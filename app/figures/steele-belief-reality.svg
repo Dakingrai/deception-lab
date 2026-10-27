@@ -1,0 +1,132 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 660" role="img" aria-label="Mechanism of belief–reality separation (Steele, Wen &amp; Han 2026)" font-family="var(--sans)">
+  <defs>
+    <marker id="sbr-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--muted)"/></marker>
+    <marker id="sbr-p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--purple)"/></marker>
+    <marker id="sbr-b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--blue)"/></marker>
+  </defs>
+  <style>
+    .t{fill:var(--fg);font-size:14px}.m{fill:var(--muted);font-size:12.5px}.s{font-size:11.5px;fill:var(--muted)}
+    .h{fill:var(--fg);font-size:15px;font-weight:700}.k{fill:var(--muted);font-size:11px;font-family:var(--mono);letter-spacing:.06em}
+    .q{fill:var(--fg);font-size:16px;font-weight:700;font-family:var(--serif)}.a{fill:var(--fg);font-size:14px;font-family:var(--serif)}
+    .box{fill:var(--surface);stroke:var(--line);stroke-width:1.2}.slot{fill:var(--gray-soft);stroke:var(--gray);stroke-width:1.2}
+    .pb{fill:var(--purple-soft);stroke:var(--purple);stroke-width:1.4}.bb{fill:var(--blue-soft);stroke:var(--blue);stroke-width:1.4}
+    .ln{stroke:var(--muted);stroke-width:1.5;fill:none}.dash{stroke-dasharray:6 4}.ctl{stroke:var(--muted);stroke-width:1.2;fill:none;stroke-dasharray:2 3}
+    .lp{stroke:var(--purple);stroke-width:2;fill:none}.lb{stroke:var(--blue);stroke-width:2;fill:none}
+    .card{fill:var(--surface);stroke:var(--line);stroke-width:1.2}
+  </style>
+
+  <!-- question + answer -->
+  <text class="q" x="20" y="30">Does the model hold what a character believes apart from what is true?</text>
+  <text class="a" x="20" y="54">Yes — but not in the stored value. Both values sit in one frame-agnostic slot; the separation is in which one the query reads out.</text>
+
+  <!-- column labels -->
+  <text class="k" x="20" y="88">CONTEXT · TWO ROUTES IN</text>
+  <text class="k" x="350" y="88">VALUE TOKENS · VALUE SLOT</text>
+  <text class="k" x="640" y="88">ROUTER (QUERY TOKEN)</text>
+  <text class="k" x="830" y="88">READOUT</text>
+
+  <!-- context cards -->
+  <rect class="box" x="20" y="100" width="270" height="58" rx="8"/>
+  <text class="h" x="32" y="122">Asserted belief</text>
+  <text class="t" x="32" y="144">“Anna believes the cup is <tspan font-weight="700" style="fill:var(--purple)">blue</tspan>.”</text>
+
+  <rect class="box" x="20" y="176" width="270" height="86" rx="8"/>
+  <text class="h" x="32" y="198">Derived belief</text>
+  <text class="t" x="32" y="219">“Anna paints the cup blue; Ben paints</text>
+  <text class="t" x="32" y="237">it red. Carol sees only Anna.”</text>
+  <text class="s" x="32" y="254">Carol’s belief must be inferred: blue</text>
+
+  <rect class="box" x="20" y="300" width="270" height="58" rx="8"/>
+  <text class="h" x="32" y="322">Stated reality</text>
+  <text class="t" x="32" y="344">“In reality the cup is <tspan font-weight="700" style="fill:var(--blue)">red</tspan>.”</text>
+
+  <!-- value slots -->
+  <rect class="box" x="350" y="104" width="240" height="96" rx="8"/>
+  <text class="m" x="362" y="124">value token “blue”</text>
+  <rect class="slot" x="362" y="134" width="216" height="52" rx="6"/>
+  <text class="t" x="374" y="156">slot holds: <tspan font-weight="700">blue</tspan></text>
+  <text class="s" x="374" y="175">frame tag: none</text>
+
+  <rect class="box" x="350" y="276" width="240" height="96" rx="8"/>
+  <text class="m" x="362" y="296">value token “red”</text>
+  <rect class="slot" x="362" y="306" width="216" height="52" rx="6"/>
+  <text class="t" x="374" y="328">slot holds: <tspan font-weight="700">red</tspan></text>
+  <text class="s" x="374" y="347">frame tag: none</text>
+
+  <text class="s" x="350" y="220">same slot format for both routes and both frames:</text>
+  <text class="s" x="350" y="236">8-dim DAS subspace, ~3-dim shared core</text>
+  <text class="s" x="350" y="258" style="fill:var(--orange)">slot site: value or answer token? (§4.4 vs §3.4)</text>
+
+  <!-- context → slot -->
+  <path class="ln" d="M290,129 L350,140" marker-end="url(#sbr-a)"/>
+  <text class="s" x="296" y="122">written</text>
+  <path class="ln dash" d="M290,219 C322,219 322,175 350,168" marker-end="url(#sbr-a)"/>
+  <text class="s" x="294" y="250">lookback,</text>
+  <text class="s" x="294" y="264">gated by</text>
+  <text class="s" x="294" y="278">visibility</text>
+  <path class="ln" d="M290,329 L350,327" marker-end="url(#sbr-a)"/>
+
+  <!-- query box -->
+  <rect class="box" x="612" y="196" width="226" height="76" rx="8"/>
+  <text class="m" x="622" y="214">query, final token:</text>
+  <text class="t" x="622" y="233" style="fill:var(--purple);font-size:13px">“Anna thinks the cup is __”</text>
+  <text class="t" x="622" y="250" style="fill:var(--blue);font-size:13px">“In fact the cup is __”</text>
+  <text class="t" x="622" y="266" style="fill:var(--blue);font-size:13px">“The cup is __” <tspan class="s">(defaults to reality)</tspan></text>
+
+  <!-- router gates -->
+  <rect class="pb" x="650" y="130" width="150" height="40" rx="20"/>
+  <text class="t" x="725" y="155" text-anchor="middle" font-weight="700">belief router</text>
+  <rect class="bb" x="650" y="298" width="150" height="40" rx="20"/>
+  <text class="t" x="725" y="323" text-anchor="middle" font-weight="700">reality router</text>
+  <path class="ctl" d="M700,196 L700,170"/><path class="ctl" d="M700,272 L700,298"/>
+  <text class="s" x="725" y="363" text-anchor="middle">near-orthogonal subspaces</text>
+  <text class="s" x="725" y="378" text-anchor="middle">(top cosine 0.19–0.28)</text>
+
+  <!-- read paths -->
+  <path class="lp" d="M590,160 L650,150"/>
+  <path class="lp" d="M800,150 C840,150 840,215 868,222" marker-end="url(#sbr-p)"/>
+  <path class="lb" d="M590,330 L650,318"/>
+  <path class="lb" d="M800,318 C840,318 840,262 868,254" marker-end="url(#sbr-b)"/>
+
+  <!-- readout -->
+  <rect class="box" x="870" y="196" width="112" height="76" rx="8"/>
+  <text class="t" x="926" y="226" text-anchor="middle" style="fill:var(--purple)" font-weight="700">blue</text>
+  <text class="s" x="926" y="242" text-anchor="middle">or</text>
+  <text class="t" x="926" y="261" text-anchor="middle" style="fill:var(--blue)" font-weight="700">red</text>
+
+  <!-- probe note -->
+  <text class="s" x="350" y="398">Frame information is still present at the value tokens: a linear probe recovers it</text>
+  <text class="s" x="350" y="413">(balanced accuracy 1.000, layers 1–28, Qwen2.5-7B-Instruct) — it just isn’t in the causal slot.</text>
+
+  <!-- evidence cards -->
+  <text class="k" x="20" y="448">HOW EACH PART WAS SHOWN (DAS INTERCHANGE INTERVENTIONS)</text>
+
+  <rect class="card" x="20" y="460" width="310" height="132" rx="8"/>
+  <text class="h" x="32" y="483">Swap the slot → no frame tag</text>
+  <text class="t" x="32" y="506">Patching a donor’s slot injects the donor’s</text>
+  <text class="t" x="32" y="524">colour. A slot trained on belief moves the</text>
+  <text class="t" x="32" y="542">reality readout just as well.</text>
+  <text class="s" x="32" y="566">cross-frame transfer 0.87–0.95 of own range</text>
+  <text class="s" x="32" y="581">(random ≈ 0.03); asserted↔derived 0.74–0.97</text>
+
+  <rect class="card" x="345" y="460" width="310" height="132" rx="8"/>
+  <text class="h" x="357" y="483">Splice the router → frame flips</text>
+  <text class="t" x="357" y="506">Splicing a router from another context into</text>
+  <text class="t" x="357" y="524">the query flips which frame is read, without</text>
+  <text class="t" x="357" y="542">bringing in that context’s colour.</text>
+  <text class="s" x="357" y="566">flip rate 1.00; donor colour injected 0.00;</text>
+  <text class="s" x="357" y="581">cross-leg leakage ≤ 0.16 (bar 0.30)</text>
+
+  <rect class="card" x="670" y="460" width="310" height="132" rx="8"/>
+  <text class="h" x="682" y="483">Project out the router → readout fails</text>
+  <text class="t" x="682" y="506">Removing the matched router collapses the</text>
+  <text class="t" x="682" y="524">readout; a wrong-position or random rank-8</text>
+  <text class="t" x="682" y="542">subspace leaves it intact.</text>
+  <text class="s" x="682" y="566">Qwen2.5-7B belief 0.60 → 0.00;</text>
+  <text class="s" x="682" y="581">OLMo-2-7B belief 0.956 → 0.000</text>
+
+  <!-- footer -->
+  <line x1="20" y1="612" x2="980" y2="612" stroke="var(--line)"/>
+  <text class="s" x="20" y="632">Scope: Qwen2.5-7B/14B, Mistral-7B, OLMo-2-7B; templated colour stories; comprehension, not generation. “Reality” is stated in the story, not the model’s own knowledge.</text>
+  <text class="s" x="20" y="650">Solid arrow: shown by intervention · dashed arrow: inferred from input manipulations only (lookback after Prakash et al. 2026; not localised) · orange: unresolved in the paper.</text>
+</svg>

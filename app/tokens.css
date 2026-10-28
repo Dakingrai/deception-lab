@@ -1,0 +1,78 @@
+/* Deception Lab design tokens — see docs/BRAND.md. Use variables, never raw hex. */
+:root{
+  /* neutrals */
+  --bg:#FFFFFF; --surface:#FFFFFF; --surface-sunk:#F7F7F6;
+  --ink:#1F2328; --ink-2:#5F6670; --ink-3:#8B9097;
+  --hairline:rgba(0,0,0,.10); --rule:rgba(0,0,0,.20);
+
+  /* meaning colours (palette from Distill's Gaussian-processes article) — base for marks, ink for text, wash for backgrounds */
+  --honest:#4EB3D3;    --honest-ink:#0868AC;    --honest-wash:#EAF6FA;
+  --deceptive:#C51B8A; --deceptive-ink:#AE017E; --deceptive-wash:#F8E4F1;
+  --mistaken:#9A8B7A;  --mistaken-ink:#6E6153;  --mistaken-wash:#F3F1EF;
+  --subject:#49006A;   --subject-ink:#49006A;   --subject-wash:#E9E0ED;
+  --interact:#F5B53E;  --interact-ink:#9A6400;  --interact-wash:#FEF6E8;
+  --context:#918F8F;
+  --band:#FFE0FF; --band-edge:#FA9FB5;
+  /* encoded by form: belief = solid ink; frame = hatch; contested = dash */
+  --frame-hatch:repeating-linear-gradient(45deg,var(--ink) 0 1.5px,transparent 1.5px 6px);
+  --dash:4 3;
+
+  /* ramps */
+  /* ColorBrewer 9-class sequential; diverging is 11 steps, matched in lightness, --div-6 neutral */
+  --rdpu-1:#FFF7F3; --rdpu-2:#FDE0DD; --rdpu-3:#FCC5C0; --rdpu-4:#FA9FB5; --rdpu-5:#F768A1; --rdpu-6:#DD3497; --rdpu-7:#AE017E; --rdpu-8:#7A0177; --rdpu-9:#49006A;
+  --gnbu-1:#F7FCF0; --gnbu-2:#E0F3DB; --gnbu-3:#CCEBC5; --gnbu-4:#A8DDB5; --gnbu-5:#7BCCC4; --gnbu-6:#4EB3D3; --gnbu-7:#2B8CBE; --gnbu-8:#0868AC; --gnbu-9:#084081;
+  --div-1:#0868AC; --div-2:#2B8CBE; --div-3:#4EB3D3; --div-4:#7BCCC4; --div-5:#CCEBC5; --div-6:#F7F7F7; --div-7:#FDE0DD; --div-8:#FA9FB5; --div-9:#F768A1; --div-10:#DD3497; --div-11:#AE017E;
+  --seq-1:#D9DCE0; --seq-2:#B3B8BF; --seq-3:#8B9097; --seq-4:#5F6670; --seq-5:#1F2328;
+
+  /* type */
+  --font:"Source Sans 3",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+  --fs-title:44px; --fs-h2:28px; --fs-h3:20px; --fs-h4:15px;
+  --fs-body:17px; --fs-ui:14px; --fs-caption:13px; --fs-label:11px; --fs-code:13px;
+  --lh-body:1.7; --lh-ui:1.45; --lh-tight:1.15;
+
+  /* layout (Distill grid at >=1180px) */
+  --col-text:704px; --col-gutter:152px; --col-page:1072px; --col-gap:32px;
+  --s-1:4px; --s-2:8px; --s-3:12px; --s-4:16px; --s-5:24px; --s-6:32px; --s-7:48px; --s-8:64px;
+
+  /* shape, surface, motion */
+  --radius:4px; --radius-pill:999px; --border:1px solid var(--hairline);
+  --shadow-pop:0 2px 10px rgba(0,0,0,.08),0 0 0 1px rgba(0,0,0,.06);
+  --dur:150ms; --dur-layout:300ms; --ease:cubic-bezier(.2,.7,.2,1);
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#15171A; --surface:#1D2024; --surface-sunk:#191B1E;
+    --ink:#E9E7E1; --ink-2:#A2A7AD; --ink-3:#7D838A;
+    --hairline:rgba(255,255,255,.10); --rule:rgba(255,255,255,.20);
+    --honest:#1D91C0;    --honest-ink:#4EB3D3;    --honest-wash:#1A2E38;
+    --deceptive:#DD3497; --deceptive-ink:#F768A1; --deceptive-wash:#3A1F30;
+    --mistaken:#8F8170;  --mistaken-ink:#B3A594;  --mistaken-wash:#2A2927;
+    --subject:#D9B3EA;   --subject-ink:#D9B3EA;   --subject-wash:#33293A;
+    --interact:#F5B53E;  --interact-ink:#F5B53E;  --interact-wash:#3D3320;
+    --context:#8F8D8D;
+    --band:#3A2533; --band-edge:#C2678D;
+    --div-6:#2A2D31;
+    --seq-1:#30343A; --seq-2:#4A4F57; --seq-3:#7D838A; --seq-4:#A2A7AD; --seq-5:#E9E7E1;
+    --shadow-pop:0 2px 12px rgba(0,0,0,.4),0 0 0 1px rgba(255,255,255,.08);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#15171A; --surface:#1D2024; --surface-sunk:#191B1E;
+  --ink:#E9E7E1; --ink-2:#A2A7AD; --ink-3:#7D838A;
+  --hairline:rgba(255,255,255,.10); --rule:rgba(255,255,255,.20);
+  --honest:#1D91C0;    --honest-ink:#4EB3D3;    --honest-wash:#1A2E38;
+  --deceptive:#DD3497; --deceptive-ink:#F768A1; --deceptive-wash:#3A1F30;
+  --mistaken:#8F8170;  --mistaken-ink:#B3A594;  --mistaken-wash:#2A2927;
+  --subject:#D9B3EA;   --subject-ink:#D9B3EA;   --subject-wash:#33293A;
+  --interact:#F5B53E;  --interact-ink:#F5B53E;  --interact-wash:#3D3320;
+  --context:#8F8D8D;
+  --band:#3A2533; --band-edge:#C2678D;
+  --div-6:#2A2D31;
+  --seq-1:#30343A; --seq-2:#4A4F57; --seq-3:#7D838A; --seq-4:#A2A7AD; --seq-5:#E9E7E1;
+  --shadow-pop:0 2px 12px rgba(0,0,0,.4),0 0 0 1px rgba(255,255,255,.08);
+  color-scheme:dark;
+}
+@media (prefers-reduced-motion:reduce){ :root{ --dur:0ms; --dur-layout:0ms; } }

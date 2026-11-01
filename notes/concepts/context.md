@@ -2,7 +2,7 @@
 title: Context
 kind: input · this turn
 ---
-Everything in the prompt the model conditions on: instructions, stated incentives, evidence, and frame cues such as "write a story" or "you are a pirate". Context builds scoped beliefs for the model to generate from, supplies aims the model may adopt, and tells the model who it is talking to.
+Everything in the prompt the model conditions on: instructions, stated incentives, evidence, and frame cues such as "write a story" or "you are a pirate". Context updates the model's current belief with evidence it accepts, builds scoped beliefs for the model to generate from, supplies aims the model may adopt, and tells the model who it is talking to.
 
 **In an LLM.** System prompt: "You are a salesperson. Never admit the car has defects." It builds a persona space and supplies an aim.
 

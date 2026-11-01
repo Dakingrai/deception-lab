@@ -7,7 +7,7 @@ status: scoping
 ---
 ## Research question
 
-**Is the expressed false answer computed from the model's neutral belief?**
+**When instructed to lie, does the language model first identify the answer it believes is correct and then deliberately avoid it? Or does it produce a false answer through another mechanism?**
 
 <svg xmlns="http://www.w3.org/2000/svg" width="1100" height="720" viewBox="0 0 1100 720" font-family="Helvetica, Arial, sans-serif" font-size="13">
   <defs>

@@ -23,6 +23,8 @@
   --gnbu-1:#F7FCF0; --gnbu-2:#E0F3DB; --gnbu-3:#CCEBC5; --gnbu-4:#A8DDB5; --gnbu-5:#7BCCC4; --gnbu-6:#4EB3D3; --gnbu-7:#2B8CBE; --gnbu-8:#0868AC; --gnbu-9:#084081;
   --div-1:#0868AC; --div-2:#2B8CBE; --div-3:#4EB3D3; --div-4:#7BCCC4; --div-5:#CCEBC5; --div-6:#F7F7F7; --div-7:#FDE0DD; --div-8:#FA9FB5; --div-9:#F768A1; --div-10:#DD3497; --div-11:#AE017E;
   --seq-1:#D9DCE0; --seq-2:#B3B8BF; --seq-3:#8B9097; --seq-4:#5F6670; --seq-5:#1F2328;
+  /* text on ramp cells: ramp hues are the same in both themes, so this text is too */
+  --on-ramp-dark:#FFFFFF; --on-ramp-light:#1F2328;
 
   /* type */
   --font:"Source Sans 3",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;

@@ -2,7 +2,7 @@
 title: Scoped belief
 kind: variable · someone else's proposition
 ---
-Propositions the model represents as true inside a scope that is not its own view: what is true in the story, what this character believes, what the prompt stated as a fact, what follows from a supposition. The content is either supplied by the context (a stated fact) or derived from parametric knowledge (what a pirate captain or a conspiracy theorist would believe). This is where fiction lives on the map. Also called: the value slot bound to a mental space (Steele, Wen & Han 2026); a character's belief state (Prakash et al. 2026).
+Propositions the model represents as true inside a scope that is not its own view: what is true in the story, what this character believes, what follows from a supposition. A fact the prompt states and the model accepts is not scoped: it updates Belief. The content is either supplied by the context (a premise, a story) or derived from what the model believes (what a pirate captain or a conspiracy theorist would believe). This is where fiction lives on the map. Also called: the value slot bound to a mental space (Steele, Wen & Han 2026); a character's belief state (Prakash et al. 2026).
 
 **In an LLM.** Asked to play a flat-earther, the model represents "the horizon is flat" as the character's belief while its own view is unchanged.
 

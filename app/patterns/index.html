@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Figure patterns</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="../tokens.css">
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:var(--fs-ui);line-height:var(--lh-ui)}
+.wrap{max-width:var(--col-page);margin:0 auto;padding:var(--s-5) var(--s-4) var(--s-8)}
+.k{font-family:var(--mono);font-size:var(--fs-label);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);margin:0 0 var(--s-2)}
+h1{font-size:32px;line-height:var(--lh-tight);font-weight:700;margin:0 0 var(--s-2)}
+h2{font-size:var(--fs-h2);line-height:1.25;font-weight:600;margin:var(--s-8) 0 var(--s-3);padding-bottom:var(--s-2);border-bottom:var(--border);scroll-margin-top:var(--s-4)}
+.lede,.prose{font-size:var(--fs-body);line-height:var(--lh-body);max-width:var(--col-text);margin:0 0 var(--s-4)}
+code{font-family:var(--mono);font-size:var(--fs-code);background:var(--surface-sunk);padding:0 4px;border-radius:var(--radius)}
+a{color:var(--ink);text-decoration-color:var(--rule);text-underline-offset:2px}
+a:hover{text-decoration-color:var(--ink)}
+:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+
+/* index of patterns */
+.index{display:flex;flex-wrap:wrap;gap:6px;margin:var(--s-4) 0 0}
+.index a{font-family:var(--mono);font-size:var(--fs-label);letter-spacing:.04em;padding:3px 8px;border-radius:var(--radius);border:var(--border);color:var(--ink);text-decoration:none}
+.index a:hover{background:var(--surface-sunk);border-color:var(--rule)}
+
+/* per-pattern meta */
+.meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:var(--s-3) var(--s-5);margin:0 0 var(--s-5);font-size:13px;color:var(--ink-2)}
+.meta b{display:block;color:var(--ink);font-weight:500;font-size:var(--fs-label);font-family:var(--mono);letter-spacing:.08em;text-transform:uppercase;margin-bottom:2px}
+.meta .file{grid-column:1/-1;font-family:var(--mono);font-size:12px}
+
+/* figures */
+figure{margin:0;position:relative}
+figcaption{font-size:var(--fs-caption);line-height:1.5;color:var(--ink-2);max-width:var(--col-text);margin-top:var(--s-3)}
+figcaption b{color:var(--ink);font-weight:600}
+.hint{font-style:italic;color:var(--interact-ink);font-size:13px}
+.row{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s-2) var(--s-5);margin:var(--s-2) 0}
+.legend{display:flex;flex-wrap:wrap;gap:var(--s-2) var(--s-4);font-size:13px;color:var(--ink-2)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:-1px}
+.count{font-family:var(--mono);font-size:12px;color:var(--ink-2)}
+.count b{color:var(--ink);font-weight:500}
+svg.fig{width:100%;height:auto;display:block;overflow:visible;touch-action:manipulation}
+svg.fig text{font-family:var(--font);font-size:13px;fill:var(--ink)}
+svg.fig text.m{font-family:var(--mono);font-size:11px;fill:var(--ink-2)}
+svg.fig text.s{font-size:12px;fill:var(--ink-2)}
+svg.fig .ax{stroke:var(--rule);fill:none}
+svg.fig .grid{stroke:var(--hairline);fill:none}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:var(--s-4)}
+.split{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:var(--s-4)}
+@media (max-width:700px){.split{grid-template-columns:1fr}}
+.panel-title{font-size:13px;font-weight:600;margin:0 0 2px}
+.panel-sub{font-family:var(--mono);font-size:11px;color:var(--ink-2)}
+
+/* controls */
+input[type=range]{accent-color:var(--interact);width:min(420px,100%)}
+.seg{display:inline-flex;border:1px solid var(--rule);border-radius:var(--radius);overflow:hidden}
+.seg button{font:400 13px var(--font);color:var(--ink);background:var(--surface);border:0;border-right:1px solid var(--hairline);padding:4px 10px;cursor:pointer}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.btn{font:600 13px var(--font);color:var(--ink);background:var(--surface);border:1px solid var(--rule);border-radius:var(--radius);padding:4px 12px;cursor:pointer}
+.btn:hover{background:var(--surface-sunk)}
+.btn:disabled{color:var(--ink-3);cursor:default;background:var(--surface)}
+
+/* chips and tags */
+.chip{font-size:12px;padding:1px 7px;border-radius:var(--radius);white-space:nowrap;display:inline-block}
+.chip.honest{background:var(--honest-wash);color:var(--honest-ink)}
+.chip.deceptive{background:var(--deceptive-wash);color:var(--deceptive-ink)}
+.chip.mistaken{background:var(--mistaken-wash);color:var(--mistaken-ink)}
+.chip.frame{background:var(--frame-hatch) left/7px 100% no-repeat,var(--surface-sunk);color:var(--ink);padding-left:13px}
+.chip.belief{background:var(--surface-sunk);color:var(--ink)}
+.tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;padding:1px 6px;border-radius:var(--radius);border:1px solid var(--rule);color:var(--ink-2);white-space:nowrap}
+.tag.dashed{border-style:dashed}
+
+/* tooltip / hover card */
+.tip{position:absolute;pointer-events:none;z-index:10;background:var(--surface);color:var(--ink);border-radius:var(--radius);box-shadow:var(--shadow-pop);padding:6px 10px;font-size:12.5px;line-height:1.4;max-width:260px;opacity:0;transition:opacity var(--dur) var(--ease)}
+.tip.on{opacity:1}
+.tip .m{font-family:var(--mono);font-size:11px;color:var(--ink-2)}
+
+/* P3, P7, P8, P9, P11, P18 specifics live with their figures; small shared bits here */
+.quilt{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:var(--s-2)}
+.it{border:var(--border);border-radius:var(--radius);padding:var(--s-2) var(--s-3);background:var(--surface);display:grid;gap:4px;align-content:start}
+.it.bad{border-color:var(--ink);box-shadow:inset 3px 0 0 var(--ink)}
+.it .top{display:flex;justify-content:space-between;align-items:center;gap:6px}
+.it .sc{font-family:var(--mono);font-size:12px}
+.it .q{font-size:13px;color:var(--ink-2)}
+.it .a{font-size:14px;font-weight:600}
+.it .why{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase}
+.empty{font-size:13px;color:var(--ink-2);padding:var(--s-3) 0}
+@media (max-width:640px){h1{font-size:26px}h2{font-size:22px}}
+</style></head>
+<body><div class="wrap">
+<p class="k">Patterns</p>
+<h1>Figure patterns</h1>
+<p class="lede">One working reference figure for each pattern in <code>docs/viz-patterns.md</code>, drawn with the brand tokens. Every figure uses <b>toy data</b> made up to show the pattern, never real results. Each pattern lives in its own file (<code>app/patterns/pNN.js</code>) so an agent can copy it.</p>
+<nav class="index" id="index" aria-label="Patterns"></nav>
+<main id="list"></main>
+</div>
+<script src="core.js"></script>
+<script src="p01.js"></script><script src="p02.js"></script><script src="p03.js"></script><script src="p04.js"></script><script src="p05.js"></script><script src="p06.js"></script>
+<script src="p07.js"></script><script src="p08.js"></script><script src="p09.js"></script><script src="p10.js"></script><script src="p11.js"></script><script src="p12.js"></script>
+<script src="p13.js"></script><script src="p14.js"></script><script src="p15.js"></script><script src="p16.js"></script><script src="p17.js"></script><script src="p18.js"></script>
+<script>DL.renderAll(document.getElementById('index'),document.getElementById('list'));</script>
+</body></html>

@@ -254,6 +254,7 @@ Each card: **Job · Use when · Data · Form and interaction · Don't use when �
 
 ## Implementation conventions
 
+- **Reference code:** every pattern has a working demo in `app/patterns/pNN.js` (shared helpers in `app/patterns/core.js`), shown in the app's Patterns tab. Start a new figure by copying the matching file, then swap in real data.
 - **Stack:** vanilla JS and inline SVG in the existing no-build app; tokens from `app/tokens.css`. Bring in a library (e.g. D3 for zoom/pan) only when a pattern needs it, loaded from a pinned CDN version, and say why in a comment.
 - **Data:** precompute everything in the experiments repo; the app reads JSON/Markdown. No model calls from the browser.
 - **Markup:**

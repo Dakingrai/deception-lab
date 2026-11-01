@@ -1,3 +1,3 @@
 # Deception Lab — agent notes
 
-Before adding or changing any figure, view, or visual element, read `docs/viz-patterns.md` (when to use a figure vs text, which pattern, how much interaction) and follow `docs/BRAND.md` (colours, type, logo, layout). Use the CSS variables in `app/tokens.css`; never hard-code colours.
+Before adding or changing any figure, view, or visual element, read `docs/viz-patterns.md` (when to use a figure vs text, which pattern, how much interaction) and follow `docs/BRAND.md` (colours, type, logo, layout). Use the CSS variables in `app/tokens.css`; never hard-code colours. Working reference figures for each pattern are in `app/patterns/pNN.js`; copy the matching one rather than inventing a new figure style.

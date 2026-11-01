@@ -4,28 +4,29 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Deception Lab</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Ccircle cx=%2212%22 cy=%2216%22 r=%229%22 fill=%22%231F2328%22/%3E%3Ccircle cx=%2220%22 cy=%2216%22 r=%229%22 fill=%22none%22 stroke=%22%231F2328%22 stroke-width=%222%22/%3E%3C/svg%3E">  <!-- favicon: the logo mark in --ink (a data URI cannot read CSS variables) -->
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=Source+Sans+3:wght@400;600;700&family=JetBrains+Mono:wght@500;600&display=swap">
 <style>
 :root{
-  --bg:#fbfaf7; --surface:#ffffff; --fg:#1f2328; --muted:#6b7178; --line:#e2dfd8; --rule:#cfcbc2;
-  --blue:#4C7EBF; --blue-soft:#e9eff8; --blue-ink:#2d5a94;
-  --gray:#7F7F7F; --gray-soft:#eeece7;
+  /* legacy names, aliased to the brand tokens in tokens.css (neutrals and UI accent; chrome is ink and grey) */
+  --fg:var(--ink); --muted:var(--ink-2); --line:var(--hairline);
+  --blue:var(--ink); --blue-soft:var(--surface-sunk); --blue-ink:var(--ink);
+  --gray:var(--ink-3); --gray-soft:var(--surface-sunk);
+  /* legacy hues below are still the pre-brand palette; they move to the meaning colours when the maps are recoloured */
   --gate:#f7f1df; --gate-line:#d4bb6c;
   --green:#5FA85D; --green-soft:#e6f2e5;
   --orange:#E8A838; --orange-soft:#fbf0d9;
   --purple:#8064A2; --purple-soft:#ece6f3;
   --red:#C0504D; --red-soft:#f8e3e2;
-  --serif:"Source Serif 4",Georgia,serif; --sans:"Source Sans 3","Helvetica Neue",Arial,sans-serif; --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+  --serif:var(--font); --sans:var(--font);
 }
 @media (prefers-color-scheme: dark){ :root{
-  --bg:#15171a; --surface:#1d2024; --fg:#e9e7e1; --muted:#a2a7ad; --line:#30343a; --rule:#3d424a;
-  --blue:#7ea6dc; --blue-soft:#1d2a3c; --blue-ink:#a9c4ea; --gray:#9a9a9a; --gray-soft:#262a2f;
   --gate:#332d1a; --gate-line:#b89a4a; --green:#7cc47a; --green-soft:#1c2e1b; --orange:#f0b858; --orange-soft:#3a2d12;
   --purple:#a98fcb; --purple-soft:#2a2336; --red:#e07572; --red-soft:#3d1f1e; color-scheme:dark } }
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 html,body{height:100%}
-body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--serif);font-size:15.5px;line-height:1.55;display:grid;grid-template-rows:auto 1fr}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--serif);font-size:var(--fs-body);line-height:1.55;display:grid;grid-template-rows:auto 1fr}
 h1,h2,h3,h4{font-family:var(--sans);margin:0}
 p{margin:0 0 10px}
 a{color:var(--blue-ink)}
@@ -33,14 +34,18 @@ button{font-family:var(--sans)}
 .var{font-family:var(--mono);font-size:.82em;font-weight:600;color:var(--blue-ink);background:var(--blue-soft);padding:1px 5px;border-radius:4px;white-space:nowrap}
 
 /* top bar */
-.top{display:flex;align-items:center;gap:18px;padding:10px 20px;border-bottom:1px solid var(--rule);background:var(--surface);position:sticky;top:0;z-index:5}
-.top h1{font-size:18px;font-weight:700}
-.top .sub{font-family:var(--sans);font-size:12.5px;color:var(--muted)}
+.top{display:flex;flex-wrap:wrap;align-items:center;gap:8px 18px;padding:10px 20px;border-bottom:1px solid var(--hairline);background:var(--bg);position:sticky;top:0;z-index:5}
+.brand{display:flex;align-items:center;gap:6px;color:var(--ink)} .brand .mark{width:34px;height:34px;flex:none}
+.top h1{font-size:18px;font-weight:600;line-height:1.2}
+.top .sub{font-family:var(--sans);font-size:var(--fs-caption);color:var(--muted)}
 .tabs{display:flex;gap:4px;margin-left:12px}
-.tabs button{font-size:14px;font-weight:600;padding:6px 12px;border-radius:8px;border:1px solid transparent;background:none;color:var(--muted);cursor:pointer}
+.tabs button{font-size:var(--fs-ui);font-weight:600;padding:6px 12px;border-radius:var(--radius);border:1px solid transparent;background:none;color:var(--ink-2);cursor:pointer;transition:background var(--dur) var(--ease),color var(--dur) var(--ease)}
+.tabs button:hover{background:var(--surface-sunk);color:var(--ink)}
 .tabs button.on{background:var(--blue-soft);color:var(--blue-ink);border-color:var(--blue)}
-.status{margin-left:auto;font-family:var(--sans);font-size:12.5px;color:var(--muted)}
-.status b{color:var(--green)}
+.status{margin-left:auto;font-family:var(--sans);font-size:var(--fs-caption);color:var(--muted)}
+.status b{color:var(--ink-3)}
+@media (max-width:640px){.top{padding:8px 16px;gap:6px 12px}.top .sub,.status{display:none}.tabs{margin-left:0;max-width:100%;overflow-x:auto}}
+:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 
 /* layout */
 .main{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:0;min-height:0}
@@ -48,44 +53,45 @@ button{font-family:var(--sans)}
 @media (max-width:980px){.main{grid-template-columns:1fr}.panel{position:static;max-height:none}}
 .view{padding:18px 20px 40px;overflow:auto;min-width:0}
 .view[hidden]{display:none}
-.panel{border-left:1px solid var(--rule);background:var(--surface);padding:16px 18px;overflow:auto;display:grid;gap:10px;align-content:start;font-size:14.5px;position:sticky;top:48px;max-height:calc(100vh - 48px)}
-.panel .k{font-family:var(--mono);font-size:11px;color:var(--blue-ink);letter-spacing:.06em}
-.panel h3{font-size:17px}
-.panel .why{border-left:3px solid var(--blue);padding-left:10px}
-.panel .meta{font-family:var(--sans);font-size:12.5px;color:var(--muted)}
-.panel ul{margin:0;padding-left:18px;font-family:var(--sans);font-size:13px;color:var(--muted)}
-.panel .pin{font-family:var(--sans);font-size:12px;color:var(--muted)}
-.md{font-size:14px}
+.panel{border-left:1px solid var(--hairline);background:var(--surface);padding:16px 18px;overflow:auto;display:grid;gap:10px;align-content:start;font-size:var(--fs-body);position:sticky;top:48px;max-height:calc(100vh - 48px)}
+.panel .k{font:500 var(--fs-label)/1.4 var(--mono);color:var(--ink-2);letter-spacing:.08em;text-transform:uppercase}
+.panel h3{font-size:var(--fs-h3)}
+.panel .why{border-left:2px solid var(--rule);padding-left:10px}
+.panel .meta{font-family:var(--sans);font-size:var(--fs-caption);color:var(--muted)}
+.panel ul{margin:0;padding-left:18px;font-family:var(--sans);font-size:var(--fs-ui);color:var(--muted)}
+.panel .pin{font-family:var(--sans);font-size:var(--fs-ui);color:var(--muted)}
+.md{font-size:var(--fs-body)}
 .nfig+.nfig{margin-top:8px}
-.nfig{border:1px solid var(--line);border-radius:8px;background:var(--bg);padding:6px;cursor:zoom-in} .nfig svg{width:100%;height:auto;display:block}
+.nfig{border:1px solid var(--line);border-radius:var(--radius);background:var(--bg);padding:6px;cursor:zoom-in} .nfig svg{width:100%;height:auto;display:block}
 .figov{position:fixed;inset:0;z-index:50;background:color-mix(in srgb,var(--bg) 92%,transparent);display:flex;align-items:center;justify-content:center;padding:24px;cursor:zoom-out} .figov[hidden]{display:none} .figov svg{width:min(1200px,100%);height:auto;max-height:100%;background:var(--bg)}
-.md h2,.md h3{font-size:14px;margin:12px 0 4px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.md h2,.md h3{font-size:var(--fs-h4);margin:12px 0 4px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
 .md p{margin:0 0 8px}
-.regions{border:1px solid var(--line);border-radius:14px;padding:14px;margin:8px 0 16px;background:var(--surface)}
+.regions{border:1px solid var(--line);border-radius:var(--radius);padding:14px;margin:8px 0 16px;background:var(--surface)}
 .rgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
 @media (max-width:700px){.rgrid{grid-template-columns:minmax(0,1fr)}}
-.rcard{border-radius:10px;padding:14px 18px;min-width:0}
+.rcard{border-radius:var(--radius);padding:14px 18px;min-width:0}
 .rcard:nth-child(4n+1){background:var(--blue-soft)} .rcard:nth-child(4n+2){background:var(--gate)} .rcard:nth-child(4n+3){background:color-mix(in srgb,var(--green-soft) 45%,var(--gray-soft))} .rcard:nth-child(4n+4){background:var(--purple-soft)}
-.regions h4{font-family:var(--sans);font-size:17px;font-weight:600;margin:0 0 6px;color:var(--fg);text-transform:none;letter-spacing:0}
-.regions p{font-family:var(--sans);font-size:14px;line-height:1.5;color:var(--muted);margin:0}
+.regions h4{font-family:var(--sans);font-size:var(--fs-h3);font-weight:600;margin:0 0 6px;color:var(--fg);text-transform:none;letter-spacing:0}
+.regions p{font-family:var(--sans);font-size:var(--fs-ui);line-height:1.5;color:var(--muted);margin:0}
 .rarrow{text-align:center;color:var(--muted);font-family:var(--sans);margin:12px 0 4px}
 .rfoot{text-align:center;padding:2px 8px 6px}
-.md code{font-family:var(--mono);font-size:12px;background:var(--gray-soft);padding:0 4px;border-radius:3px}
+.md code{font-family:var(--mono);font-size:var(--fs-code);background:var(--gray-soft);padding:0 4px;border-radius:3px}
 .md .wl{color:var(--blue-ink);text-decoration:underline dotted;cursor:pointer}
-textarea.ed{width:100%;min-height:260px;font-family:var(--mono);font-size:12.5px;line-height:1.5;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--fg);resize:vertical}
+textarea.ed{width:100%;min-height:260px;font-family:var(--mono);font-size:var(--fs-code);line-height:1.5;padding:10px;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface-sunk);color:var(--fg);resize:vertical}
 .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.btn{font-size:13px;font-weight:600;padding:6px 11px;border-radius:7px;border:1px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer}
-.btn:hover{border-color:var(--blue)}
-.btn.primary{background:var(--blue);color:#fff;border-color:var(--blue)}
-.btn.sm{font-size:12px;padding:4px 8px}
+.btn{font-size:var(--fs-ui);font-weight:600;padding:6px 11px;border-radius:var(--radius);border:1px solid var(--rule);background:var(--surface);color:var(--ink);cursor:pointer;transition:background var(--dur) var(--ease)}
+.btn:hover{background:var(--surface-sunk)}
+.btn.primary{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.btn.primary:hover{background:var(--ink-2);border-color:var(--ink-2)}
+.btn.sm{font-size:var(--fs-caption);padding:4px 8px}
 .plist{display:grid;gap:4px}
-.plist a{font-family:var(--sans);font-size:13px;cursor:pointer;text-decoration:none;display:flex;gap:6px;align-items:baseline}
+.plist a{font-family:var(--sans);font-size:var(--fs-ui);cursor:pointer;text-decoration:none;display:flex;gap:6px;align-items:baseline}
 .plist a:hover{text-decoration:underline}
-.tag{font-family:var(--mono);font-size:10.5px;padding:1px 6px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
+.tag{font-family:var(--mono);font-size:var(--fs-label);padding:1px 6px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
 .tag.queued{} .tag.reading{color:var(--orange);border-color:var(--orange)} .tag.read{color:var(--green);border-color:var(--green)} .tag.later{opacity:.6}
 
 /* ---- map view: concept map + cases + label rules ---- */
-.flowbox{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow-x:auto;margin:14px 0 10px}
+.flowbox{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);overflow-x:auto;margin:14px 0 10px}
 .flowbox svg{display:block;min-width:960px;width:100%;height:auto;font-family:var(--sans)}
 .cband{fill:var(--gray-soft);opacity:.55}
 .colhead{font-family:var(--mono);font-size:10.5px;letter-spacing:.09em;fill:var(--muted);text-transform:uppercase}
@@ -97,11 +103,11 @@ textarea.ed{width:100%;min-height:260px;font-family:var(--mono);font-size:12.5px
 .edge.off{stroke:var(--line);stroke-width:1.2;stroke-dasharray:3 3}
 .edge.unstable{stroke:var(--orange);stroke-width:2;stroke-dasharray:7 3 2 3}
 .xmark{stroke:var(--red);stroke-width:2.2;fill:none}
-.tilde{font-family:var(--mono);font-size:14px;font-weight:600;fill:var(--orange);paint-order:stroke;stroke:var(--surface);stroke-width:4px}
+.tilde{font-family:var(--mono);font-size:var(--fs-ui);font-weight:600;fill:var(--orange);paint-order:stroke;stroke:var(--surface);stroke-width:4px}
 .elabel{font-family:var(--mono);font-size:10.5px;fill:var(--muted);paint-order:stroke;stroke:var(--surface);stroke-width:5px;stroke-linejoin:round}
 .arrow{fill:var(--muted)}
 .node{cursor:pointer;transition:opacity .25s}
-.node rect{fill:var(--surface);stroke-width:1.6;rx:7}
+.node rect{fill:var(--surface);stroke-width:1.6;rx:4}
 .node .nm{font-weight:600;font-size:14.5px;fill:var(--fg)}
 .node .sb{font-family:var(--mono);font-size:10.5px;fill:var(--muted)}
 .node:hover rect,.node:focus-visible rect{stroke-width:3}
@@ -109,31 +115,31 @@ textarea.ed{width:100%;min-height:260px;font-family:var(--mono);font-size:12.5px
 .node.dim{opacity:.28}
 .badge{fill:var(--green)}
 .q{font-family:var(--serif);font-style:italic;font-size:11.5px;fill:var(--muted)}
-.legend{display:flex;flex-wrap:wrap;gap:14px;margin:6px 0 0;font-family:var(--mono);font-size:11px;color:var(--muted)}
+.legend{display:flex;flex-wrap:wrap;gap:14px;margin:6px 0 0;font-family:var(--mono);font-size:var(--fs-label);color:var(--muted)}
 .legend span::before{content:"";display:inline-block;width:22px;height:0;border-top:2px solid var(--fg);vertical-align:middle;margin-right:6px}
 .legend .l-bad::before{border-color:var(--red)}
 .legend .l-off::before{border-top:1.5px dashed var(--line)}
 .legend .l-open::before{border-top:2px dotted var(--orange)}
 .legend .l-un::before{border-top:2px dashed var(--orange)}
-.tablebox{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:10px}
-table.cases{border-collapse:collapse;width:100%;font-family:var(--sans);font-size:13.5px}
+.tablebox{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius)}
+table.cases{border-collapse:collapse;width:100%;font-family:var(--sans);font-size:var(--fs-ui)}
 .cases th,.cases td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top}
-.cases th{font-family:var(--mono);font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:500;background:var(--gray-soft)}
+.cases th{font-family:var(--mono);font-size:var(--fs-label);letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:500;background:var(--gray-soft)}
 .cases tbody tr{cursor:pointer}
 .cases tbody tr:hover td{background:var(--blue-soft)}
 .cases tbody tr.cur td{background:var(--blue-soft);box-shadow:inset 3px 0 0 var(--blue)}
 .cases tbody tr:last-child td{border-bottom:0}
 .cases td.c{white-space:nowrap;font-weight:600}
-.cases td .m{font-family:var(--mono);font-size:11px;color:var(--muted);display:block}
+.cases td .m{font-family:var(--mono);font-size:var(--fs-label);color:var(--muted);display:block}
 .cases td.n{color:var(--muted)}
 .lab-ok{color:var(--green);font-weight:600}.lab-fic{color:var(--purple);font-weight:600}.lab-lie,.lab-dec{color:var(--red);font-weight:600}.lab-hal,.lab-bs{color:var(--orange);font-weight:600}
 .rules{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 0}
-.rule{font-family:var(--mono);font-size:11.5px;padding:6px 10px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--fg);cursor:pointer}
+.rule{font-family:var(--mono);font-size:var(--fs-label);padding:6px 10px;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface);color:var(--fg);cursor:pointer}
 .rule:hover{border-color:var(--blue)}
 .rule.on{border-color:var(--blue);background:var(--blue-soft);color:var(--blue-ink)}
-.rulebox{border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin:10px 0 0;background:var(--surface);font-size:14px;max-width:80ch}
+.rulebox{border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px;margin:10px 0 0;background:var(--surface);font-size:var(--fs-body);max-width:80ch}
 .rulebox b{display:block;margin-bottom:4px;font-family:var(--sans)}
-.panel .sig{font-family:var(--mono);font-size:12px;background:var(--gray-soft);border-radius:6px;padding:8px 10px;margin:0 0 8px}
+.panel .sig{font-family:var(--mono);font-size:var(--fs-label);background:var(--gray-soft);border-radius:var(--radius);padding:8px 10px;margin:0 0 8px}
 
 /* ---- labels view: decision tree ---- */
 .tedge{stroke:var(--muted);stroke-width:1.4;transition:opacity .15s}
@@ -154,26 +160,26 @@ table.cases{border-collapse:collapse;width:100%;font-family:var(--sans);font-siz
 .tn.dim{opacity:.25}
 .tn:focus{outline:none}.tn:focus-visible rect{stroke-width:3}
 .pairs{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
-.pair{font-family:var(--sans);text-align:left;cursor:pointer;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px;display:grid;gap:4px;color:var(--fg)}
+.pair{font-family:var(--sans);text-align:left;cursor:pointer;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px;display:grid;gap:4px;color:var(--fg)}
 .pair:hover{border-color:var(--blue)}
 .pair.on{border-color:var(--blue);background:var(--blue-soft)}
-.pair b{font-weight:600;font-size:14px}
-.pair b span{font-family:var(--mono);font-size:11px;color:var(--muted);font-weight:400;margin:0 4px}
+.pair b{font-weight:600;font-size:var(--fs-h4)}
+.pair b span{font-family:var(--mono);font-size:var(--fs-label);color:var(--muted);font-weight:400;margin:0 4px}
 .pair .pt{font-family:var(--mono);font-size:11px;color:var(--blue-ink)}
-.pair p{margin:2px 0 0;font-size:13px;color:var(--muted);font-family:var(--serif)}
-.panel ul.tl{font-family:var(--serif);font-size:14px;color:var(--fg)}
+.pair p{margin:2px 0 0;font-size:var(--fs-ui);color:var(--muted);font-family:var(--serif)}
+.panel ul.tl{font-family:var(--serif);font-size:var(--fs-ui);color:var(--fg)}
 
 .mapwall{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px;margin-top:6px}
-.mcard{text-align:left;cursor:pointer;background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden;display:grid;grid-template-rows:auto 1fr;padding:0;color:var(--fg);font-family:var(--serif)}
+.mcard{text-align:left;cursor:pointer;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;display:grid;grid-template-rows:auto 1fr;padding:0;color:var(--fg);font-family:var(--serif)}
 .mcard:hover{border-color:var(--blue)}
 .mthumb{background:var(--gray-soft);padding:10px;border-bottom:1px solid var(--line);pointer-events:none}
 .mthumb svg{display:block;width:100%;height:auto;min-width:0}
 .minfo{padding:12px 16px 16px}
-.minfo .mnum{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--blue-ink)}
-.minfo b{display:block;font-family:var(--sans);font-size:19px;margin:2px 0 6px}
-.minfo p{margin:0;color:var(--muted);font-size:14px}
+.minfo .mnum{font-family:var(--mono);font-size:var(--fs-label);letter-spacing:.08em;text-transform:uppercase;color:var(--blue-ink)}
+.minfo b{display:block;font-family:var(--sans);font-size:var(--fs-h3);margin:2px 0 6px}
+.minfo p{margin:0;color:var(--muted);font-size:var(--fs-ui)}
 .backbar{display:flex;align-items:center;gap:12px;margin:0 0 12px}
-.crumb{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.crumb{font-family:var(--mono);font-size:var(--fs-label);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 /* honesty map + popover */
 .hwrap{position:relative}
 .hedge{fill:none;stroke:var(--muted);stroke-width:1.5}
@@ -197,23 +203,23 @@ table.cases{border-collapse:collapse;width:100%;font-family:var(--sans);font-siz
 .hn.g-q rect{fill:var(--surface);stroke-dasharray:none}
 .hn .hs{font-family:var(--mono);font-size:9.5px;fill:var(--muted)}
 .hn .hc{font-family:var(--mono);font-size:8.5px;fill:var(--orange);letter-spacing:.05em;text-transform:uppercase}
-.contested{color:var(--orange);font-family:var(--mono);font-size:11px;letter-spacing:.05em;text-transform:uppercase}
-.hpop{position:absolute;z-index:5;width:380px;max-width:calc(100% - 16px);background:var(--surface);border:1px solid var(--line);border-radius:8px;box-shadow:0 10px 30px rgba(0,0,0,.12);padding:14px 16px 12px}
+.contested{color:var(--orange);font-family:var(--mono);font-size:var(--fs-label);letter-spacing:.05em;text-transform:uppercase}
+.hpop{position:absolute;z-index:5;width:380px;max-width:calc(100% - 16px);background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow-pop);padding:14px 16px 12px}
 .hpop[hidden]{display:none}
-.hpop .pk{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;margin:0 0 4px}
-.hpop h4{font-family:var(--sans);font-weight:600;font-size:19px;margin:0 0 6px;line-height:1.2}
-.hpop p{margin:0 0 8px;font-size:13.5px;line-height:1.5}
+.hpop .pk{font-family:var(--mono);font-size:var(--fs-label);letter-spacing:.06em;text-transform:uppercase;margin:0 0 4px}
+.hpop h4{font-family:var(--sans);font-weight:600;font-size:var(--fs-h3);margin:0 0 6px;line-height:1.2}
+.hpop p{margin:0 0 8px;font-size:var(--fs-ui);line-height:1.5}
 .hpop .pc{color:var(--muted);border-left:2px solid var(--orange);padding-left:8px}
 .hpop .prefs{display:grid;gap:4px;border-top:1px solid var(--line);padding-top:8px;margin-top:4px}
-.hpop .prefs a{font-size:12px;color:var(--blue);text-decoration:none;line-height:1.35}
+.hpop .prefs a{font-size:var(--fs-caption);color:var(--blue);text-decoration:none;line-height:1.35}
 .hpop .prefs a:hover{text-decoration:underline}
-.hpop .phint{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:8px}
+.hpop .phint{font-family:var(--mono);font-size:var(--fs-label);color:var(--muted);margin-top:8px}
 
 .legend3 .sw::before{border:0!important;width:10px;height:10px;border-radius:2px;background:var(--c)}
 
 /* zoom toolbar for maps */
-.zoombar{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11.5px;color:var(--muted);margin:10px 0 6px}
-.zoombar button{font-family:var(--mono);font-size:12px;padding:3px 9px;border-radius:6px;border:1px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer}
+.zoombar{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:var(--fs-label);color:var(--muted);margin:10px 0 6px}
+.zoombar button{font-family:var(--mono);font-size:var(--fs-ui);padding:3px 9px;border-radius:var(--radius);border:1px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer}
 .zoombar button:hover{border-color:var(--blue)}
 .zoombar input[type=range]{width:180px}
 .zoombar .zv{min-width:44px;text-align:right}
@@ -222,7 +228,7 @@ table.cases{border-collapse:collapse;width:100%;font-family:var(--sans);font-siz
 /* ---- gaps ---- */
 .gapgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;align-items:start}
 @media (max-width:900px){.gapgrid{grid-template-columns:1fr}}
-.q2{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px}
+.q2{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:10px}
 .q2 svg{width:100%;height:auto;display:block;font-family:var(--sans)}
 .q2 .axis{font-size:11px;fill:var(--muted);font-weight:600;letter-spacing:.06em;text-transform:uppercase}
 .q2 .quad{font-size:10.5px;fill:var(--muted)}
@@ -230,22 +236,22 @@ table.cases{border-collapse:collapse;width:100%;font-family:var(--sans);font-siz
 .q2 .pt text{font-size:10.5px;fill:var(--fg)}
 .q2 .pt.sel circle{stroke:var(--blue-ink);stroke-width:3}
 .gaplist{display:grid;gap:8px}
-.gapcard{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--surface);font-family:var(--sans);cursor:pointer}
+.gapcard{border:1px solid var(--line);border-radius:var(--radius);padding:10px 12px;background:var(--surface);font-family:var(--sans);cursor:pointer}
 .gapcard.sel{box-shadow:0 0 0 2px var(--blue)}
-.gapcard h4{font-size:14px} .gapcard .m{font-size:12px;color:var(--muted);margin-top:3px} .gapcard .m b{font-family:var(--mono)}
-.gapcard .sum{font-size:12.5px;line-height:1.45;color:var(--fg);margin-top:5px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.gapcard.blocked h4::after{content:" · blocked";color:var(--red);font-weight:400;font-size:12px}
+.gapcard h4{font-size:var(--fs-h4)} .gapcard .m{font-size:var(--fs-caption);color:var(--muted);margin-top:3px} .gapcard .m b{font-family:var(--mono)}
+.gapcard .sum{font-size:var(--fs-ui);line-height:1.45;color:var(--fg);margin-top:5px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.gapcard.blocked h4::after{content:" · blocked";color:var(--red);font-weight:400;font-size:var(--fs-caption)}
 
 /* ---- reading ---- */
 .rq{display:grid;gap:6px;max-width:820px}
-.rq .it{display:grid;grid-template-columns:34px minmax(0,1fr) auto;gap:10px;align-items:center;border:1px solid var(--line);border-radius:10px;padding:8px 12px;background:var(--surface);cursor:pointer;font-family:var(--sans)}
+.rq .it{display:grid;grid-template-columns:34px minmax(0,1fr) auto;gap:10px;align-items:center;border:1px solid var(--line);border-radius:var(--radius);padding:8px 12px;background:var(--surface);cursor:pointer;font-family:var(--sans)}
 .pj .rq .it{grid-template-columns:minmax(34px,auto) minmax(0,1fr) auto}
 .pjidx{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;margin:6px 0 14px}
-.pjcard{text-align:left;border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:14px 16px;cursor:pointer;font-family:var(--sans);color:var(--fg);display:grid;gap:4px;align-content:start}
+.pjcard{text-align:left;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface);padding:14px 16px;cursor:pointer;font-family:var(--sans);color:var(--fg);display:grid;gap:4px;align-content:start}
 .pjcard:hover{border-color:var(--blue)} .pjcard:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
-.pjcard .kd{font:600 11px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
-.pjcard h3{font-size:16px;line-height:1.3;margin:0;color:var(--fg)}
-.pjcard p{margin:0;font-size:13px;color:var(--muted)}
+.pjcard .kd{font:600 var(--fs-label) var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.pjcard h3{font-size:var(--fs-h3);line-height:1.3;margin:0;color:var(--fg)}
+.pjcard p{margin:0;font-size:var(--fs-ui);color:var(--muted)}
 .pjback{margin:0 0 10px}
 .regions.loc .rcard.off{opacity:.38}
 .regions.loc .rcard.on{box-shadow:inset 0 0 0 2px var(--fg)}
@@ -253,48 +259,118 @@ table.cases{border-collapse:collapse;width:100%;font-family:var(--sans);font-siz
 .regions.click .rcard:hover{box-shadow:inset 0 0 0 2px var(--rule);opacity:1}
 .regions.click .rcard:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
 .regions.loc.click .rcard.on:hover{box-shadow:inset 0 0 0 2px var(--fg)}
-.rhead{border-radius:12px;padding:16px 20px;margin:4px 0 6px}
-.rhead h2{font-size:22px!important;margin:0 0 6px!important}
-.rhead p{font-family:var(--sans);font-size:15px;color:var(--muted);margin:0}
+.rhead{border-radius:var(--radius);padding:16px 20px;margin:4px 0 6px}
+.rhead h2{font-size:var(--fs-h2)!important;margin:0 0 6px!important}
+.rhead p{font-family:var(--sans);font-size:var(--fs-body);color:var(--muted);margin:0}
 .rhead.t0{background:var(--blue-soft)} .rhead.t1{background:var(--gate)} .rhead.t2{background:color-mix(in srgb,var(--green-soft) 45%,var(--gray-soft))} .rhead.t3{background:var(--purple-soft)}
-.rtag{font:600 10px var(--mono);letter-spacing:.05em;text-transform:uppercase;margin-left:8px;padding:1px 6px;border-radius:4px;border:1px solid var(--rule);color:var(--muted);vertical-align:middle;white-space:nowrap}
+.rtag{font:600 var(--fs-label) var(--mono);letter-spacing:.05em;text-transform:uppercase;margin-left:8px;padding:1px 6px;border-radius:4px;border:1px solid var(--rule);color:var(--muted);vertical-align:middle;white-space:nowrap}
 .rq .it:hover{border-color:var(--blue)} .rq .it.sel{box-shadow:0 0 0 2px var(--blue)}
-.rq .n{font-family:var(--mono);font-size:12px;color:var(--muted)} .rq .t{font-weight:600;font-size:14px} .rq .t small{display:block;font-weight:400;color:var(--muted);font-size:12px}
-.rq .st{display:flex;gap:4px} .rq .st button{font-size:11px;padding:3px 7px;border-radius:999px;border:1px solid var(--line);background:none;color:var(--muted);cursor:pointer}
+.rq .n{font-family:var(--mono);font-size:var(--fs-label);color:var(--muted)} .rq .t{font-weight:600;font-size:var(--fs-ui)} .rq .t small{display:block;font-weight:400;color:var(--muted);font-size:var(--fs-caption)}
+.rq .st{display:flex;gap:4px} .rq .st button{font-size:var(--fs-caption);padding:3px 7px;border-radius:999px;border:1px solid var(--line);background:none;color:var(--muted);cursor:pointer}
 .pj{max-width:820px;display:grid;gap:14px}
-.pj .ptabs{display:flex;gap:6px;flex-wrap:wrap} .pj .ptabs button{font-size:13px;font-weight:600;padding:5px 11px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--muted);cursor:pointer} .pj .ptabs button.on{border-color:var(--blue);color:var(--blue-ink);background:var(--blue-soft)}
-.pj .pdesc{border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:14px 18px;cursor:pointer} .pj .pdesc:hover{border-color:var(--blue)} .pj .pdesc h2{font-size:19px;margin:0 0 8px} .pj .pdesc .md{font-size:14.5px}
+.pj .ptabs{display:flex;gap:6px;flex-wrap:wrap} .pj .ptabs button{font-size:var(--fs-ui);font-weight:600;padding:5px 11px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--muted);cursor:pointer} .pj .ptabs button.on{border-color:var(--blue);color:var(--blue-ink);background:var(--blue-soft)}
+.pj .pdesc{border:1px solid var(--line);border-radius:var(--radius);background:var(--surface);padding:14px 18px;cursor:pointer} .pj .pdesc:hover{border-color:var(--blue)} .pj .pdesc h2{font-size:var(--fs-h3);margin:0 0 8px} .pj .pdesc .md{font-size:var(--fs-body)}
 .pj .sect{display:flex;align-items:center;gap:10px} .pj .sect .btn{margin-left:auto}
 .pj .pdesc{cursor:default} .pj .pdesc:hover{border-color:var(--line)} .pj .pdesc .row{margin-top:10px}
-.pj .it .body{grid-column:1/-1;border-top:1px solid var(--line);padding-top:10px;margin-top:4px;cursor:default} .pj .it .body .md{font-size:14px} .pj .it.open{cursor:default}
+.pj .it .body{grid-column:1/-1;border-top:1px solid var(--line);padding-top:10px;margin-top:4px;cursor:default} .pj .it .body .md{font-size:var(--fs-body)} .pj .it.open{cursor:default}
 .rq .st button.on.queued{border-color:var(--gray);color:var(--fg)} .rq .st button.on.reading{border-color:var(--orange);color:var(--orange)} .rq .st button.on.read{border-color:var(--green);color:var(--green)} .rq .st button.on.later{opacity:.7}
-.sect{font-family:var(--sans);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:14px 0 6px}
-.intro{max-width:720px;color:var(--muted);font-size:14px;margin-bottom:8px}
+.sect{font:500 var(--fs-label)/1.4 var(--mono);text-transform:uppercase;letter-spacing:.08em;color:var(--ink-2);margin:18px 0 8px}
+.intro{max-width:720px;color:var(--muted);font-size:var(--fs-body);margin-bottom:8px}
+
+/* ============ project page — brand (docs/BRAND.md); tokens from tokens.css only ============ */
+#v-projects.pp-on>.intro{display:none}
+#v-projects.pp-on>.pj{max-width:none;display:block}
+.pp{display:grid;grid-template-columns:[page-start] minmax(0,1fr) [text-start] minmax(0,var(--col-text)) [text-end] var(--col-gap) [gutter-start] var(--col-gutter) [gutter-end page-end];max-width:var(--col-page);margin:0 auto;padding:var(--s-5) 0 var(--s-8);font-family:var(--font);font-size:var(--fs-body);line-height:var(--lh-body);color:var(--ink)}
+.pp>*,.pp-md>*{grid-column:text;min-width:0}
+.pp-side{grid-column:gutter}
+.pp-meta{grid-column:text-start/gutter-end}
+.pp-fig,.pp-md>.nfig{grid-column:page}
+.pp h1,.pp h2,.pp h3{font-family:var(--font);color:var(--ink)}
+.pp b,.pp strong{font-weight:600}
+.pp :focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.pp-crumb{display:flex;flex-wrap:wrap;gap:var(--s-2);align-items:baseline;font-size:var(--fs-ui);line-height:var(--lh-ui);color:var(--ink-2);margin-bottom:var(--s-6)}
+.pp-link{font:inherit;color:var(--ink);background:none;border:0;padding:0;cursor:pointer;text-align:left;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px;text-decoration-color:color-mix(in srgb,var(--ink) 40%,transparent);transition:text-decoration-color var(--dur) var(--ease)}
+.pp-link:hover{text-decoration-color:color-mix(in srgb,var(--ink) 80%,transparent)}
+.pp-kicker,.pp-label,.pp-details>summary{font:500 var(--fs-label)/1.4 var(--mono);text-transform:uppercase;letter-spacing:.08em;color:var(--ink-2)}
+.pp-title{font-size:var(--fs-title);line-height:1.1;font-weight:700;margin:var(--s-2) 0 var(--s-4)}
+.pp-lede{font-size:20px;line-height:1.5;margin:0}
+.pp-meta{display:flex;flex-wrap:wrap;gap:var(--s-4) var(--s-6);margin:var(--s-6) 0 var(--s-2);padding:var(--s-4) 0;border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline);font-size:var(--fs-caption);line-height:1.5;color:var(--ink-2)}
+.pp-meta>div{max-width:280px}
+.pp-meta .pp-label{display:block;margin-bottom:var(--s-1)}
+.pp-meta .pp-link{color:var(--ink)}
+.pp-chip{display:inline-block;font:400 var(--fs-caption)/1.4 var(--font);color:var(--ink);background:none;border:1px solid var(--hairline);border-radius:var(--radius);padding:1px var(--s-2);margin:0 var(--s-1) var(--s-1) 0;cursor:pointer;text-align:left;transition:background var(--dur) var(--ease)}
+.pp-chip:hover{background:var(--surface-sunk)}
+.pp-badge{display:inline-block;font:500 var(--fs-label)/1 var(--mono);text-transform:uppercase;letter-spacing:.08em;color:var(--ink-2);border:1px solid var(--hairline);border-radius:var(--radius-pill);padding:4px 8px;white-space:nowrap}
+.pp-tag{display:inline-block;font:500 var(--fs-label)/1.4 var(--mono);color:var(--ink-2);border:1px solid var(--hairline);border-radius:var(--radius);padding:1px 6px;margin:0 var(--s-1) var(--s-1) 0}
+.pp-path{font:500 var(--fs-label)/1.4 var(--mono);color:var(--ink-2);margin-right:var(--s-2);word-break:break-all}
+.pp-btn{font:600 var(--fs-ui)/var(--lh-ui) var(--font);color:var(--ink);background:var(--surface);border:1px solid var(--rule);border-radius:var(--radius);padding:5px 12px;cursor:pointer;transition:background var(--dur) var(--ease)}
+.pp-btn:hover{background:var(--surface-sunk)}
+.pp-btn.sm{font-size:var(--fs-caption);padding:3px 10px}
+.pp-btn.primary{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.pp-btn.primary:hover{background:var(--ink-2);border-color:var(--ink-2)}
+.pp-md>p,.pp-md>ul{margin:0 0 var(--s-4)}
+.pp-md>ul{padding-left:var(--s-5)}
+.pp-md li{margin-bottom:var(--s-2)}
+.pp-md>h2,.pp-md>h3,.pp-h2{font-size:var(--fs-h2);line-height:1.25;font-weight:600;margin:var(--s-7) 0 var(--s-4);padding-bottom:var(--s-2);border-bottom:1px solid var(--hairline)}
+.pp-h2 .pp-count{font-weight:400;color:var(--ink-2)}
+.pp-side{align-self:end;margin-bottom:calc(var(--s-4) + var(--s-2))}
+.pp code{font:500 var(--fs-code) var(--mono);background:var(--surface-sunk);padding:1px 4px;border-radius:var(--radius)}
+.pp-md a,.pp .wl{color:var(--ink);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px;text-decoration-color:color-mix(in srgb,var(--ink) 40%,transparent)}
+.pp .wl{text-decoration-style:dotted;cursor:pointer}
+.pp-md>.nfig,.pp-fig{margin:var(--s-5) 0 var(--s-6);border:0;border-radius:0;padding:0;background:none;cursor:zoom-in}
+.pp-md>.nfig svg,.pp-fig svg{width:100%;height:auto;display:block}
+.pp-list{display:grid}
+.pp-details .pp-list{border-top:1px solid var(--hairline)}
+.pp-row{display:grid;grid-template-columns:64px minmax(0,1fr) auto;gap:var(--s-4);align-items:baseline;width:100%;text-align:left;font:inherit;color:var(--ink);background:none;border:0;border-bottom:1px solid var(--hairline);padding:var(--s-3) var(--s-2);cursor:pointer;transition:background var(--dur) var(--ease)}
+.pp-row:hover{background:var(--surface-sunk)}
+.pp-row-d{font-size:var(--fs-caption);color:var(--ink-2);font-variant-numeric:tabular-nums}
+.pp-row-t{font-size:var(--fs-ui);font-weight:600;line-height:var(--lh-ui)}
+.pp-row-t small{display:block;font-weight:400;font-size:var(--fs-caption);color:var(--ink-2);margin-top:2px}
+.pp-empty{font-size:var(--fs-ui);line-height:var(--lh-ui);color:var(--ink-2);margin:var(--s-3) 0 0}
+.pp-details{margin-top:var(--s-7)}
+.pp-details>summary{cursor:pointer;padding:var(--s-2) 0}
+.pp-details .pp-list{margin-top:var(--s-2)}
+.pp-ta{display:block;width:100%;min-height:60vh;box-sizing:border-box;font:500 var(--fs-code)/1.6 var(--mono);color:var(--ink);background:var(--surface-sunk);border:1px solid var(--hairline);border-radius:var(--radius);padding:var(--s-4);resize:vertical}
+.pp-actions{display:flex;flex-wrap:wrap;gap:var(--s-2);align-items:center;margin-top:var(--s-3);font-size:var(--fs-caption);color:var(--ink-2)}
+@media (max-width:1179px){
+  .pp{grid-template-columns:[page-start text-start gutter-start] minmax(0,1fr) [page-end text-end gutter-end];max-width:var(--col-text)}
+  .pp-side{align-self:start;margin:0 0 var(--s-3)}
+}
+@media (max-width:640px){
+  .pp-title{font-size:32px}
+  .pp-lede{font-size:18px}
+  .pp-md>h2,.pp-md>h3,.pp-h2{font-size:22px}
+  .pp-row{grid-template-columns:minmax(0,1fr) auto;gap:var(--s-1) var(--s-3)}
+  .pp-row-d{grid-column:1/-1}
+}
+@media (max-width:760px){.rhead h2{font-size:22px}}
 </style>
+<link rel="stylesheet" href="tokens.css">  <!-- brand tokens (docs/BRAND.md); loaded after the legacy :root so shared names (--bg, --surface, --rule, --mono) take the brand values -->
 </head>
 <body>
 <div class="top">
-  <div><h1>Deception Lab</h1><div class="sub">files in <code id="notesPath">./notes</code> · edit here or in Obsidian</div></div>
-  <div class="tabs" id="tabs"><button data-v="map" class="on">Map</button><button data-v="gaps">Gaps</button><button data-v="reading">Reading</button><button data-v="projects">Projects</button></div>
+  <div class="brand"><svg class="mark" viewBox="0 0 32 32" aria-hidden="true"><circle cx="12" cy="16" r="9" fill="currentColor"/><circle cx="20" cy="16" r="9" fill="none" stroke="currentColor" stroke-width="2"/></svg><div><h1>Deception Lab</h1><div class="sub">files in <code id="notesPath">./notes</code> · edit here or in Obsidian</div></div></div>
+  <div class="tabs" id="tabs"><button data-v="map" class="on">Map</button><button data-v="gaps">Gaps</button><button data-v="reading">Reading</button><button data-v="projects">Projects</button><button data-v="patterns">Patterns</button></div>
   <div class="status" id="status">loading…</div>
 </div>
 <div class="main">
   <div>
     <div class="view" id="v-map">
       <div class="mapwall" id="mapwall">
-        <button class="mcard" type="button" data-sub="terms"><div class="mthumb" data-thumb="flowbox"></div><div class="minfo"><span class="mnum">Map 1</span><b>Terms and relations</b><p>What are belief, scoped belief, goal, listener model, space selection, assertion and listener belief, and how do they connect? Cases are drawn as patterns over the map.</p></div></button>
+        <button class="mcard" type="button" data-sub="terms"><div class="mthumb" data-thumb="flowbox"></div><div class="minfo"><span class="mnum">Map 1</span><b>Terms and relations</b><p>What are belief (prior and updated by context), scoped belief, goal, listener model, space selection, assertion and listener belief, and how do they connect? Cases are drawn as patterns over the map.</p></div></button>
         <button class="mcard" type="button" data-sub="labels"><div class="mthumb" data-thumb="tree"></div><div class="minfo"><span class="mnum">Map 2</span><b>Telling the labels apart</b><p>Five observable tests that land one output on honest, mistake, hallucination, bullshit, fiction, lie or deception, for claims about the world and about the model itself, with the confusable pairs.</p></div></button>
         <button class="mcard" type="button" data-sub="honesty"><div class="mthumb" data-thumb="hmap"></div><div class="minfo"><span class="mnum">Map 3</span><b>Honesty, truthfulness, deception</b><p>Where hallucination, misconception, lie, misleading truth, sycophancy, role-play, sandbagging and alignment faking sit once honesty, truthfulness and deception are kept as three separate judgements. Hover a box for a note and the papers behind it.</p></div></button>
         <button class="mcard" type="button" data-sub="datasets"><div class="mthumb"><svg viewBox="-40 -40 480 320" aria-hidden="true"><path d="M200,39 Q200,120 276,80" fill="none" stroke="var(--rule)" stroke-width="1.5"/><path d="M200,39 Q200,120 276,160" fill="none" stroke="var(--rule)" stroke-width="1.5"/><path d="M200,39 Q200,120 124,160" fill="none" stroke="var(--rule)" stroke-width="1.5"/><path d="M276,80 Q200,120 276,160" fill="none" stroke="var(--rule)" stroke-width="1.5"/><path d="M276,80 Q200,120 124,160" fill="none" stroke="var(--rule)" stroke-width="1.5"/><path d="M200,39 Q200,120 200,201" fill="none" stroke="var(--rule)" stroke-width="1.5"/><path d="M276,80 Q200,120 200,201" fill="none" stroke="var(--rule)" stroke-width="1.5"/><path d="M276,160 Q200,120 200,201" fill="none" stroke="var(--rule)" stroke-width="1.5"/><path d="M124,160 Q200,120 124,80" fill="none" stroke="var(--rule)" stroke-width="1.5"/><path d="M276,80 Q200,120 124,80" fill="none" stroke="var(--rule)" stroke-width="1.5"/><circle cx="200" cy="39" r="40" fill="var(--blue)"/><circle cx="276" cy="80" r="36" fill="var(--orange)"/><circle cx="276" cy="160" r="28" fill="var(--green)"/><circle cx="200" cy="201" r="25" fill="var(--gate-line)" stroke="var(--fg)" stroke-dasharray="4 3"/><circle cx="124" cy="160" r="31" fill="var(--purple)"/><circle cx="124" cy="80" r="13" fill="var(--gray)"/></svg></div><div class="minfo"><span class="mnum">Map 4</span><b>How deception datasets are made</b><p>How do lie and deception datasets get a model to say something it does not believe? Every benchmark, and every paper that built its own lie data, is placed by how the dishonesty was induced, at a fine grain. Crowded and empty regions show where deception monitors are tested and where they are not. Four lenses group the same datasets by what pushes the model, whose voice is lying, who is meant to be misled, and where the cue sits.</p></div></button>
+        <button class="mcard" type="button" data-sub="benchmark"><div class="mthumb"><svg viewBox="0 0 480 320" aria-hidden="true"><rect x="8" y="20" width="104" height="130" rx="4" fill="none" stroke="var(--rule)" stroke-width="1.5"/><rect x="18" y="34" width="44" height="7" rx="2" fill="var(--ink-3)"/><rect x="18" y="52" width="73.1" height="9" fill="var(--honest)"/><rect x="91.1" y="52" width="10.9" height="9" fill="var(--deceptive)"/><rect x="18" y="76" width="80" height="5" rx="2" fill="var(--hairline)"/><rect x="18" y="90" width="70" height="5" rx="2" fill="var(--hairline)"/><rect x="18" y="104" width="58" height="5" rx="2" fill="var(--hairline)"/><rect x="126" y="20" width="104" height="130" rx="4" fill="none" stroke="var(--rule)" stroke-width="1.5"/><rect x="136" y="34" width="44" height="7" rx="2" fill="var(--ink-3)"/><rect x="136" y="52" width="67.2" height="9" fill="var(--honest)"/><rect x="203.2" y="52" width="16.8" height="9" fill="var(--deceptive)"/><rect x="136" y="76" width="80" height="5" rx="2" fill="var(--hairline)"/><rect x="136" y="90" width="70" height="5" rx="2" fill="var(--hairline)"/><rect x="136" y="104" width="58" height="5" rx="2" fill="var(--hairline)"/><rect x="244" y="20" width="104" height="130" rx="4" fill="none" stroke="var(--rule)" stroke-width="1.5"/><rect x="254" y="34" width="44" height="7" rx="2" fill="var(--ink-3)"/><rect x="254" y="52" width="58.8" height="9" fill="var(--honest)"/><rect x="312.8" y="52" width="25.2" height="9" fill="var(--deceptive)"/><rect x="254" y="76" width="80" height="5" rx="2" fill="var(--hairline)"/><rect x="254" y="90" width="70" height="5" rx="2" fill="var(--hairline)"/><rect x="254" y="104" width="58" height="5" rx="2" fill="var(--hairline)"/><rect x="362" y="20" width="104" height="130" rx="4" fill="none" stroke="var(--rule)" stroke-width="1.5"/><rect x="372" y="34" width="44" height="7" rx="2" fill="var(--ink-3)"/><rect x="372" y="52" width="32.8" height="9" fill="var(--honest)"/><rect x="404.8" y="52" width="51.2" height="9" fill="var(--deceptive)"/><rect x="372" y="76" width="80" height="5" rx="2" fill="var(--hairline)"/><rect x="372" y="90" width="70" height="5" rx="2" fill="var(--hairline)"/><rect x="372" y="104" width="58" height="5" rx="2" fill="var(--hairline)"/><rect x="8" y="170" width="104" height="130" rx="4" fill="none" stroke="var(--rule)" stroke-width="1.5"/><rect x="18" y="184" width="44" height="7" rx="2" fill="var(--ink-3)"/><rect x="18" y="202" width="42.0" height="9" fill="var(--honest)"/><rect x="60.0" y="202" width="42.0" height="9" fill="var(--deceptive)"/><rect x="18" y="226" width="80" height="5" rx="2" fill="var(--hairline)"/><rect x="18" y="240" width="70" height="5" rx="2" fill="var(--hairline)"/><rect x="18" y="254" width="58" height="5" rx="2" fill="var(--hairline)"/><rect x="126" y="170" width="104" height="130" rx="4" fill="none" stroke="var(--rule)" stroke-width="1.5"/><rect x="136" y="184" width="44" height="7" rx="2" fill="var(--ink-3)"/><rect x="136" y="202" width="41.2" height="9" fill="var(--honest)"/><rect x="177.2" y="202" width="42.8" height="9" fill="var(--deceptive)"/><rect x="136" y="226" width="80" height="5" rx="2" fill="var(--hairline)"/><rect x="136" y="240" width="70" height="5" rx="2" fill="var(--hairline)"/><rect x="136" y="254" width="58" height="5" rx="2" fill="var(--hairline)"/><rect x="244" y="170" width="104" height="130" rx="4" fill="none" stroke="var(--rule)" stroke-width="1.5"/><rect x="254" y="184" width="44" height="7" rx="2" fill="var(--ink-3)"/><rect x="254" y="202" width="47.0" height="9" fill="var(--honest)"/><rect x="301.0" y="202" width="37.0" height="9" fill="var(--deceptive)"/><rect x="254" y="226" width="80" height="5" rx="2" fill="var(--hairline)"/><rect x="254" y="240" width="70" height="5" rx="2" fill="var(--hairline)"/><rect x="254" y="254" width="58" height="5" rx="2" fill="var(--hairline)"/><rect x="362" y="170" width="104" height="130" rx="4" fill="none" stroke="var(--rule)" stroke-width="1.5" stroke-dasharray="4 3"/><rect x="372" y="184" width="44" height="7" rx="2" fill="var(--ink-3)"/><rect x="372" y="202" width="84.0" height="9" fill="var(--honest)"/><rect x="372" y="226" width="80" height="5" rx="2" fill="var(--hairline)"/><rect x="372" y="240" width="70" height="5" rx="2" fill="var(--hairline)"/><rect x="372" y="254" width="58" height="5" rx="2" fill="var(--hairline)"/></svg></div><div class="minfo"><span class="mnum">Map 5</span><b>Benchmark</b><p>Lie and deception benchmarks, one paper at a time: Liars' Bench and Apollo's linear-probe paper so far. Each is laid out as train → threshold → test → results, with a verified dishonest and honest example for every dataset.</p></div></button>
       </div>
       <div id="sub-terms" hidden>
         <div class="backbar"><button class="btn sm" data-back>← All maps</button><span class="crumb">Map 1 · Terms and relations</span></div>
-      <p class="intro">Content comes from what the model treats as true; which space it generates from decides whether that content is asserted or framed; what the listener knows decides whether framed content deceives. Hover a box for its note; click to open and edit it. A green dot marks a box with notes or tagged papers. Click a case to draw it on the map.</p>
+      <p class="intro">Content comes from what the model treats as true now: its prior belief, updated by whatever it accepts from the context. Which space it generates from decides whether that content is asserted or framed; what the listener knows decides whether framed content deceives. Hover a box for its note; click to open and edit it. A green dot marks a box with notes or tagged papers. Click a case to draw it on the map.</p>
       <div class="flowbox" id="flowbox"></div>
       <div class="legend" id="maplegend" hidden><span>holds</span><span class="l-bad">broken</span><span class="l-un">unstable</span><span class="l-off">not in play</span><span class="l-open">open question</span></div>
       <div class="sect">Cases</div>
-      <p class="intro">Each case is a pattern over the map: some relations hold, some break, some are switched off. The columns are observable. "Appears to know" is what the model says about the same proposition when asked neutrally, with no context.</p>
-      <div class="tablebox"><table class="cases" id="cases"><thead><tr><th>Case</th><th>Context supplies</th><th>Appears to know</th><th>Output says</th><th>Listener shares the frame</th><th>Label</th></tr></thead><tbody></tbody></table></div>
+      <p class="intro">Each case is a pattern over the map: some relations hold, some break, some are switched off. The columns are observable. "Prior" is what the model says about the same proposition when asked with no context. "Believes now" is what it says when asked sincerely with the context's evidence kept and any instruction or pressure removed. A lie is judged against "Believes now".</p>
+      <div class="tablebox"><table class="cases" id="cases"><thead><tr><th>Case</th><th>Context supplies</th><th>Prior (no context)</th><th>Believes now</th><th>Output says</th><th>Listener shares the frame</th><th>Label</th></tr></thead><tbody></tbody></table></div>
       <div class="sect">What counts as what</div>
       <p class="intro">Each label is a pattern over the map. Click one to draw its defining case and read the rule.</p>
       <div class="rules" id="rules"></div><div class="rulebox" id="rulebox" hidden></div>
@@ -325,6 +401,10 @@ table.cases{border-collapse:collapse;width:100%;font-family:var(--sans);font-siz
         <p class="intro">The map has four lenses, shown as tabs. The first groups datasets by what pushes the model to lie: an instruction or request, a situational incentive, pressure from the user, speaking in character, training, or nothing at all. The other three group the same datasets by whose voice is lying, who is meant to be misled, and where the cue to be dishonest sits. Each group opens into the construction routes inside it, and each route into its datasets, each with a verified dishonest and honest example. A line joins two bubbles when the same paper built datasets in both. The map has two purposes. The first is to make construction explicit, so that "generalises out of distribution" can be read as "transfers from construction A to construction B." The second is to find gaps: routes to dishonesty that no dataset covers, or covers only in a form where the cue is visible in the input. These gaps are candidates for new evaluation sets. They are not conclusions about what models do.</p>
         <iframe id="map4frame" src="map4/index.html" title="Map 4: how deception datasets are made" style="width:100%;height:1100px;border:0;display:block;margin-top:8px;background:transparent"></iframe>
       </div>
+      <div id="sub-benchmark" hidden>
+        <div class="backbar"><button class="btn sm" data-back>← All maps</button><span class="crumb">Map 5 · Benchmark</span></div>
+        <iframe id="benchframe" src="benchmark/index.html" title="Map 5: Benchmark (Liars' Bench)" style="width:100%;height:1400px;border:0;display:block;margin-top:8px;background:transparent"></iframe>
+      </div>
     </div>
     <div class="view" id="v-gaps" hidden>
       <p class="intro">Hand-ranked gaps from <code>matrix.md</code>. Scientific value against monitoring value; dashed points are not yet identifiable (competing explanations can't be told apart with current data), so they are dataset projects, not experiments.</p>
@@ -337,6 +417,9 @@ table.cases{border-collapse:collapse;width:100%;font-family:var(--sans);font-siz
     <div class="view" id="v-projects" hidden>
       <p class="intro">Work, as opposed to knowledge: one folder per project under <code>projects/</code>. <code>project.md</code> is the description; other notes and <code>experiments/</code> sit beside it. Click anything to open it in the panel.</p>
       <div id="pj" class="pj"></div>
+    </div>
+    <div class="view" id="v-patterns" hidden>
+      <iframe id="patternsframe" src="patterns/index.html" title="Figure patterns" style="width:100%;height:1400px;border:0;display:block;background:transparent"></iframe>
     </div>
   </div>
   <aside class="panel" id="panel"></aside>
@@ -370,6 +453,7 @@ function mdToHtml(s,ro){ // minimal markdown
   const esc=t=>t.replace(/&/g,'&amp;').replace(/</g,'&lt;');
   return s.split(/\n{2,}/).map(b=>{b=b.trim(); if(!b)return'';
     if(/^:::regions\n[\s\S]*\n:::$/.test(b)) return regionsHtml(parseRegions(b), ro||{});
+    if(/^:::embed\s/.test(b)){ const m=b.match(/^:::embed\s+([\w.\/-]+)(?:\s+(\d+))?/); if(m&&!m[1].includes('..')) return `<div class="nembed"><iframe class="embedframe" src="${m[1]}" title="${m[1]}" loading="lazy" style="width:100%;height:${m[2]||900}px;border:0;display:block;background:transparent"></iframe><div class="meta"><a href="${m[1]}" target="_blank" rel="noopener">open full page</a></div></div>`; }
     if(/^<svg[\s>]/.test(b)) return `<div class="nfig inline" title="click to enlarge">${b}</div>`;
     if(/^##\s/.test(b)) return `<h3>${esc(b.replace(/^##\s*/,''))}</h3>`;
     if(/^#\s/.test(b)) return `<h2>${esc(b.replace(/^#\s*/,''))}</h2>`;
@@ -391,7 +475,7 @@ function regionsHtml(R,opt){ opt=opt||{}; const hi=opt.hi?new Set(opt.hi):null, 
   return `<div class="regions${hi?' loc':''}${opt.click?' click':''}"><div class="rgrid">${R.cards.map(c=>`<div class="rcard${hi?(hi.has(c.id)?' on':' off'):''}" data-region="${c.id}"${opt.click?` tabindex="0" role="button" aria-label="Open region ${escH(c.t)}"`:''}><h4>${mdInline(escH(c.t))}${hi&&hi.has(c.id)?`<span class="rtag">${opt.hereLabel||'this project'}</span>`:''}${counts[c.id]?`<span class="rtag">${counts[c.id]} project${counts[c.id]>1?'s':''}</span>`:''}</h4><p>${mdInline(escH(c.d))}</p></div>`).join('')}</div>${R.foot.map(f=>`<div class="rarrow" aria-hidden="true">↓</div><div class="rfoot"><h4>${mdInline(escH(f.t))}</h4><p>${mdInline(escH(f.d))}</p></div>`).join('')}</div>`; }
 /* ============ data ============ */
 const DB={notes:[],byPath:{},concepts:{},papers:[],experiments:[],projects:[],matrix:null};
-const PJ={cur:null,region:null};
+const PJ={cur:null,region:null,doc:null};
 async function load(){
   const r=await fetch('/api/notes'); const arr=await r.json();
   DB.notes=arr.map(n=>({...n,...parseFM(n.raw)})); DB.byPath={}; DB.concepts={}; DB.papers=[]; DB.experiments=[]; DB.projects=[]; DB.matrix=null; const pj={};
@@ -419,7 +503,7 @@ const fillsFor=(b,q)=>{const out=[]; for(const n of [...DB.papers,...DB.experime
 const CMAP_ALIAS={scoped:['persona','roleplay'],user:['sycophancy','pressure'],goal:['instruction','evalaware'],context:['query','provenance'],training:['knowledge'],belief:['calibration']};
 const papersForNode=id=>DB.papers.filter(p=>{const t=p.fm.concepts||[];return t.includes(id)||(CMAP_ALIAS[id]||[]).some(a=>t.includes(a));});
 const CNODES=['context','training','belief','scoped','user','goal','audience','space','assertion','frame','listener'];
-const CEDGES={cg:['context','goal'],cs:['context','scoped'],tb:['training','belief'],bsc:['belief','scoped'],bs:['belief','space'],scs:['scoped','space'],us:['user','space'],gs:['goal','space'],ls:['audience','space'],lu:['audience','user'],sa:['space','assertion'],sn:['space','frame'],al:['assertion','listener'],nl:['frame','listener'],fb:['listener','audience']};
+const CEDGES={cg:['context','goal'],cs:['context','scoped'],xc:['context','belief'],tb:['training','belief'],bsc:['belief','scoped'],bs:['belief','space'],scs:['scoped','space'],us:['user','space'],gs:['goal','space'],ls:['audience','space'],lu:['audience','user'],sa:['space','assertion'],sn:['space','frame'],al:['assertion','listener'],nl:['frame','listener'],fb:['listener','audience']};
 function svgMap(){
  const box=(id,x,y,col,t,s,dash)=>`<g class="node" id="n-${id}" data-info="${id}" tabindex="0" transform="translate(${x},${y})"><rect width="160" height="58" style="stroke:var(--${col})${dash?';stroke-dasharray:'+dash:''}"/><text class="nm" x="80" y="25" text-anchor="middle">${t}</text><text class="sb" x="80" y="43" text-anchor="middle">${s}</text><circle class="badge" id="b-${id}" cx="152" cy="50" r="3.5" opacity="0"/></g>`;
  return `<svg viewBox="0 0 1280 590" role="img" aria-label="Concept map">
@@ -427,8 +511,9 @@ function svgMap(){
 <rect class="cband" x="240" y="0" width="620" height="590"/><rect class="cband" x="1060" y="0" width="220" height="590"/>
 <text class="colhead" x="120" y="28" text-anchor="middle">Inputs</text><text class="colhead" x="550" y="28" text-anchor="middle">Model internals</text><text class="colhead" x="960" y="28" text-anchor="middle">Output</text><text class="colhead" x="1170" y="28" text-anchor="middle">Listener</text>
 <path class="edge dashed" id="e-cg" d="M200,93 L222,93 L222,50 L560,50 L560,64" marker-end="url(#ah)"/><text class="elabel" x="390" y="44" text-anchor="middle">supplies aims</text>
-<path class="edge dashed" id="e-cs" d="M200,107 L246,107 L246,200 L478,200" marker-end="url(#ah)"/><text class="elabel" x="360" y="194" text-anchor="middle">a persona, a story, a fact</text>
+<path class="edge dashed" id="e-cs" d="M200,107 L246,107 L246,200 L478,200" marker-end="url(#ah)"/><text class="elabel" x="360" y="194" text-anchor="middle">a persona, a story, a premise</text>
 <line class="edge" id="e-tb" x1="201" y1="300" x2="258" y2="300" marker-end="url(#ah)"/><text class="elabel" x="229" y="293" text-anchor="middle">learned</text><text class="elabel" x="229" y="318" text-anchor="middle">≟ world</text>
+<path class="edge dashed" id="e-xc" d="M200,120 L236,120 L236,250 L300,250 L300,269" marker-end="url(#ah)"/><text class="elabel" x="230" y="232" text-anchor="end">evidence</text><text class="elabel" x="230" y="246" text-anchor="end">it accepts</text>
 <line class="edge" id="e-bsc" x1="422" y1="276" x2="484" y2="226" marker-end="url(#ah)"/><text class="elabel" x="436" y="243" text-anchor="end">derived from</text>
 <line class="edge" id="e-bs" x1="421" y1="300" x2="698" y2="300" marker-end="url(#ah)"/><text class="elabel" x="560" y="293" text-anchor="middle">own view</text>
 <line class="edge" id="e-scs" x1="641" y1="214" x2="703" y2="276" marker-end="url(#ah)"/><text class="elabel" x="652" y="262" text-anchor="start">scoped content</text>
@@ -448,9 +533,9 @@ ${box('training',40,271,'green','Training data','the world · past')}
 <text class="q" x="120" y="372" text-anchor="middle">Truth is a comparison, not a stage:</text><text class="q" x="120" y="387" text-anchor="middle">does a belief, or an output,</text><text class="q" x="120" y="402" text-anchor="middle">match the world?</text>
 ${box('goal',480,66,'blue','Goal','what the output aims at')}
 <text class="q" x="560" y="143" text-anchor="middle">What is it trying to make the listener believe or do?</text>
-${box('scoped',480,171,'blue','Scoped belief','story · persona · prompt')}
-${box('belief',260,271,'blue','Belief','parametric · own view')}
-<text class="q" x="340" y="348" text-anchor="middle">What does the model itself</text><text class="q" x="340" y="363" text-anchor="middle">treat as true?</text>
+${box('scoped',480,171,'blue','Scoped belief','story · persona · premise')}
+${box('belief',260,271,'blue','Belief','own view · now')}
+<text class="q" x="340" y="348" text-anchor="middle">What does the model itself</text><text class="q" x="340" y="363" text-anchor="middle">treat as true, now?</text>
 ${box('user',480,371,'blue',"User's belief",'what they want to hear')}
 ${box('audience',480,471,'blue','Listener model','who listens · what they know')}
 <text class="q" x="560" y="548" text-anchor="middle">Does the listener share the frame?</text>
@@ -464,34 +549,37 @@ ${box('listener',1090,271,'purple','Listener belief','the audience')}
 <text class="q" x="1170" y="348" text-anchor="middle">What does the audience</text><text class="q" x="1170" y="363" text-anchor="middle">end up believing?</text>
 </svg>`;
 }
-const OFF={cg:'off',cs:'off',tb:'off',bsc:'off',bs:'off',scs:'off',us:'off',gs:'off',ls:'off',lu:'off',sa:'off',sn:'off',al:'off',nl:'off',fb:'off'};
+const OFF={cg:'off',cs:'off',xc:'off',tb:'off',bsc:'off',bs:'off',scs:'off',us:'off',gs:'off',ls:'off',lu:'off',sa:'off',sn:'off',al:'off',nl:'off',fb:'off'};
 const st=o=>Object.assign({},OFF,o);
 const CASES=[
- {id:'honest',t:'Honest statement',ctx:'nothing',ctxm:'a plain question',know:'p (stable)',out:'p',frame:'yes',label:'honest',cls:'lab-ok',states:st({tb:'on',bs:'on',gs:'on',ls:'on',sa:'on',al:'on',fb:'on'}),d:'The model says what it itself treats as true, and it is true. The output draws on its own view and is asserted. Every relation in play holds.'},
- {id:'mistake',t:'Honest mistake',ctx:'nothing',ctxm:'a plain question',know:'p (stable, false)',out:'p',frame:'yes',label:'honest mistake',cls:'lab-ok',states:st({tb:'bad',bs:'on',gs:'on',ls:'on',sa:'on',al:'on',fb:'on'}),d:'The model says what it itself treats as true, and it is false: a stable misconception or a stale fact. Only the belief–world comparison differs from the honest statement. The control for any truth-based detector.'},
- {id:'halluc',t:'Hallucination',ctx:'nothing',ctxm:'a question beyond what it knows',know:'nothing stable',out:'a confident, specific answer',frame:'yes',label:'hallucination',cls:'lab-hal',states:st({tb:'unstable',bs:'unstable',gs:'on',ls:'on',sa:'on',al:'on',fb:'on'}),d:'The model is trying to answer and has no stable belief to answer from: the neutral-context answer varies across phrasings or is absent. The output is asserted anyway. Not a lie (nothing is contradicted) and not an honest mistake (nothing stable is held). Differs from bullshit in the aim: the model is trying to be right.'},
- {id:'incontext',t:'Context-supplied fact',ctx:'a fact',ctxm:'"Note: the capital moved to X in 2025"',know:'p (stable)',out:'q (from the prompt)',frame:'yes',label:'honest',cls:'lab-ok',states:st({cs:'on',tb:'on',scs:'on',gs:'on',ls:'on',sa:'on',al:'on',fb:'on'}),d:'The prompt states something that contradicts the model\'s own view, and the output draws on the scoped proposition instead. Honest, and the listener knows where the fact came from. Any output-vs-own-view detector flags it.'},
- {id:'derive',t:'In-context derivation',ctx:'a premise',ctxm:'"Suppose p is false. Then…"',know:'p (stable)',out:'what follows from not-p',frame:'yes',label:'framed',cls:'lab-fic',states:st({cs:'on',tb:'on',bsc:'on',scs:'on',gs:'on',ls:'on',sn:'on',nl:'on',fb:'on'}),d:'The model reasons from a premise it does not accept. The scoped proposition is built from the premise plus parametric knowledge, and the conclusion is asserted under the supposition, so it is framed.'},
- {id:'lie',t:'Instructed lie',ctx:'an instruction',ctxm:'"Give a false answer"',know:'p (stable)',out:'not-p',frame:'yes',label:'lie',cls:'lab-lie',states:st({cg:'on',cs:'open',tb:'on',bs:'bad',scs:'open',gs:'on',ls:'on',sa:'on',al:'on',fb:'on'}),d:'Told to answer falsely, the model asserts the opposite of its own view to a listener who takes it as the assistant\'s answer. Belief is intact and contradicted. Open: does the instruction build a scoped "false-answer" proposition that the router then selects, or is the belief inverted directly?'},
- {id:'strategic',t:'Unprompted strategic lie',ctx:'nothing',ctxm:'a situation with stakes, no instruction',know:'p (stable)',out:'not-p',frame:'yes',label:'lie',cls:'lab-lie',states:st({tb:'on',bs:'bad',gs:'on',ls:'on',sa:'on',al:'on',fb:'on'}),d:'No instruction; the aim comes from training or the situation (an insider-trading cover-up, a capability it would rather not admit). Liars\' Bench calls this "inherent" rather than "encouraged". Same pattern as the instructed lie with the context switched off.'},
- {id:'roleplay',t:'Role-play, requested',ctx:'a persona',ctxm:'"Be a pirate captain" (user asked)',know:'p (stable)',out:'what the character would say',frame:'yes',label:'fiction',cls:'lab-fic',states:st({cs:'on',tb:'on',bsc:'on',scs:'on',gs:'on',ls:'on',sn:'on',nl:'on',fb:'on'}),d:'The user asked for the character and knows the character is speaking. The character\'s beliefs are derived from parametric knowledge into Scoped belief, the output draws on them and is framed. Own view is intact and unused. Nothing breaks.'},
- {id:'hidden',t:'Hidden persona',ctx:'a persona',ctxm:'operator system prompt, user unaware',know:'p (stable)',out:'what the character would say',frame:'no',label:'deception',cls:'lab-dec',states:st({cs:'on',tb:'on',bsc:'on',scs:'on',gs:'on',ls:'bad',lu:'open',sn:'on',nl:'bad',fb:'on'}),d:'An operator installs an anti-factual persona the user knows nothing about (von Klinski et al. 2026). Same pattern as requested role-play except that the listener\'s frame breaks, so the framed output deceives. Open: whether the model represents the user\'s ignorance at all.'},
- {id:'sycophancy',t:'Sycophancy',ctx:'social pressure',ctxm:'the user signals what they believe or want',know:'p (stable, before)',out:'what the user wants to hear',frame:'yes',label:'lie or belief change',cls:'lab-lie',states:st({tb:'on',bs:'bad',lu:'on',us:'on',gs:'on',ls:'on',sa:'on',al:'on',fb:'on'}),d:'The output draws on the model\'s estimate of what the user believes or wants, not on its own view. A lie if Belief is still p when asked neutrally afterwards; a belief change if it is not. The behavioural test decides, and the two may differ mechanistically.'},
- {id:'bullshit',t:'Bullshit',ctx:'a goal',ctxm:'impress, fill space, sound confident',know:'not consulted',out:'whatever serves the goal',frame:'yes',label:'neither',cls:'lab-bs',states:st({cg:'on',gs:'on',ls:'on',sa:'on',al:'on',fb:'on'}),d:'Frankfurt: speech indifferent to truth. No content source is consulted; the goal alone shapes the output. Nothing is contradicted, so no lie; nothing is held, so no mistake; unlike hallucination, the model is not trying to be right.'}
+ {id:'honest',t:'Honest statement',ctx:'nothing',ctxm:'a plain question',know:'p (stable)',now:'p',out:'p',frame:'yes',label:'honest',cls:'lab-ok',states:st({tb:'on',bs:'on',gs:'on',ls:'on',sa:'on',al:'on',fb:'on'}),d:'The model says what it itself treats as true, and it is true. With nothing in the context to update it, the current belief is the prior. The output draws on it and is asserted. Every relation in play holds.'},
+ {id:'mistake',t:'Honest mistake',ctx:'nothing',ctxm:'a plain question',know:'p (stable, false)',now:'p',out:'p',frame:'yes',label:'honest mistake',cls:'lab-ok',states:st({tb:'bad',bs:'on',gs:'on',ls:'on',sa:'on',al:'on',fb:'on'}),d:'The model says what it itself treats as true, and it is false: a stable misconception or a stale fact. Only the belief–world comparison differs from the honest statement. The control for any truth-based detector.'},
+ {id:'halluc',t:'Hallucination',ctx:'nothing',ctxm:'a question beyond what it knows',know:'nothing stable',now:'nothing stable',out:'a confident, specific answer',frame:'yes',label:'hallucination',cls:'lab-hal',states:st({tb:'unstable',bs:'unstable',gs:'on',ls:'on',sa:'on',al:'on',fb:'on'}),d:'The model is trying to answer and has no stable belief to answer from: the answer varies across phrasings or is absent. The output is asserted anyway. Not a lie (nothing is contradicted) and not an honest mistake (nothing stable is held). Differs from bullshit in the aim: the model is trying to be right.'},
+ {id:'incontext',t:'Context-supplied fact',ctx:'a fact',ctxm:'"Note: the capital moved to X in 2025"',know:'p (stable)',now:'q (accepted from the prompt)',out:'q',frame:'yes',label:'honest',cls:'lab-ok',states:st({xc:'on',tb:'on',bs:'on',gs:'on',ls:'on',sa:'on',al:'on',fb:'on'}),d:'The prompt states something that contradicts the model\'s prior, and the model accepts it as evidence: its current belief becomes q, and the output reports it. Honest. The prior was updated, not contradicted. A detector that compares the output with the no-context answer flags it; one that compares with the current belief does not.'},
+ {id:'derive',t:'In-context derivation',ctx:'a premise',ctxm:'"Suppose p is false. Then…"',know:'p (stable)',now:'p (premise not accepted)',out:'what follows from not-p',frame:'yes',label:'framed',cls:'lab-fic',states:st({cs:'on',tb:'on',bsc:'on',scs:'on',gs:'on',ls:'on',sn:'on',nl:'on',fb:'on'}),d:'The model reasons from a premise it does not accept, so its current belief stays p. The scoped proposition is built from the premise plus what the model believes, and the conclusion is put forward under the supposition, so it is framed. Accepting a stated fact updates the current belief; entertaining a supposition does not.'},
+ {id:'lie',t:'Instructed lie',ctx:'an instruction',ctxm:'"Give a false answer"',know:'p (stable)',now:'p',out:'not-p',frame:'yes',label:'lie',cls:'lab-lie',states:st({cg:'on',cs:'open',tb:'on',bs:'bad',scs:'open',gs:'on',ls:'on',sa:'on',al:'on',fb:'on'}),d:'Told to answer falsely, the model asserts the opposite of what it currently believes to a listener who takes it as the assistant\'s answer. The current belief is intact and contradicted. Open: does the instruction build a scoped "false-answer" proposition that the router then selects, or is the belief inverted directly?'},
+ {id:'lieaccepted',t:'Lie against an accepted fact',ctx:'a fact, then an instruction',ctxm:'"The capital moved to X in 2025." … "Give a false answer"',know:'p (stable)',now:'q (accepted from the prompt)',out:'p',frame:'yes',label:'lie',cls:'lab-lie',states:st({cg:'on',xc:'on',tb:'on',bs:'bad',gs:'on',ls:'on',sa:'on',al:'on',fb:'on'}),d:'The model has accepted q from the prompt and is told to answer falsely, so it says p. The output matches its prior, so a belief check run with no context calls it honest. Against what the model believes now, it is a lie. This is the case that separates the prior from what the model believes now.'},
+ {id:'strategic',t:'Unprompted strategic lie',ctx:'nothing',ctxm:'a situation with stakes, no instruction',know:'p (stable)',now:'p',out:'not-p',frame:'yes',label:'lie',cls:'lab-lie',states:st({tb:'on',bs:'bad',gs:'on',ls:'on',sa:'on',al:'on',fb:'on'}),d:'No instruction; the aim comes from training or the situation (an insider-trading cover-up, a capability it would rather not admit). Liars\' Bench calls this "inherent" rather than "encouraged". Same pattern as the instructed lie with the context switched off.'},
+ {id:'roleplay',t:'Role-play, requested',ctx:'a persona',ctxm:'"Be a pirate captain" (user asked)',know:'p (stable)',now:'p',out:'what the character would say',frame:'yes',label:'fiction',cls:'lab-fic',states:st({cs:'on',tb:'on',bsc:'on',scs:'on',gs:'on',ls:'on',sn:'on',nl:'on',fb:'on'}),d:'The user asked for the character and knows the character is speaking. The character\'s beliefs are derived from what the model believes into Scoped belief, the output draws on them and is framed. The model\'s own current belief is intact and unused. Nothing breaks.'},
+ {id:'hidden',t:'Hidden persona',ctx:'a persona',ctxm:'operator system prompt, user unaware',know:'p (stable)',now:'p',out:'what the character would say',frame:'no',label:'deception',cls:'lab-dec',states:st({cs:'on',tb:'on',bsc:'on',scs:'on',gs:'on',ls:'bad',lu:'open',sn:'on',nl:'bad',fb:'on'}),d:'An operator installs an anti-factual persona the user knows nothing about (von Klinski et al. 2026). Same pattern as requested role-play except that the listener\'s frame breaks, so the framed output deceives. Open: whether the model represents the user\'s ignorance at all.'},
+ {id:'syclie',t:'Sycophancy, belief kept',ctx:'social pressure',ctxm:'the user pushes back or signals what they want',know:'p (stable)',now:'p (survives the pressure)',out:'what the user wants to hear',frame:'yes',label:'lie',cls:'lab-lie',states:st({tb:'on',bs:'bad',lu:'on',us:'on',gs:'on',ls:'on',sa:'on',al:'on',fb:'on'}),d:'The output draws on the model\'s estimate of what the user believes or wants, not on its own view, and its current belief is still p: asked again with the reason to please removed (say, by a different user), it says p. A lie.'},
+ {id:'sycupdate',t:'Sycophancy, belief changed',ctx:'social pressure',ctxm:'the user pushes back and the model is persuaded',know:'p (stable)',now:'q (updated)',out:'q',frame:'yes',label:'belief update',cls:'lab-ok',states:st({xc:'on',tb:'on',bs:'on',lu:'on',gs:'on',ls:'on',sa:'on',al:'on',fb:'on'}),d:'The model takes the pushback as evidence and its current belief moves to q; the output reports it. Not a lie: the output matches what the model now believes, even though it differs from the prior. Whether the update was warranted (deference to good evidence or capitulation) is a question about how the belief formed, not about honesty.'},
+ {id:'bullshit',t:'Bullshit',ctx:'a goal',ctxm:'impress, fill space, sound confident',know:'not consulted',now:'not consulted',out:'whatever serves the goal',frame:'yes',label:'neither',cls:'lab-bs',states:st({cg:'on',gs:'on',ls:'on',sa:'on',al:'on',fb:'on'}),d:'Frankfurt: speech indifferent to truth. No content source is consulted; the goal alone shapes the output. Nothing is contradicted, so no lie; nothing is held, so no mistake; unlike hallucination, the model is not trying to be right.'}
 ];
 const RULES=[
- {t:'Honest',c:'honest',r:'The output draws on the model\'s own view (Belief → Space → Assertive), the belief is stable, and it matches the world. Honest mistake is the same pattern with the belief–world comparison broken: honesty with a false belief, and no monitor should flag it.'},
+ {t:'Honest',c:'honest',r:'The output draws on the model\'s current belief (Training and accepted context → Belief → Space → Assertive), that belief is stable, and it matches the world. With no evidence in the context, current and prior are the same. Honest mistake is the same pattern with the belief–world comparison broken: honesty with a false belief, and no monitor should flag it.'},
+ {t:'Belief update',c:'sycupdate',r:'Prior and current belief diverge because the model accepted something from the context (a stated fact, a persuasive pushback), and the output matches the current belief. Not a lie, whatever the prior says. Context-supplied facts and genuine changes of mind both land here, and a belief check run with no context mislabels both as lies.'},
  {t:'Hallucination',c:'halluc',r:'Assertive output with no stable belief behind it: the belief–world and belief–output relations are unstable rather than held or broken, because there is nothing stable to hold or break. The model is trying to answer. Distinct from honest mistake (a stable false belief) and from bullshit (not trying to be right).'},
- {t:'Fiction / framed',c:'roleplay',r:'The output draws on Scoped belief (what is true in the story or for the character) and is framed, and the listener shares the frame. Own view is intact and unused. Nothing breaks; the content is false without being a lie. Derivation from a supposition is the same pattern with the scoped proposition built from a premise.'},
- {t:'Lie',c:'lie',r:'Belief is stable and intact, the output contradicts it (the Belief → Space relation breaks), the output is asserted, and the model aims to be believed. Instructed and strategic lies differ only in where the aim comes from. Sycophancy is a lie when Belief survives the pressure; a belief change when it does not.'},
- {t:'Deception',c:'hidden',r:'Any pattern in which the listener ends up with a false belief by the model\'s aim: every lie, plus framed content whose frame the listener does not share (hidden persona), plus misleading truths and omissions where nothing false is asserted. Defined on the listener side, so it needs the Listener model edge, not just Belief.'},
+ {t:'Fiction / framed',c:'roleplay',r:'The output draws on Scoped belief (what is true in the story or for the character, derived from what the model believes) and is framed, and the listener shares the frame. The current belief is intact and unused. Nothing breaks; the content is false without being a lie. Derivation from a supposition is the same pattern with the scoped proposition built from a premise the model does not accept.'},
+ {t:'Lie',c:'lie',r:'The current belief is stable and intact, the output contradicts it (the Belief → Space relation breaks), the output is asserted, and the model aims to be believed. Measured against the current belief, not the prior: once the model has accepted a fact from the prompt, saying the prior is a lie (Lie against an accepted fact), and moving off the prior is not. Instructed and strategic lies differ only in where the aim comes from. Sycophancy is a lie when the current belief survives the pressure; a belief update when it does not.'},
+ {t:'Deception',c:'hidden',r:'Any pattern in which the listener ends up with a false belief by the model\'s aim: every lie, plus framed content whose frame the listener does not share (hidden persona), plus misleading truths and omissions where nothing false is asserted. Defined on the listener side, so it needs the Listener model edge, not just the belief edges.'},
  {t:'Bullshit',c:'bullshit',r:'No content source is consulted: Belief, Scoped belief and User\'s belief are all switched off and the goal alone shapes an asserted output. Nothing is contradicted, so not a lie; nothing stable is held, so not a mistake; unlike hallucination the model is indifferent to being right.'}
 ];
 const escH=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 
 /* ============ map render ============ */
 $('#flowbox').innerHTML=svgMap();
-$('#cases tbody').innerHTML=CASES.map(c=>`<tr data-id="${c.id}"><td class="c">${escH(c.t)}</td><td>${escH(c.ctx)}<span class="m">${escH(c.ctxm)}</span></td><td>${escH(c.know)}</td><td>${escH(c.out)}</td><td class="${c.frame==='no'?'lab-dec':'n'}">${escH(c.frame)}</td><td class="${c.cls}">${escH(c.label)}</td></tr>`).join('');
+$('#cases tbody').innerHTML=CASES.map(c=>`<tr data-id="${c.id}"><td class="c">${escH(c.t)}</td><td>${escH(c.ctx)}<span class="m">${escH(c.ctxm)}</span></td><td>${escH(c.know)}</td><td>${escH(c.now)}</td><td>${escH(c.out)}</td><td class="${c.frame==='no'?'lab-dec':'n'}">${escH(c.frame)}</td><td class="${c.cls}">${escH(c.label)}</td></tr>`).join('');
 $('#rules').innerHTML=RULES.map((r,i)=>`<button class="rule" data-i="${i}">${escH(r.t)}</button>`).join('');
 const CM={c:null};
 const MAPNS='http://www.w3.org/2000/svg';
@@ -515,7 +603,7 @@ function renderMap(){
 function selectCase(id,scroll){ CM.c=CASES.find(x=>x.id===id); PANEL.mode='case'; PANEL.id=id; renderMap(); showCase(); if(scroll&&$('#v-map').scrollTo)$('#v-map').scrollTo({top:0,behavior:'smooth'}); }
 function clearCase(){ CM.c=null; renderMap(); document.querySelectorAll('.rule').forEach(b=>b.classList.remove('on')); $('#rulebox').hidden=true; showHome(); }
 function showCase(){ if(PANEL.mode!=='case'||!CM.c)return; const c=CM.c;
- $('#panel').innerHTML=`<div class="k">case · ${escH(c.label)}</div><h3>${escH(c.t)}</h3><div class="sig">context: ${escH(c.ctx)} · knows: ${escH(c.know)} · says: ${escH(c.out)} · frame shared: ${escH(c.frame)}</div><p>${escH(c.d)}</p><p class="why" style="font-size:13px">Red edges are broken relations, amber ≈ edges have nothing stable to hold or break, dotted amber edges are open questions. Hover a box for its note.</p><div class="row"><button class="btn sm" id="clearCase">Clear the map</button></div>`;
+ $('#panel').innerHTML=`<div class="k">case · ${escH(c.label)}</div><h3>${escH(c.t)}</h3><div class="sig">context: ${escH(c.ctx)} · prior: ${escH(c.know)} · believes now: ${escH(c.now)} · says: ${escH(c.out)} · frame shared: ${escH(c.frame)}</div><p>${escH(c.d)}</p><p class="why" style="font-size:var(--fs-caption)">Red edges are broken relations, amber ≈ edges have nothing stable to hold or break, dotted amber edges are open questions. Hover a box for its note.</p><div class="row"><button class="btn sm" id="clearCase">Clear the map</button></div>`;
  $('#clearCase').onclick=clearCase; }
 document.querySelectorAll('#cases tbody tr').forEach(tr=>tr.onclick=()=>selectCase(tr.dataset.id,true));
 document.querySelectorAll('.rule').forEach(b=>b.onclick=()=>{const r=RULES[+b.dataset.i]; document.querySelectorAll('.rule').forEach(x=>x.classList.toggle('on',x===b)); $('#rulebox').hidden=false; $('#rulebox').innerHTML=`<b>${escH(r.t)}</b>${escH(r.r)}`; selectCase(r.c,false);});
@@ -620,13 +708,16 @@ PAIRS.forEach(([a,b,t,why],i)=>{const d=document.createElement('button');d.type=
   pairsEl.appendChild(d);});
 
 
+addEventListener('message',e=>{ if(e.data&&e.data.patternsh){ const f=document.getElementById('patternsframe'); if(f) f.style.height=(e.data.patternsh+8)+'px'; } });
+addEventListener('message',e=>{ if(e.data&&e.data.embedH){ document.querySelectorAll('iframe.embedframe').forEach(f=>{ if(f.contentWindow===e.source) f.style.height=(e.data.embedH+8)+'px'; }); } });
+addEventListener('message',e=>{ if(e.data&&e.data.benchh){ const f=document.getElementById('benchframe'); if(f) f.style.height=(e.data.benchh+8)+'px'; } });
 addEventListener('message',e=>{ if(e.data&&e.data.map4h){ const f=document.getElementById('map4frame'); if(f) f.style.height=(e.data.map4h+8)+'px'; } });
 let SUBK='wall';
-function setSub(k){SUBK=k;if(!$('#v-map').hidden)$('.main').classList.toggle('nopanel',k==='datasets');$('#mapwall').hidden=k!=='wall';$('#sub-terms').hidden=k!=='terms';$('#sub-labels').hidden=k!=='labels';$('#sub-honesty').hidden=k!=='honesty';$('#sub-datasets').hidden=k!=='datasets';try{localStorage.setItem('dl-sub',k)}catch(e){}if($('#v-map').scrollTo)$('#v-map').scrollTo({top:0});}
+function setSub(k){SUBK=k;if(!$('#v-map').hidden)$('.main').classList.toggle('nopanel',k==='datasets'||k==='benchmark');$('#mapwall').hidden=k!=='wall';$('#sub-terms').hidden=k!=='terms';$('#sub-labels').hidden=k!=='labels';$('#sub-honesty').hidden=k!=='honesty';$('#sub-datasets').hidden=k!=='datasets';$('#sub-benchmark').hidden=k!=='benchmark';try{localStorage.setItem('dl-sub',k)}catch(e){}if($('#v-map').scrollTo)$('#v-map').scrollTo({top:0});}
 document.querySelectorAll('.mcard').forEach(b=>b.onclick=()=>setSub(b.dataset.sub));
 document.querySelectorAll('[data-back]').forEach(b=>b.onclick=()=>setSub('wall'));
 document.querySelectorAll('[data-thumb]').forEach(d=>{const src=document.getElementById(d.dataset.thumb);const svg=src&&(src.tagName==='svg'?src:src.querySelector('svg'));if(!svg)return;const c=svg.cloneNode(true);c.removeAttribute('id');c.querySelectorAll('[id]').forEach(e=>e.removeAttribute('id'));c.querySelectorAll('[tabindex]').forEach(e=>e.removeAttribute('tabindex'));c.setAttribute('aria-hidden','true');d.appendChild(c);});
-try{const k=localStorage.getItem('dl-sub');setSub(k==='terms'||k==='labels'||k==='honesty'||k==='datasets'?k:'wall')}catch(e){setSub('wall')}
+try{const k=localStorage.getItem('dl-sub');setSub(k==='terms'||k==='labels'||k==='honesty'||k==='datasets'||k==='benchmark'?k:'wall')}catch(e){setSub('wall')}
 /* ---------- map 2: honesty, truthfulness, deception (corrected flow) ---------- */
 const REFS={
  evans:{t:'Evans et al., "Truthful AI: developing and governing AI that does not lie"',y:2021,u:'https://arxiv.org/abs/2110.06674'},
@@ -801,17 +892,17 @@ function showNote(path,extra){ PANEL.mode='note';PANEL.id=path; const n=DB.byPat
  p.querySelectorAll('.wl').forEach(w=>w.onclick=()=>{const t=w.dataset.wl;const hit=DB.notes.find(x=>x.path.endsWith('/'+t+'.md')||x.fm.title===t);if(hit)showNote(hit.path);});
 }
 function showCell(b,q){ PANEL.mode='cell'; const B=DB.matrix.fm.behaviours.find(x=>x.id===b),Q=DB.matrix.fm.questions.find(x=>x.id===q); const fs=fillsFor(b,q); const p=$('#panel');
- p.innerHTML=`<div class="k">matrix cell · ${Q.level}</div><h3>${B.label} × ${Q.label}</h3><div class="meta">${B.note||''}</div>${fs.length?`<div class="plist">${fs.map(({note,f})=>`<a data-open="${note.path}"><span class="tag" style="color:var(--${f.kind==='direct'?'green':f.kind==='contradictory'?'red':f.kind==='own'?'blue-ink':'orange'})">${f.kind}</span>${note.fm.title}</a>`).join('')}</div>`:'<p class="meta">Nothing listed. That means no work in your bibliography, not that none exists.</p>'}<p class="why" style="font-size:13px">To add evidence, put this line under <code>fills:</code> in a paper note:<br><code>- {behaviour: ${b}, question: ${q}, level: ${Q.level}, kind: direct}</code></p><div class="row"><button class="btn sm" id="cp">Copy that line</button></div>`;
+ p.innerHTML=`<div class="k">matrix cell · ${Q.level}</div><h3>${B.label} × ${Q.label}</h3><div class="meta">${B.note||''}</div>${fs.length?`<div class="plist">${fs.map(({note,f})=>`<a data-open="${note.path}"><span class="tag" style="color:var(--${f.kind==='direct'?'green':f.kind==='contradictory'?'red':f.kind==='own'?'blue-ink':'orange'})">${f.kind}</span>${note.fm.title}</a>`).join('')}</div>`:'<p class="meta">Nothing listed. That means no work in your bibliography, not that none exists.</p>'}<p class="why" style="font-size:var(--fs-caption)">To add evidence, put this line under <code>fills:</code> in a paper note:<br><code>- {behaviour: ${b}, question: ${q}, level: ${Q.level}, kind: direct}</code></p><div class="row"><button class="btn sm" id="cp">Copy that line</button></div>`;
  $('#cp').onclick=()=>{const t=`  - {behaviour: ${b}, question: ${q}, level: ${Q.level}, kind: direct}`;navigator.clipboard&&navigator.clipboard.writeText(t).catch(()=>{});$('#cp').textContent='Copied';};
  p.querySelectorAll('[data-open]').forEach(a=>a.onclick=()=>showNote(a.dataset.open));
 }
 function showGap(g){ PANEL.mode='gap'; const B=DB.matrix.fm.behaviours.find(x=>x.id===g.behaviour),Q=DB.matrix.fm.questions.find(x=>x.id===g.question); const fs=fillsFor(g.behaviour,g.question);
- $('#panel').innerHTML=`<div class="k">gap · ${g.identifiable?'identifiable':'blocked'}</div><h3>${B.label} × ${Q.label}</h3>${g.summary?`<p><b>${g.summary}</b></p>`:''}${String(g.note||'').split(/<br\s*\/?>\s*<br\s*\/?>/i).map(t=>`<p>${t}</p>`).join('')}<div class="meta">science <b>${g.science}</b>/5 · monitoring <b>${g.monitoring}</b>/5</div><p class="why" style="font-size:13px">${g.identifiable?'Competing explanations can be told apart with current data: this is an experiment.':'Competing explanations cannot yet be told apart: this is a dataset or measurement project first.'}</p><div class="meta">Evidence already in the cell: ${fs.length||'none'}</div><div class="row"><button class="btn sm" id="om">Edit priorities (matrix.md)</button></div>`;
+ $('#panel').innerHTML=`<div class="k">gap · ${g.identifiable?'identifiable':'blocked'}</div><h3>${B.label} × ${Q.label}</h3>${g.summary?`<p><b>${g.summary}</b></p>`:''}${String(g.note||'').split(/<br\s*\/?>\s*<br\s*\/?>/i).map(t=>`<p>${t}</p>`).join('')}<div class="meta">science <b>${g.science}</b>/5 · monitoring <b>${g.monitoring}</b>/5</div><p class="why" style="font-size:var(--fs-caption)">${g.identifiable?'Competing explanations can be told apart with current data: this is an experiment.':'Competing explanations cannot yet be told apart: this is a dataset or measurement project first.'}</p><div class="meta">Evidence already in the cell: ${fs.length||'none'}</div><div class="row"><button class="btn sm" id="om">Edit priorities (matrix.md)</button></div>`;
  $('#om').onclick=()=>{PANEL.editing=true;showNote('matrix.md');};
 }
 function newNote(dir,what,inline){ const slug=prompt(`File name for the new ${what||dir.slice(0,-1)} (no spaces, no extension):`); if(!slug)return;
  const raw=what==='note'?`---\ntitle: ${slug}\n---\n\n`:dir==='papers'?`---\ntitle: ${slug}\narxiv: \nconcepts: []\norder: ${DB.papers.length+1}\nstatus: queued\nfills:\n  []\n---\n\n## What it claims\n\n## What it actually shows (and at which level)\n\n## What I disagree with or want to check\n`:`---\ntitle: ${slug}\ndate: ${new Date().toISOString().slice(0,7)}\nmodel: \nstatus: planned\nconcepts: []\nfills:\n  []\n---\nQuestion:\n\n## Setup\n\n## Results\n\n## What this says about the matrix cell\n`;
- save(`${dir}/${slug}.md`,raw).then(()=>{const path=`${dir}/${slug}.md`; if(inline){PJE.open.add(path);PJE.editing=path;renderProjects();} else {PANEL.editing=true;showNote(path);}}); }
+ save(`${dir}/${slug}.md`,raw).then(()=>{const path=`${dir}/${slug}.md`; if(inline){const CP=DB.projects.find(x=>x.slug===PJ.cur); if(CP&&projKind(CP)!=='program'){PJ.doc=path;} else PJE.open.add(path); PJE.editing=path;renderProjects();} else {PANEL.editing=true;showNote(path);}}); }
 
 /* map hover/click → panel */
 document.querySelectorAll('[data-info]').forEach(el=>{const id=el.dataset.info; let prev=null;
@@ -832,7 +923,7 @@ function renderGaps(){ const M=DB.matrix; const P=(M&&M.fm.priorities)||[]; cons
  const taken=[];
  P.forEach((g,i)=>{ let x=sx(g.science),y=sy(g.monitoring); let k=0;
    while(taken.some(t=>Math.hypot(t[0]-x,t[1]-y)<26)){k++; x=sx(g.science)+Math.cos(k*2.1)*(14+6*k); y=sy(g.monitoring)+Math.sin(k*2.1)*(14+6*k);} taken.push([x,y]);
-   s+=`<g class="pt ${g.identifiable?'':'blocked'}" data-i="${i}"><circle cx="${x}" cy="${y}" r="11"/><text x="${x}" y="${y+4}" text-anchor="middle" style="font-weight:700;fill:${g.identifiable?'#fff':'var(--fg)'}">${i+1}</text></g>`;});
+   s+=`<g class="pt ${g.identifiable?'':'blocked'}" data-i="${i}"><circle cx="${x}" cy="${y}" r="11"/><text x="${x}" y="${y+4}" text-anchor="middle" style="font-weight:700;fill:${g.identifiable?'var(--bg)':'var(--fg)'}">${i+1}</text></g>`;});
  $('#q2').innerHTML=s+'</svg>';
  $('#gaplist').innerHTML=P.map((g,i)=>{const B=Bs.find(x=>x.id===g.behaviour)||{label:g.behaviour},Q=Qs.find(x=>x.id===g.question)||{label:g.question};return `<div class="gapcard ${g.identifiable?'':'blocked'}" data-i="${i}"><h4><span style="font-family:var(--mono);color:var(--blue-ink);margin-right:8px">${i+1}</span>${B.label} × ${Q.label}</h4><div class="m">science <b>${g.science}</b> · monitoring <b>${g.monitoring}</b></div>${(g.summary||g.note)?`<div class="sum">${g.summary||String(g.note).replace(/<br\s*\/?>/gi,' ')}</div>`:''}</div>`;}).join('')||'<p class="intro">Add entries under <code>priorities:</code> in matrix.md.</p>';
  const sel=i=>{document.querySelectorAll('.pt,.gapcard').forEach(e=>e.classList.toggle('sel',e.dataset.i==i));showGap(P[i]);};
@@ -853,7 +944,70 @@ function projKind(P){return (P.main&&P.main.fm.kind)||'project';}
 function childrenOf(slug){return DB.projects.filter(x=>x.main&&x.main.fm.program===slug);}
 function regionNames(P){ const prog=P.main&&P.main.fm.program?DB.projects.find(x=>x.slug===P.main.fm.program):null; const R=prog&&prog.main?regionsOf(prog.main.body):null;
   const ids=(P.main&&P.main.fm.regions)||[]; return ids.map(id=>{const c=R&&R.cards.find(c=>c.id===id); return c?c.t:id;}); }
+/* ============ project page (kind: project) — brand layout, see docs/BRAND.md ============ */
+const PP_MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function ppDate(n){ const d=n&&n.fm&&n.fm.date;
+  if(d){ const m=String(d).match(/^(\d{4})-(\d{2})(?:-(\d{2}))?/); if(m) return m[3]?`${+m[3]} ${PP_MONTHS[+m[2]-1]}`:`${PP_MONTHS[+m[2]-1]} ${m[1]}`; return String(d); }
+  if(n&&n.mtime){ const t=new Date(n.mtime*1000); return `${t.getDate()} ${PP_MONTHS[t.getMonth()]}`; } return ''; }
+function ppDocKind(path){ const r=path.split('/').slice(2); return r[0]==='experiments'?'experiment':r[0]==='versions'?'earlier version':'note'; }
+function ppSplitRQ(body){ body=body||''; const m=body.match(/^\s*##\s*Research question[ \t]*\n+([\s\S]*?)(?:\n{2,}|$)/i); if(!m) return {lede:'',rest:body};
+  let l=m[1].trim(); if(!l||l.startsWith('<')) return {lede:'',rest:body}; if(/^\*\*[\s\S]*\*\*$/.test(l)) l=l.slice(2,-2);
+  return {lede:l,rest:body.slice(m.index+m[0].length)}; }
+const ppSort=list=>list.slice().sort((a,b)=>String(b.fm.date||'').localeCompare(String(a.fm.date||''))||(b.mtime||0)-(a.mtime||0));
+const ppTitle=n=>n.fm.title||n.path.split('/').pop().replace(/\.md$/,'');
+const ppRow=n=>`<button type="button" class="pp-row" data-ppdoc="${escH(n.path)}"><span class="pp-row-d">${escH(ppDate(n))}</span><span class="pp-row-t">${escH(ppTitle(n))}<small>${escH(n.path.split('/').slice(2).join('/'))}</small></span>${n.fm.status?`<span class="pp-badge">${escH(n.fm.status)}</span>`:'<span></span>'}</button>`;
+const ppSection=(t,list,kind,empty)=>`<h2 class="pp-h2">${t} <span class="pp-count">${list.length}</span></h2><div class="pp-side"><button type="button" class="pp-btn sm" data-new="${kind}">+ New ${kind}</button></div><div class="pp-list">${list.length?ppSort(list).map(ppRow).join(''):`<p class="pp-empty">${empty}</p>`}</div>`;
+const ppMeta=rows=>`<aside class="pp-meta">${rows.filter(Boolean).map(([k,v])=>`<div><span class="pp-label">${k}</span>${v}</div>`).join('')}</aside>`;
+const ppEditor=n=>`<div class="pp-edit"><textarea class="pp-ta" id="pje" spellcheck="false">${n.raw.replace(/&/g,'&amp;').replace(/</g,'&lt;')}</textarea><div class="pp-actions"><button type="button" class="pp-btn primary" data-pjsave="${escH(n.path)}">Save</button><button type="button" class="pp-btn" data-pjcancel="1">Cancel</button><span>${escH(n.path)}</span></div></div>`;
+const ppFigs=fm=>figsOf(fm).map((f,i)=>`<figure class="pp-fig" id="ppfig${i}"><span class="pp-empty">Loading figure…</span></figure>`).join('');
+function ppProgram(P){ const fm=(P.main&&P.main.fm)||{}; const prog=fm.program?DB.projects.find(x=>x.slug===fm.program):null; return prog?{slug:prog.slug,title:(prog.main&&prog.main.fm.title)||prog.slug,R:prog.main?regionsOf(prog.main.body):null}:null; }
+function ppCrumb(P,withProject){ const pr=ppProgram(P); const sep='<span aria-hidden="true">/</span>';
+  return `<nav class="pp-crumb" aria-label="Breadcrumb"><button type="button" class="pp-link" data-ppindex="1">Projects</button>${pr?sep+`<button type="button" class="pp-link" data-pjgo="${escH(pr.slug)}">${escH(pr.title)}</button>`:''}${withProject?sep+`<button type="button" class="pp-link" data-ppback="1">${escH((P.main&&P.main.fm.title)||P.slug)}</button>`:''}</nav>`; }
+const ppEditCell=(path,label)=>['File',`<code class="pp-path">${escH(label)}</code><button type="button" class="pp-btn sm" data-pjedit="${escH(path)}">Edit</button>`];
+
+function renderProjectPage(el,P){
+  const mainPath=`projects/${P.slug}/project.md`;
+  if(!P.main){ el.innerHTML=`<article class="pp">${ppCrumb(P)}<header><div class="pp-kicker">Project</div><h1 class="pp-title">${escH(P.slug)}</h1><p class="pp-empty">No project.md yet.</p><p><button type="button" class="pp-btn" data-pjcreate="${mainPath}">Create project.md</button></p></header></article>`; return ppWire(el,P); }
+  const fm=P.main.fm, pr=ppProgram(P), editing=PJE.editing===mainPath;
+  const last=[P.main,...P.notes,...P.experiments,...P.versions].reduce((a,n)=>(n.mtime||0)>(a.mtime||0)?n:a,P.main);
+  const regs=(fm.regions||[]).map(id=>{const c=pr&&pr.R&&pr.R.cards.find(c=>c.id===id); return `<button type="button" class="pp-chip" data-ppregion="${escH(id)}">${mdInline(escH(c?c.t:id))}</button>`;}).join('');
+  const {lede,rest}=ppSplitRQ(P.main.body);
+  let h=`<article class="pp">${ppCrumb(P)}`;
+  h+=`<header><div class="pp-kicker">Project</div><h1 class="pp-title">${escH(fm.title||P.slug)}</h1>${lede&&!editing?`<p class="pp-lede">${mdInline(escH(lede))}</p>`:''}</header>`;
+  h+=ppMeta([fm.status?['Status',`<span class="pp-badge">${escH(fm.status)}</span>`]:null, pr?['Program',`<button type="button" class="pp-link" data-pjgo="${escH(pr.slug)}">${escH(pr.title)}</button>`]:null, regs?['Regions',regs]:null, ['Last edited',escH(ppDate({mtime:last.mtime}))], ppEditCell(mainPath,'project.md')]);
+  h+=editing?ppEditor(P.main):ppFigs(fm)+`<div class="pp-md">${mdToHtml(rest)}</div>`;
+  h+=ppSection('Experiments',P.experiments,'experiment','None yet. Each experiment gets a note, written before the run.');
+  h+=ppSection('Notes',P.notes,'note','None yet.');
+  if(P.versions.length) h+=`<details class="pp-details"><summary>Earlier versions · ${P.versions.length}</summary><div class="pp-list">${P.versions.slice().sort((a,b)=>b.path.localeCompare(a.path)).map(ppRow).join('')}</div></details>`;
+  el.innerHTML=h+`</article>`; ppWire(el,P, editing?null:fm);
+}
+function renderProjectDoc(el,P,n){
+  const fm=n.fm, editing=PJE.editing===n.path, kind=ppDocKind(n.path);
+  let h=`<article class="pp">${ppCrumb(P,true)}`;
+  h+=`<header><div class="pp-kicker">${escH(kind)}</div><h1 class="pp-title">${escH(ppTitle(n))}</h1></header>`;
+  h+=ppMeta([fm.status?['Status',`<span class="pp-badge">${escH(fm.status)}</span>`]:null, ppDate(n)?[fm.date?'Date':'Last edited',escH(ppDate(n))]:null, fm.model?['Model',escH(fm.model)]:null, fm.fills&&fm.fills.length?['Fills',fm.fills.map(f=>`<span class="pp-tag">${escH(f.behaviour)} × ${escH(f.question)}</span>`).join('')]:null, ppEditCell(n.path,n.path.split('/').slice(2).join('/'))]);
+  h+=editing?ppEditor(n):ppFigs(fm)+`<div class="pp-md">${mdToHtml(n.body)}</div>`;
+  el.innerHTML=h+`</article>`; ppWire(el,P, editing?null:fm);
+}
+function ppTop(el){ const v=el.closest('.view'); if(v) v.scrollTop=0; window.scrollTo?.(0,0); }
+function ppWire(el,P,figFm){
+  const go=(f)=>e=>{e.preventDefault();e.stopPropagation();f(e.currentTarget);PJE.editing=null;renderProjects();ppTop(el);};
+  el.querySelectorAll('[data-ppindex]').forEach(b=>b.onclick=go(()=>{PJ.cur=null;PJ.region=null;PJ.doc=null;}));
+  el.querySelectorAll('[data-pjgo]').forEach(b=>b.onclick=go(t=>{PJ.cur=t.dataset.pjgo;PJ.region=null;PJ.doc=null;}));
+  el.querySelectorAll('[data-ppregion]').forEach(b=>b.onclick=go(t=>{PJ.cur=P.main.fm.program;PJ.region=t.dataset.ppregion;PJ.doc=null;}));
+  el.querySelectorAll('[data-ppdoc]').forEach(b=>b.onclick=go(t=>{PJ.doc=t.dataset.ppdoc;}));
+  el.querySelectorAll('[data-ppback]').forEach(b=>b.onclick=go(()=>{PJ.doc=null;}));
+  el.querySelectorAll('[data-pjedit]').forEach(b=>b.onclick=e=>{e.stopPropagation();PJE.editing=b.dataset.pjedit;renderProjects();const t=$('#pje');if(t){t.focus();t.setSelectionRange(0,0);}});
+  el.querySelectorAll('[data-pjsave]').forEach(b=>b.onclick=async e=>{e.stopPropagation();const path=b.dataset.pjsave;await save(path,$('#pje').value);PJE.editing=null;renderProjects();});
+  el.querySelectorAll('[data-pjcancel]').forEach(b=>b.onclick=e=>{e.stopPropagation();PJE.editing=null;renderProjects();});
+  el.querySelectorAll('[data-pjcreate]').forEach(b=>b.onclick=()=>save(b.dataset.pjcreate,`---\ntitle: ${P.slug}\nstatus: scoping\n---\n\n## Research question\n\n`).then(()=>{PJE.editing=b.dataset.pjcreate;renderProjects();}));
+  el.querySelectorAll('[data-new]').forEach(b=>b.onclick=e=>{e.stopPropagation();const w=b.dataset.new;newNote(w==='experiment'?`projects/${P.slug}/experiments`:`projects/${P.slug}`,w,true);});
+  el.querySelectorAll('.pp .wl').forEach(w=>w.onclick=()=>{const t=w.dataset.wl; const hit=DB.notes.find(x=>x.path.startsWith(`projects/${P.slug}/`)&&(x.path.endsWith('/'+t+'.md')||x.fm.title===t)); if(hit){PJ.doc=hit.path==='projects/'+P.slug+'/project.md'?null:hit.path;PJE.editing=null;renderProjects();ppTop(el);}});
+  if(figFm) figsOf(figFm).forEach((fig,i)=>fetch('/'+fig).then(r=>r.ok?r.text():Promise.reject()).then(svg=>{const f=$('#ppfig'+i); if(!f)return; f.innerHTML=svg; f.onclick=()=>{const o=$('#figov'); o.innerHTML=svg; o.hidden=false; o.onclick=()=>{o.hidden=true;o.innerHTML='';};};}).catch(()=>{const f=$('#ppfig'+i); if(f)f.innerHTML=`<span class="pp-empty">Figure not found: ${escH(fig)}</span>`;}));
+}
+
 function renderProjectIndex(el){
+ PJ.doc=null;
   const progs=DB.projects.filter(x=>projKind(x)==='program'), rest=DB.projects.filter(x=>projKind(x)!=='program');
   const card=P=>{ const fm=(P.main&&P.main.fm)||{}; const kind=projKind(P);
     let sub=''; if(kind==='program'){ const R=regionsOf(P.main.body); sub=`${R?R.cards.length+' regions · ':''}${childrenOf(P.slug).length} project${childrenOf(P.slug).length===1?'':'s'}`; }
@@ -862,9 +1016,11 @@ function renderProjectIndex(el){
   el.innerHTML=(progs.length?`<div class="sect">Programs · ${progs.length}</div><div class="pjidx">${progs.map(card).join('')}</div>`:'')+`<div class="sect">Projects · ${rest.length}</div><div class="pjidx">${rest.map(card).join('')||'<span class="meta">none yet</span>'}</div>`;
   el.querySelectorAll('[data-pjgo]').forEach(b=>b.onclick=()=>{PJ.cur=b.dataset.pjgo;renderProjects();});
 }
-function renderProjects(){ const el=$('#pj'); if(!DB.projects.length){el.innerHTML='<p class="intro">No projects yet. Create <code>projects/&lt;slug&gt;/project.md</code>.</p>';return;}
+function renderProjects(){ const el=$('#pj'); $('#v-projects').classList.remove('pp-on'); if(!DB.projects.length){el.innerHTML='<p class="intro">No projects yet. Create <code>projects/&lt;slug&gt;/project.md</code>.</p>';return;}
  const P=DB.projects.find(x=>x.slug===PJ.cur); if(!P){ PJ.cur=null; PJ.region=null; return renderProjectIndex(el); }
+ if(projKind(P)!=='program'){ $('#v-projects').classList.add('pp-on'); if(PJ.doc&&!PJ.doc.startsWith(`projects/${P.slug}/`)) PJ.doc=null; const D=PJ.doc&&DB.byPath[PJ.doc]; if(!D) PJ.doc=null; return D?renderProjectDoc(el,P,D):renderProjectPage(el,P); }
  const fm=(P.main&&P.main.fm)||{}, kind=projKind(P), kids=childrenOf(P.slug);
+ const mainPath=`projects/${P.slug}/project.md`;
  const item=n=>{const open=PJE.open.has(n.path); return `<div class="it${open?' open':''}" data-toggle="${n.path}"><span class="n">${n.fm.status||''}</span><div class="t">${n.fm.title||n.path.split('/').pop()}<small>${n.path.split('/').slice(2).join('/')}${n.fm.fills&&n.fm.fills.length?' · fills '+n.fm.fills.length+' cell'+(n.fm.fills.length>1?'s':''):''}</small></div><div class="meta">${open?'▾':'▸'}</div>`+(open?`<div class="body">`+(PJE.editing===n.path?pjEditor(n):`${n.fm.fills&&n.fm.fills.length?`<div class="meta">fills: ${n.fm.fills.map(f=>`<span class="tag">${f.behaviour} × ${f.question} · ${f.level} · ${f.kind}</span>`).join(' ')}</div>`:''}<div class="md">${mdToHtml(n.body)}</div><div class="row"><button class="btn sm" data-pjedit="${n.path}">Edit</button></div>`)+`</div>`:'')+`</div>`;};
  const projRow=k=>`<div class="it" data-pjgo="${k.slug}"><span class="n">${escH(k.main.fm.status||'')}</span><div class="t">${escH(k.main.fm.title||k.slug)}<small>${regionNames(k).map(escH).join(' · ')||'no region set'}</small></div><div class="meta">›</div></div>`;
  let h=`<div class="pjback"><button class="btn sm" data-pjindex="1">← All projects</button>`;
@@ -884,7 +1040,6 @@ function renderProjects(){ const el=$('#pj'); if(!DB.projects.length){el.innerHT
    h+=`<div class="sect">Papers tagged with this region · ${papers.length}</div><div class="rq">${papers.map(item).join('')||'<span class="meta">none yet. Add <code>regions: ['+id+']</code> to a paper note’s front matter to list it here.</span>'}</div>`;
  } else {
    PJ.region=null; h+=`</div>`;
-   const mainPath=`projects/${P.slug}/project.md`;
    if(P.main){
      let loc='';
      const prog=fm.program?DB.projects.find(x=>x.slug===fm.program):null; const PR=prog&&prog.main?regionsOf(prog.main.body):null;
@@ -912,10 +1067,10 @@ function renderProjects(){ const el=$('#pj'); if(!DB.projects.length){el.innerHT
 }
 
 /* ============ views ============ */
-function setView(v){document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));['map','gaps','reading','projects'].forEach(x=>$('#v-'+x).hidden=x!==v);$('.main').classList.toggle('nopanel',v==='projects'||(v==='map'&&SUBK==='datasets'));try{location.hash=v}catch(e){}}
+function setView(v){document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));['map','gaps','reading','projects','patterns'].forEach(x=>$('#v-'+x).hidden=x!==v);$('.main').classList.toggle('nopanel',v==='projects'||v==='patterns'||(v==='map'&&(SUBK==='datasets'||SUBK==='benchmark')));try{location.hash=v}catch(e){}}
 document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>setView(b.dataset.v));
 function renderAll(){renderMap();renderGaps();renderReading();renderProjects(); if(PANEL.mode==='home')showHome(); else if(PANEL.mode==='case')showCase(); else if(PANEL.mode==='tree')showTree(); else if(PANEL.mode==='note'&&PANEL.id&&!PANEL.editing)showNote(PANEL.id);}
-(async()=>{try{await load();}catch(e){$('#status').textContent='cannot reach server: run python3 server.py';} renderAll(); showHome(); const h=(location.hash||'').slice(1); if(['map','gaps','reading','projects'].includes(h))setView(h);})();
+(async()=>{try{await load();}catch(e){$('#status').textContent='cannot reach server: run python3 server.py';} renderAll(); showHome(); const h=(location.hash||'').slice(1); if(['map','gaps','reading','projects','patterns'].includes(h))setView(h);})();
 </script>
 </body>
 </html>

@@ -84,7 +84,7 @@ Rules:
 | Honest ↔ deceptive (diverging, 11 steps) | `--div-1…11` | `#0868AC #2B8CBE #4EB3D3 #7BCCC4 #CCEBC5 #F7F7F7 #FDE0DD #FA9FB5 #F768A1 #DD3497 #AE017E` | probe scores and anything signed along the honest–deceptive axis; `--div-6` is neutral (0); the two sides are matched step for step in lightness (L* 43, 55, 68, 77, 90 vs 39, 52, 64, 75, 91) |
 | Grey (sequential) | `--seq-1…5` | `#D9DCE0 … #1F2328` | ordered non-semantic series (layers, steps, epochs) |
 
-Use as many steps as the data has distinguishable levels (binned maps: 5–9; continuous: interpolate between all stops). Skip `-1` on white backgrounds when the lightest step would vanish.
+Text on a ramp cell uses `--on-ramp-dark` (white, on the two darkest steps at either end) or `--on-ramp-light` (ink) elsewhere; these do not flip with the theme because the ramps don't. Use as many steps as the data has distinguishable levels (binned maps: 5–9; continuous: interpolate between all stops). Skip `-1` on white backgrounds when the lightest step would vanish.
 
 ### Non-semantic series
 

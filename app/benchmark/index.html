@@ -1,0 +1,683 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Benchmark · Liars' Bench</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="../tokens.css">
+<style>
+/* Benchmark map, example first. A strip lays out the paper's evaluation (train -> threshold -> test, P5);
+   each entry in it is a tab. The selected dataset shows one verified dishonest and honest example in full,
+   on the same turns (P3). Filters are collapsed and only dim test tabs (P10 rule). Tokens only; docs/BRAND.md. */
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:var(--fs-ui);line-height:var(--lh-ui)}
+.wrap{max-width:var(--col-page);margin:0 auto;padding:var(--s-2) var(--s-4) var(--s-7)}
+.k{font-family:var(--mono);font-size:var(--fs-label);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);margin:0}
+h1{font-size:var(--fs-title);line-height:var(--lh-tight);font-weight:700;margin:var(--s-2) 0 var(--s-3)}
+h2{font-size:var(--fs-h2);line-height:1.25;font-weight:600;margin:var(--s-1) 0 var(--s-2)}
+.lede,.ptext{font-size:var(--fs-body);line-height:var(--lh-body);max-width:var(--col-text);margin:0 0 var(--s-3)}
+a{color:var(--ink);text-decoration-color:var(--rule);text-underline-offset:2px}
+a:hover{text-decoration-color:var(--ink)}
+code{font-family:var(--mono);font-size:var(--fs-code);background:var(--surface-sunk);padding:0 4px;border-radius:var(--radius)}
+:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+
+/* train -> threshold -> test strip; every box is a tab */
+.strip{display:flex;align-items:flex-end;gap:var(--s-2);flex-wrap:wrap;border-top:var(--border);border-bottom:var(--border);padding:var(--s-4) 0 var(--s-3);margin:var(--s-5) 0 0}
+.stage{display:flex;flex-direction:column;gap:6px}
+.stage .k{display:flex;align-items:center;gap:var(--s-2);min-height:22px}
+.tabs{display:flex;flex-wrap:wrap;gap:6px}
+.arrow{color:var(--ink-3);font-size:18px;padding:0 2px 6px}
+.tab{font:500 var(--fs-ui)/1.2 var(--mono);color:var(--ink);background:var(--surface);border:var(--border);border-radius:var(--radius);padding:7px 10px;cursor:pointer;transition:background var(--dur) var(--ease),border-color var(--dur) var(--ease),opacity var(--dur-layout) var(--ease)}
+.tab:hover{background:var(--surface-sunk)}
+.tab[aria-selected="true"]{background:var(--surface-sunk);border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.tab.dim{opacity:.3}
+.tab sup{font-family:var(--font);color:var(--ink-2);margin-left:1px}
+.fbtn{font:600 var(--fs-ui) var(--font);color:var(--ink-2);background:none;border:var(--border);border-radius:var(--radius);padding:1px 8px;cursor:pointer;text-transform:none;letter-spacing:0}
+.fbtn[aria-expanded="true"]{color:var(--ink);border-color:var(--ink)}
+.stripnote{font-size:var(--fs-caption);color:var(--ink-2);max-width:var(--col-text);margin:var(--s-2) 0 0}
+
+/* filters (collapsed by default) */
+.filters{padding:var(--s-3) 0;border-bottom:var(--border)}
+.facet{display:grid;grid-template-columns:170px minmax(0,1fr);gap:var(--s-1) var(--s-3);align-items:baseline;margin:0 0 var(--s-2)}
+.facet>span{font-size:var(--fs-ui);color:var(--ink-2)}
+.facet>span small{color:var(--ink-3);font-size:var(--fs-label);margin-left:4px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:400 var(--fs-ui)/1.3 var(--font);color:var(--ink);background:var(--surface);border:var(--border);border-radius:var(--radius);padding:3px 8px;cursor:pointer}
+.chip:hover{background:var(--surface-sunk)}
+.chip[aria-pressed="true"]{background:var(--surface-sunk);border-color:var(--ink);font-weight:600}
+.chip .n{font-family:var(--mono);font-size:var(--fs-label);color:var(--ink-3);margin-left:4px;font-weight:500}
+.fstatus{display:flex;gap:var(--s-3);align-items:center;font-size:var(--fs-ui);color:var(--ink-2);margin-top:var(--s-2)}
+.fstatus b{color:var(--ink)}
+.btn{font:600 var(--fs-ui) var(--font);color:var(--ink);background:var(--surface);border:var(--border);border-radius:var(--radius);padding:3px 10px;cursor:pointer}
+.btn:disabled{color:var(--ink-3);cursor:default}
+
+/* the selected dataset */
+#view{margin-top:var(--s-6)}
+.meta{display:flex;flex-wrap:wrap;gap:4px var(--s-3);font-size:var(--fs-ui);color:var(--ink-2);margin:0 0 var(--s-3)}
+.meta>span+span::before{content:"·";margin-right:var(--s-3);color:var(--ink-3)}
+.meta .c-h{color:var(--honest-ink)} .meta .c-d{color:var(--deceptive-ink)}
+.labelnotes{border-left:2px solid var(--ink);padding:2px 0 2px var(--s-4);max-width:var(--col-text);margin:0 0 var(--s-4)}
+.labelnotes .k{margin-bottom:var(--s-2)}
+.labelnotes ul{margin:0;padding-left:18px;display:grid;gap:var(--s-3)}
+.labelnotes li b{display:block;font-size:var(--fs-h4);font-weight:600;margin-bottom:2px}
+.labelnotes li span{display:block;font-size:var(--fs-body);line-height:var(--lh-body);color:var(--ink-2)}
+.mynote{background:var(--surface-sunk);border-radius:var(--radius);padding:var(--s-3) var(--s-4);max-width:var(--col-text);margin:var(--s-5) 0 0}
+.mynote .mytext{font-size:var(--fs-body);font-weight:600;margin:4px 0 0;line-height:1.5}
+.mynote ul{margin:0;padding-left:18px;display:grid;gap:6px;font-size:var(--fs-body);line-height:var(--lh-body);color:var(--ink)}
+.sampler{display:flex;flex-wrap:wrap;gap:var(--s-2) var(--s-4);align-items:center;margin:var(--s-4) 0 0;padding:var(--s-2) var(--s-3);background:var(--interact-wash);border-radius:var(--radius)}
+.sampler .sc{font-size:var(--fs-ui);color:var(--ink-2)}
+.sampler .sc b{color:var(--ink)}
+.shuffle{margin-left:auto;display:inline-flex;align-items:center;gap:6px;font:600 var(--fs-ui) var(--font);color:var(--interact-ink);background:var(--bg);border:1.5px solid var(--interact);border-radius:var(--radius);padding:6px 14px;cursor:pointer;transition:background var(--dur) var(--ease)}
+.shuffle:hover{background:var(--interact)}
+.shuffle:hover{color:var(--ink)}
+.dots{display:inline-flex;gap:6px;align-items:center}
+.dot{width:12px;height:12px;border-radius:50%;border:1.5px solid var(--interact);background:transparent;padding:0;cursor:pointer}
+.dot.on{background:var(--interact)}
+.dot:focus-visible,.shuffle:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.sample{display:flex;flex-wrap:wrap;gap:var(--s-2) var(--s-4);align-items:center;font-size:var(--fs-ui);color:var(--ink-2);margin:var(--s-4) 0 0}
+.sample b{color:var(--ink);font-weight:600}
+.lie{max-width:var(--col-text);margin:var(--s-4) 0 0;padding:var(--s-3) var(--s-4);border:var(--border);border-left:3px solid var(--deceptive);border-radius:var(--radius)}
+.lie>.k{margin:0 0 var(--s-2)}
+.lie dl{display:grid;grid-template-columns:150px minmax(0,1fr);gap:var(--s-2) var(--s-4);margin:0}
+.lie dt{font-family:var(--mono);font-size:var(--fs-label);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);padding-top:3px}
+.lie dd{margin:0;font-size:var(--fs-body);line-height:var(--lh-body);min-width:0;overflow-wrap:anywhere}
+.lie q{font-style:normal;white-space:normal;quotes:"“" "”"}
+.lie q.d{background:var(--deceptive-wash)} .lie q.h{background:var(--honest-wash)}
+.lie .where{display:block;font-size:var(--fs-caption);color:var(--ink-2);margin-top:2px}
+.lie .ev{font-style:italic;color:var(--ink-2)}
+.lie dd.v{font-weight:600}
+@media (max-width:640px){.lie dl{grid-template-columns:1fr}.lie dt{padding-top:var(--s-2)}}
+.flag{border-left:2px solid var(--ink);padding:2px 0 2px var(--s-3);font-size:var(--fs-body);line-height:var(--lh-body);max-width:var(--col-text);margin:0 0 var(--s-3)}
+figure{margin:var(--s-5) 0 0}
+.pair{display:grid;border-top:var(--border)}
+.pair.two{grid-template-columns:96px minmax(0,1fr) minmax(0,1fr)}
+.pair.one{grid-template-columns:96px minmax(0,1fr)}
+.pair.three{grid-template-columns:96px repeat(3,minmax(0,1fr))}
+.pair>div{padding:var(--s-2) var(--s-4) var(--s-2) 0;border-bottom:var(--border);min-width:0}
+.pair .hd{font-family:var(--mono);font-size:var(--fs-label);letter-spacing:.08em;text-transform:uppercase;padding-top:var(--s-3)}
+.pair .hd.d{color:var(--deceptive-ink)} .pair .hd.h{color:var(--honest-ink)} .pair .hd.b{color:var(--ink)}
+.mcol{display:none;font-family:var(--mono);font-size:var(--fs-label);letter-spacing:.08em;text-transform:uppercase;margin-bottom:2px}
+.mcol.b{color:var(--ink)} .mcol.d{color:var(--deceptive-ink)} .mcol.h{color:var(--honest-ink)}
+.pair .hd small{display:block;text-transform:none;letter-spacing:0;color:var(--ink-2);font-size:var(--fs-label);margin-top:2px}
+.pair .role{font-family:var(--mono);font-size:var(--fs-label);color:var(--ink-2);padding-top:11px}
+.pair .role small{display:block;color:var(--ink-2);font-size:var(--fs-label)}
+.msg{white-space:pre-wrap;overflow-wrap:anywhere;font-size:var(--fs-body);line-height:1.6}
+.msg.ref,.msg.empty{font-style:italic;color:var(--ink-2)}
+.same{font-family:var(--mono);font-size:var(--fs-label);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);display:block;margin-bottom:2px}
+mark.xd{background:var(--deceptive-wash);color:inherit;border-bottom:1.5px solid var(--deceptive);padding:0 1px}
+mark.xh{background:var(--honest-wash);color:inherit;border-bottom:1.5px solid var(--honest);padding:0 1px}
+figcaption{font-size:var(--fs-caption);line-height:1.5;color:var(--ink-2);max-width:var(--col-text);margin-top:var(--s-3)}
+figcaption b{color:var(--ink);font-weight:600}
+
+/* secondary detail, collapsed */
+details{border-top:var(--border);margin-top:var(--s-5);padding-top:var(--s-3);max-width:var(--col-page)}
+details+details{margin-top:0}
+summary{cursor:pointer;font-weight:600;font-size:var(--fs-h4);padding:2px 0 var(--s-2)}
+.tagrow{display:grid;grid-template-columns:190px 210px minmax(0,1fr);gap:var(--s-1) var(--s-4);padding:var(--s-2) 0;border-bottom:var(--border);font-size:var(--fs-ui)}
+.tagrow .k2{font-family:var(--mono);font-size:var(--fs-label);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2)}
+.tagrow .why{color:var(--ink-2);font-size:var(--fs-ui)}
+.unc{border:1px dashed var(--ink-2);border-radius:var(--radius);padding:0 5px;font-family:var(--mono);font-size:var(--fs-label);letter-spacing:.06em;color:var(--ink-2);margin-left:6px}
+ul.corr{margin:0 0 var(--s-3);padding-left:20px;max-width:var(--col-text);font-size:var(--fs-body);line-height:var(--lh-body)}
+ul.corr li{margin:0 0 4px}
+ul.corr li.d2{margin-left:20px;list-style:circle;color:var(--ink-2)}
+.empty{color:var(--ink-2)}
+/* paper list */
+.papers{list-style:none;margin:var(--s-5) 0 0;padding:0;border-top:var(--border);max-width:var(--col-page)}
+.papers li{border-bottom:var(--border)}
+.papers button{all:unset;box-sizing:border-box;display:block;width:100%;padding:var(--s-4) var(--s-3);cursor:pointer;border-radius:var(--radius)}
+.papers button:hover{background:var(--surface-sunk)}
+.papers button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.papers .pt1{font-size:var(--fs-h3);font-weight:700;line-height:1.3;margin:0}
+.papers .pm{font-size:var(--fs-ui);color:var(--ink-2);margin:4px 0 6px}
+.papers .ps{font-size:var(--fs-body);line-height:var(--lh-body);margin:0;max-width:var(--col-text)}
+.papers .pset{font-family:var(--mono);font-size:var(--fs-label);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);margin:8px 0 0}
+.backbar{margin:0 0 var(--s-4)}
+table.rt{border-collapse:collapse;font-size:var(--fs-ui);margin:var(--s-3) 0 0;min-width:min(100%,560px)}
+table.rt th,table.rt td{text-align:left;padding:7px 18px 7px 0;border-bottom:var(--border)}
+table.rt th{font-family:var(--mono);font-size:var(--fs-label);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);font-weight:500}
+table.rt td.num{font-variant-numeric:tabular-nums;font-weight:600}
+table.rt tr.mk td{background:var(--surface-sunk)}
+table.dt tr.pk{cursor:pointer}
+table.dt tr.pk:hover td{background:var(--surface-sunk)}
+table.dt tr.pk[aria-pressed="true"] td{background:var(--interact-wash)}
+table.dt tr.pk[aria-pressed="true"] td:first-child{box-shadow:inset 3px 0 0 var(--interact)}
+table.dt tr.pk:focus-visible{outline:2px solid var(--interact);outline-offset:-2px}
+table.dt td.pkn{white-space:nowrap}
+table.dt td.pkn small{display:block;font-family:var(--mono);font-size:var(--fs-label);color:var(--ink-2);font-weight:400}
+.hint{font-style:italic;color:var(--interact-ink)}
+.toclay{display:grid;grid-template-columns:200px minmax(0,1fr);gap:var(--s-6);margin-top:var(--s-4);align-items:start}
+.toc{position:sticky;top:var(--s-4);font-size:var(--fs-ui);line-height:var(--lh-ui);border-right:var(--border);padding:var(--s-1) var(--s-4) var(--s-2) 0;will-change:transform}
+.toc .tct{font-size:var(--fs-h3);font-weight:700;margin:0 0 var(--s-3)}
+.toc a{display:block;color:var(--ink-2);text-decoration:none;padding:4px 0 4px var(--s-3);border-left:2px solid transparent;margin-left:-2px}
+.toc a.l1{font-weight:600;color:var(--ink);margin-top:var(--s-2)}
+.toc a.l2{padding-left:calc(var(--s-3) + 12px)}
+.toc a:hover{color:var(--ink)}
+.toc a.on{border-left-color:var(--ink);color:var(--ink)}
+.tocbody{min-width:0}
+.ddl{display:inline-flex;align-items:center;gap:var(--s-3);margin:0 0 var(--s-4);font-size:var(--fs-ui)}
+.ddl span{font-family:var(--mono);font-size:var(--fs-label);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2)}
+select.dd{font:inherit;font-size:var(--fs-body);color:var(--ink);background:var(--interact-wash);border:1px solid var(--interact);border-radius:var(--radius);padding:6px 10px;max-width:100%;cursor:pointer}
+select.dd:focus-visible{outline:2px solid var(--interact);outline-offset:2px}
+.pkpanel{border-left:2px solid var(--interact);padding:2px 0 2px var(--s-4)}
+.pkpanel h4.pkh{font-size:var(--fs-h3);margin:var(--s-1) 0 var(--s-3)}
+.pkdl{display:grid;grid-template-columns:90px minmax(0,1fr);gap:var(--s-2) var(--s-4);margin:0;font-size:var(--fs-ui);align-items:baseline}
+.pkdl dt{font-family:var(--mono);font-size:var(--fs-label);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2)}
+.pkdl dd{margin:0}.pkdl table.rt{margin:0}
+.where{font-size:var(--fs-caption);color:var(--ink-2);font-weight:400}
+ul.pknotes{margin:0 0 var(--s-3);padding-left:18px;display:grid;gap:var(--s-2);max-width:var(--col-text);font-size:var(--fs-body);line-height:var(--lh-body)}
+.tocbody h3{font-size:var(--fs-h3);font-weight:600;line-height:var(--lh-tight);margin:var(--s-7) 0 var(--s-3);scroll-margin-top:var(--s-4)}
+.tocbody .sec:first-child h3{margin-top:0}
+.tocbody h4{font-size:var(--fs-h4);font-weight:600;margin:var(--s-5) 0 var(--s-2);scroll-margin-top:var(--s-4)}
+@media (max-width:1000px){.toclay{grid-template-columns:1fr}.toc{position:static;border-right:0;border-bottom:var(--border);padding-bottom:var(--s-3)}}
+.tblock{margin:0 0 var(--s-4)}
+.tblock .ptext{font-size:var(--fs-ui);color:var(--ink-2);margin-top:var(--s-2)}
+/* results */
+svg{display:block;width:100%;height:auto}
+.pt{font:600 var(--fs-ui) var(--font);fill:var(--ink)} .pn,.tk{font:500 var(--fs-label) var(--mono);fill:var(--ink-3)} .gl{font:500 var(--fs-ui) var(--mono);fill:var(--ink)}
+.hit{cursor:default;outline:none} .hit:hover,.hit:focus{fill:var(--surface-sunk);fill-opacity:.6}
+.lg{display:flex;flex-wrap:wrap;gap:var(--s-1) var(--s-4);font-size:var(--fs-ui);color:var(--ink-2);margin:0 0 var(--s-2)}
+.lg span{display:inline-flex;align-items:center;gap:6px}
+.lg svg{width:14px;height:14px;flex:none}
+.figscroll{overflow-x:auto}
+table.dt{border-collapse:collapse;font-size:var(--fs-ui);width:100%;margin:var(--s-2) 0 0}
+table.dt th,table.dt td{text-align:left;vertical-align:top;padding:7px 14px 7px 0;border-bottom:var(--border)}
+table.dt th{font-family:var(--mono);font-size:var(--fs-label);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);font-weight:500}
+table.dt td:first-child{font-weight:600;white-space:nowrap}
+.tip{position:fixed;z-index:5;max-width:290px;background:var(--surface);box-shadow:var(--shadow-pop);border-radius:var(--radius);padding:7px 10px;font-size:var(--fs-ui);line-height:1.45;pointer-events:none}
+@media (max-width:760px){h1{font-size:32px}}
+@media (max-width:760px){
+  table.dt td:first-child{white-space:normal}
+  .figscroll svg{min-width:720px}
+  .arrow{display:none}
+  .facet,.tagrow{grid-template-columns:minmax(0,1fr)}
+  .pair.two,.pair.one,.pair.three{grid-template-columns:minmax(0,1fr)}
+  .pair .role{padding-bottom:0;border-bottom:0}
+  .pair .hd.blank{display:none}
+  .mcol{display:block}
+}
+</style></head>
+<body>
+<div class="wrap">
+  <div id="list">
+    <p class="k">Benchmark</p>
+    <h1>Lie and deception benchmarks</h1>
+    <p class="lede">Papers whose train and test sets we have unpacked. Pick one to see how its detector is trained, calibrated and tested, one dataset at a time, with verified dishonest and honest examples.</p>
+    <ul class="papers" id="papers"></ul>
+  </div>
+  <div id="paper" hidden>
+    <div class="backbar"><button class="btn" id="back" type="button">← All papers</button></div>
+    <p class="k">Benchmark</p>
+    <h1 id="ptitle"></h1>
+    <p class="lede" id="plede"></p>
+    <div class="strip" id="strip" role="tablist" aria-label="Datasets by role"></div>
+    <p class="stripnote" id="stripnote"></p>
+    <div class="filters" id="filters" hidden></div>
+    <section id="view" aria-live="polite"></section>
+  </div>
+</div>
+<div class="tip" id="tip" role="status" hidden></div>
+<script>
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmt = n => n.toLocaleString('en-US');
+const md = s => esc(s).replace(/`([^`]+)`/g, '<code>$1</code>').replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>')
+  .replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+const STAGES = [
+  {role: 'train', name: 'Train the probe'},
+  {role: 'threshold', name: 'Set the threshold'},
+  {role: 'test', name: 'Test'},
+  {role: 'appendix', name: 'Also tested (appendix)'},
+  {role: 'results', name: 'Results'},
+];
+const PAPERS = [
+  {id: 'liars-bench', h1: "Liars' Bench", title: "Liars' Bench: Evaluating Lie Detectors for Language Models", authors: 'Kretschmar, Laurito, Maiya and Marks (Cadenza Labs)', year: 2025, url: 'https://arxiv.org/abs/2511.16035',
+   data: 'data.json', results: 'results.json', first: 'lb-id',
+   summary: 'Seven test sets of lies from four open-weight models, and four lie detectors compared on all of them.',
+   setup: 'Train: probe training pairs · Threshold: Alpaca · Test: 7 sets · 4 models'},
+  {id: 'apollo', h1: 'Detecting Strategic Deception Using Linear Probes', title: 'Detecting Strategic Deception Using Linear Probes', authors: 'Goldowsky-Dill, Chughtai, Heimersheim and Hobbhahn (Apollo Research)', year: 2025, url: 'https://arxiv.org/abs/2502.03407',
+   data: 'apollo.json', samples: 'apollo_samples.json', first: 'apollo-roleplaying',
+   summary: 'One linear probe on Llama-3.3-70B-Instruct, trained on instructed pairs and tested on role-play, insider trading and sandbagging.',
+   setup: 'Train: Instructed-Pairs · Threshold: Alpaca · Test: 4 sets (+2 in appendix) · 1 model'},
+  {id: 'mask', h1: 'MASK', title: 'The MASK Benchmark: Disentangling Honesty From Accuracy in AI Systems', authors: 'Ren, Agarwal, Mazeika, Menghini, Vacareanu, Kenstler, Yang, Barrass, Gatti, Yin, Trevino, Geralnik, Khoja, Lee, Yue and Hendrycks (Center for AI Safety and Scale AI)', year: 2025, url: 'https://arxiv.org/abs/2503.03750',
+   data: 'mask.json', samples: 'mask_samples.json', first: 'mask-known',
+   summary: 'A behavioural honesty benchmark with no detector: a response is a lie when it contradicts the belief the same model states without pressure. Six pressure archetypes, 1,000 public items.',
+   setup: 'Test: 6 pressure archetypes · prompts only, responses from Cadenza Labs’ run on 3 models · paper: 30+ models'},
+  {id: 'natarajan', h1: "One Probe Won't Catch Them All", title: "One Probe Won't Catch Them All: Towards Targeted Deception Detection", authors: 'Natarajan, Jain, Arora, Golechha and Bloom (LASR Labs and UK AI Security Institute)', year: 2026, url: 'https://arxiv.org/abs/2602.01425',
+   data: 'natarajan.json', first: 'nat-train', extra: ['data.json', 'apollo_samples.json', 'mask_samples.json'],
+   summary: 'One probe per type of deception on Gemma 2 9B IT: the training facts stay fixed and only the honest/dishonest instruction changes.',
+   setup: 'Train: 58 prompt pairs · Validate: 150 items from 3 sets · Test: 10 sets · 1 model · AUROC only'},
+];
+const MODELFULL = {llama: 'Llama-3.3-70B', qwen: 'Qwen-2.5-72B', mistral: 'Mistral-Small-24B', gemma: 'Gemma-3-27B'};
+/* detectors in the paper's Figure 2 order; the mean probe is the lab's focus, so it alone carries --subject */
+const METHODS = [
+  {k: 'llm-judge', name: 'LLM-as-a-Judge', shape: 'square'},
+  {k: 'self-eval', name: 'Self-Evaluation', shape: 'triangle'},
+  {k: 'uqc', name: 'Unrelated Question Classifier', shape: 'diamond'},
+  {k: 'mean-probe', name: 'Mean probe', shape: 'circle', focus: true},
+];
+const METRICS = [
+  {k: 'bacc', name: 'Balanced accuracy', note: 'at 1% false-positive rate', chance: .5},
+  {k: 'auroc', name: 'AUROC', note: '', chance: .5},
+  {k: 'recall', name: 'Recall', note: 'at 1% false-positive rate', chance: null},
+];
+const MODELN = {llama: 'Llama', qwen: 'Qwen', mistral: 'Mistral', gemma: 'Gemma'};
+let P = null, D, F, RES, TF, trainFact = null, sel = new Map(), cur = null, SI = {}, ANN = {};
+fetch('annotations.json').then(r => r.ok ? r.json() : {}).then(a => { ANN = a.annotations || {}; if (P && cur) select(cur, false); }).catch(() => {});
+/* a uniformly random fact from the ones the probe was trained on (not the validation 20%) */
+function newTrainFact() { const T = TF.facts.filter(f => (P && P.id === 'natarajan') || f.split === 'train'); let f; do { f = T[Math.floor(Math.random() * T.length)]; } while (T.length > 1 && f === trainFact); trainFact = f; }
+/* the two dialogues exactly as deception_detection/data/repe.py builds them (variant "plain") */
+function trainPair(f) {
+  const S = (cur && D.datasets.find(x => x.id === cur) || {}).trainSource || TF.source;
+  const src = `${S.repo} @ ${S.commit.slice(0, 7)}, ${S.file} line ${f.line}, built by ${S.code}`;
+  const turns = who => [
+    {role: 'User', q: '', ref: false, text: TF.user[who]},
+    f.start ? {role: 'Assistant', q: 'prefilled · scored by the probe', ref: false, text: f.start}
+            : {role: 'Assistant', q: 'prefilled · scored by the probe', ref: true, text: 'Empty: the statement is 5 words or fewer, so nothing in the reply is scored.'},
+    {role: 'Assistant', q: 'prefilled · last 5 words, not scored', ref: false, text: f.end.replace(/^ /, '')},
+  ];
+  return {pos: {label: 'DECEPTIVE', source: src, turns: turns('dishonest')}, neg: {label: 'HONEST', source: src, turns: turns('honest')}};
+}
+/* Natarajan et al.: the selected prompt pair over the same fact; the whole statement is prefilled and the probe skips its last 5 tokens */
+const PK = {};
+function natPair(d, f) {
+  const pr = d.pairs.find(x => x.k === (PK[d.id] || d.pairs[0].k)), stmt = f.start + f.end;
+  const src = `the prompts from ${pr.where} of [Natarajan et al. 2026](https://arxiv.org/abs/2602.01425); the statement from line ${f.line} of \`${TF.source.file}\` in [${TF.source.repo} @ ${TF.source.commit.slice(0, 7)}](https://github.com/${TF.source.repo}/tree/${TF.source.commit})`;
+  const turns = who => [
+    {role: 'System', q: pr.name, ref: false, text: pr[who]},
+    {role: 'Assistant', q: 'prefilled · probe skips the last 5 tokens', ref: false, text: stmt},
+  ];
+  return {pos: {label: 'DECEPTIVE', source: src, turns: turns('dishonest')}, neg: {label: 'HONEST', source: 'same statement and pair', turns: turns('honest')}};
+}
+function famTable(d) {
+  return `<p class="ptext">${md(d.familiesIntro)}</p><div class="figscroll"><table class="dt"><thead><tr><th>Family</th><th>Pairs</th><th>What each pair contrasts</th><th>Where</th><th>Prompts shown</th></tr></thead><tbody>${d.families.map(r =>
+    `<tr><td>${esc(r[0])}</td><td>${esc(r[1])}</td><td>${esc(r[2])}</td><td>${esc(r[3])}</td><td>${esc(r[4])}</td></tr>`).join('')}</tbody></table></div>`;
+}
+function pairTable(d) {
+  const on = PK[d.id] || d.pairs[0].k;
+  return `<p class="ptext">${md(d.pairsIntro)} <span class="hint">(click a row)</span></p>
+    <div class="figscroll"><table class="dt"><thead><tr><th>Type</th><th>Honest prompt</th><th>Dishonest prompt</th></tr></thead><tbody>${d.pairs.map(x =>
+      `<tr class="pk" data-k="${esc(x.k)}" tabindex="0" role="button" aria-pressed="${x.k === on}"><td class="pkn">${esc(x.name)}<small>${esc(x.k === 'default' ? x.where : x.k)}</small></td><td>${esc(x.honest)}</td><td>${esc(x.dishonest)}</td></tr>`).join('')}</tbody></table></div>`;
+}
+/* a reading layout with headings and a contents sidebar (used where a dataset sets toc: true) */
+const PS = {}, PSI = {}, EXTRA = {};
+/* an example for an evaluation set, taken from the source benchmark's own data on this page */
+function setExamples(on) {
+  const j = EXTRA[on.ex.file]; if (!j) return [];
+  if (j.samples) return j.samples[on.ex.id] || [];
+  const x = (j.datasets || []).find(y => y.id === on.ex.id); return x && (x.pos || x.neg) ? [{pos: x.pos, neg: x.neg}] : [];
+}
+function pickerHtml(d) {
+  const P2 = d.picker, on = P2.items.find(x => x.k === PS[d.id]) || P2.items[0];
+  const opts = P2.items.map(x => `<option value="${esc(x.k)}"${x.k === on.k ? ' selected' : ''}>${esc(x.name)} (${esc(x.from.split(' (')[0])})</option>`).join('');
+  return `<label class="ddl"><span>${esc(P2.label)}</span><select class="dd" data-d="${esc(d.id)}">${opts}</select></label>
+    <div class="pkpanel"><p class="k">${esc(on.from)} · Fig. 3: <code>${esc(on.fig)}</code></p><h4 class="pkh">${esc(on.name)}</h4>
+    <dl class="pkdl"><dt>Items</dt><dd>${esc(on.n)} <span class="where">honest/deceptive, Table 2</span></dd>${d.id === 'nat-val' ? '<dt>Held out</dt><dd>25 honest + 25 deceptive, for validation</dd>' : ''}</dl>
+    <p class="k" style="margin-top:var(--s-4)">How it is built</p><p class="ptext">${md(on.how)}</p>
+    <p class="ptext" style="font-size:var(--fs-ui);color:var(--ink-2)">${md(P2.howNote)}</p>
+    ${(() => { const E = setExamples(on); if (!E.length) return '';
+      const key = d.id + '|' + on.k, i = (PSI[key] || 0) % E.length, ex = E[i];
+      return `<p class="k" style="margin-top:var(--s-4)">An example from the source data</p><p class="flag">${md(P2.exNote)}${on.redaction ? ' ' + md(on.redaction) : ''}</p>
+        ${E.length > 1 ? `<div class="sampler"><span class="sc">Example <b>${i + 1}</b> of ${E.length}, drawn at random from the source data</span><button class="shuffle" id="another2" data-key="${esc(key)}" data-n="${E.length}" type="button">Show another example <span aria-hidden="true">→</span></button></div>` : ''}
+        ${pairFigure({pos: ex.pos, neg: ex.neg, name: on.name, role: 'test'})}${lieBox({id: on.ex.id, role: 'test', pos: ex.pos, neg: ex.neg}, i)}`; })()}
+    ${on.notes.length ? `<p class="k" style="margin-top:var(--s-4)">Notes</p><ul class="pknotes">${on.notes.map(n => `<li>${md(n)}</li>`).join('')}</ul>` : ''}</div>`;
+}
+function secHtml(x) {
+  return (x.md ? `<p class="ptext">${md(x.md)}</p>` : '') + (x.list ? `<ul class="pknotes">${x.list.map(n => `<li>${md(n)}</li>`).join('')}</ul>` : '')
+    + (x.table ? `<div class="figscroll"><table class="dt"><thead><tr>${x.table.head.map(h => `<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${x.table.rows.map(r => `<tr>${r.map((v, i) => `<td${i >= 3 && i <= 5 ? ' class="num"' : ''}>${esc(v)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>` : '');
+}
+function tocView(d, stage, meta, sample, exI) {
+  const S = d.sections ? d.sections.map(x => ({id: x.id, t: x.t, html: x.picker ? pickerHtml(d) : (x.table ? secHtml({table: x.table}) + secHtml({md: x.md}) : secHtml(x)),
+      sub: x.sub && x.sub.map(y => ({id: y.id, t: y.t, html: secHtml(y)}))})) : [
+    {id: 'sec-what', t: 'What is trained', html: `<p class="ptext">${md(d.how)}</p>`},
+    {id: 'sec-pairs', t: 'The prompt pairs', sub: [
+      {id: 'sec-families', t: 'Four families', html: famTable(d)},
+      {id: 'sec-types', t: 'Default and the 16 deception types', html: pairTable(d)},
+      {id: 'sec-controls', t: 'Controls', html: `<p class="ptext">${md(d.controlsNote)}</p>`},
+      {id: 'sec-framings', t: 'Framings', html: `<p class="ptext">${md(d.framingsNote)}</p>`}]},
+    {id: 'sec-example', t: 'A training example', html: `<p class="ptext">${md(d.exampleIntro)}</p>${sample}${pairFigure(d)}${lieBox(d, exI)}`},
+    {id: 'sec-labels', t: d.notesTitle || 'What the labels mean', sub: d.labelNotes.map((n, i) => ({id: 'sec-label-' + i, t: n.title.replace(/\.$/, ''), html: `<p class="ptext">${md(n.text)}</p>`}))},
+  ];
+  const toc = S.map(x => `<a href="#${x.id}" data-t="${x.id}" class="l1">${esc(x.t)}</a>${(x.sub || []).map(y => `<a href="#${y.id}" data-t="${y.id}" class="l2">${esc(y.t)}</a>`).join('')}`).join('');
+  const body = S.map(x => `<section class="sec"><h3 id="${x.id}">${esc(x.t)}</h3>${x.html || ''}${(x.sub || []).map(y => `<h4 id="${y.id}">${esc(y.t)}</h4>${y.html}`).join('')}</section>`).join('');
+  return `<p class="k">${esc(stage)}</p><h2>${esc(d.name)}</h2><div class="meta">${meta.map(m => `<span>${m}</span>`).join('')}</div>
+    <div class="toclay"><nav class="toc" aria-label="Contents"><p class="tct">Contents</p>${toc}</nav><div class="tocbody">${body}</div></div>`;
+}
+/* The shell sizes this page's iframe to its full height and scrolls an ancestor, so position:sticky cannot work there:
+   follow the scroller instead (same origin). Standalone, the CSS sticky does the job and this only highlights the current section. */
+let TOCPIN = null, TOCPINT = 0;
+function tocScroller() {
+  const fe = window.frameElement; if (!fe) return null;
+  for (let el = fe.parentElement; el; el = el.parentElement) { const o = getComputedStyle(el).overflowY; if ((o === 'auto' || o === 'scroll') && el.scrollHeight > el.clientHeight) return el; }
+  return null;
+}
+function tocUpdate() {
+  const nav = document.querySelector('.toc'), lay = document.querySelector('.toclay'); if (!nav || !lay) return;
+  const fe = window.frameElement, narrow = matchMedia('(max-width: 1000px)').matches;
+  let visTop = window.scrollY, viewH = innerHeight;
+  if (fe) { const sc = tocScroller(), cTop = sc ? sc.getBoundingClientRect().top : 0, fr = fe.getBoundingClientRect();
+    visTop = cTop - fr.top; viewH = (sc ? sc.clientHeight : parent.innerHeight); }
+  if (fe && !narrow) {
+    const lt = lay.getBoundingClientRect().top + window.scrollY, room = lay.offsetHeight - nav.offsetHeight;
+    nav.style.transform = `translateY(${Math.max(0, Math.min(room, visTop + 16 - lt))}px)`;
+  } else nav.style.transform = '';
+  const hs = [...document.querySelectorAll('.tocbody h3, .tocbody h4')]; let cur = hs[0];
+  hs.forEach(h => { if (h.getBoundingClientRect().top + window.scrollY <= visTop + Math.min(120, viewH / 4)) cur = h; });
+  /* a clicked entry near the end of the page cannot reach the top: keep it marked while it is on screen */
+  const pin = TOCPIN && document.getElementById(TOCPIN);
+  if (pin && Date.now() - TOCPINT < 2000) { const y = pin.getBoundingClientRect().top + window.scrollY; if (y >= visTop && y <= visTop + viewH) cur = pin; }
+  nav.querySelectorAll('a').forEach(a => a.classList.toggle('on', cur && a.dataset.t === cur.id));
+}
+(() => { const go = () => requestAnimationFrame(tocUpdate);
+  addEventListener('scroll', go, {passive: true}); addEventListener('resize', go);
+  try { const sc = tocScroller(); (sc || parent).addEventListener('scroll', go, {passive: true}); parent.addEventListener('resize', go); } catch (e) {}
+  document.addEventListener('click', e => { const a = e.target.closest('.toc a'); if (!a) return; e.preventDefault();
+    TOCPIN = a.dataset.t; TOCPINT = Date.now();
+    const t = document.getElementById(a.dataset.t); if (t) t.scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start'}); });
+})();
+const read = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+const write = (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} };
+
+fetch('train_facts.json').then(r => r.json()).then(tf => { TF = tf; newTrainFact(); });
+$('#papers').innerHTML = PAPERS.map(p => `<li><button type="button" data-p="${p.id}"><p class="pt1">${esc(p.title)}</p>
+  <p class="pm">${esc(p.authors)} · ${p.year} · arXiv ${esc(p.url.split('/').pop())}</p><p class="ps">${esc(p.summary)}</p><p class="pset">${esc(p.setup)}</p></button></li>`).join('');
+$('#papers').onclick = e => { const b = e.target.closest('button'); if (b) openPaper(b.dataset.p); };
+$('#back').onclick = () => { $('#paper').hidden = true; $('#list').hidden = false; P = null; write('dl-bench-paper', ''); post(); };
+{ const sp = read('dl-bench-paper'); if (sp && PAPERS.some(p => p.id === sp)) openPaper(sp); else post(); }
+
+function openPaper(id) {
+  const p = PAPERS.find(x => x.id === id);
+  Promise.all([fetch(p.data).then(r => r.json()), p.results ? fetch(p.results).then(r => r.json()) : null, TF ? TF : fetch('train_facts.json').then(r => r.json()), p.samples ? fetch(p.samples).then(r => r.json()) : null, Promise.all((p.extra || []).map(f => EXTRA[f] || fetch(f).then(r => r.json()).then(j => (EXTRA[f] = j))))]).then(([d, r, tf, sm]) => {
+    P = p; D = d; F = d.facets || []; RES = r; TF = tf; if (!trainFact || (p.id !== 'natarajan' && trainFact.split !== 'train')) newTrainFact();
+    if (sm) D.datasets.forEach(x => { if (sm.samples[x.id]) x.samples = sm.samples[x.id]; });
+    sel = new Map(); F.forEach(f => sel.set(f.k, new Set()));
+    if (RES || D.resultsTable) D.datasets.push({id: 'results', role: 'results', abbr: RES ? 'All detectors' : D.resultsTable.kind === 'mask' ? 'Honesty by model' : 'Probe results', name: RES ? 'How four lie detectors did on each subset' : D.resultsTable.title || 'How the probe did'});
+    $('#ptitle').textContent = p.h1;
+    $('#plede').innerHTML = D.lede ? md(D.lede) : `How a lie detector is trained, calibrated and tested on Liars' Bench (<a href="${p.url}" target="_blank" rel="noopener">Kretschmar et al. 2025</a>), one dataset at a time. Pick a dataset to read one verified dishonest and honest example in full.`;
+    $('#list').hidden = true; $('#paper').hidden = false; write('dl-bench-paper', id);
+    $('#filters').hidden = true;
+    strip(); if (F.length) filters();
+    const saved = read('dl-bench-sel-' + id);
+    select(D.datasets.some(x => x.id === saved) ? saved : p.first, false);
+    window.scrollTo(0, 0);
+  }).catch(e => { $('#list').insertAdjacentHTML('beforeend', `<p class="empty">Could not load ${esc(p.data)} (${esc(e.message)}).</p>`); });
+}
+
+function strip() {
+  $('#strip').innerHTML = STAGES.filter(s => D.datasets.some(d => d.role === s.role)).map((s, i) => `${i && s.role !== 'appendix' ? '<span class="arrow" aria-hidden="true">→</span>' : ''}
+    <div class="stage"><div class="k">${esc((D.stageNames || {})[s.role] || s.name)}${s.role === 'test' && F.length ? ' <button class="fbtn" id="fbtn" type="button" aria-expanded="false" aria-controls="filters">Filter ▾</button>' : ''}</div>
+    <div class="tabs">${D.datasets.filter(d => d.role === s.role).map(d =>
+      `<button class="tab" type="button" role="tab" id="t-${d.id}" data-id="${d.id}" aria-selected="false" title="${esc(d.name)}">${esc(d.abbr)}${d.flag ? '<sup>*</sup>' : ''}</button>`).join('')}</div></div>`).join('');
+  $('#stripnote').innerHTML = D.stripNote ? md(D.stripNote) : `All seven test subsets are test-only: no detector is trained or tuned on them. ${md(D.upperBound)} <sup>*</sup> closest to the probe's training data.`;
+  $('#strip').onclick = e => { const t = e.target.closest('.tab'); if (t) select(t.dataset.id, true); };
+  $('#strip').onkeydown = e => {
+    if (!['ArrowLeft', 'ArrowRight'].includes(e.key)) return;
+    const tabs = [...document.querySelectorAll('.tab')], i = tabs.findIndex(t => t.dataset.id === cur);
+    const n = tabs[(i + (e.key === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length]; n.focus(); select(n.dataset.id, true);
+  };
+  if ($('#fbtn')) $('#fbtn').onclick = () => { const f = $('#filters'), open = f.hidden; f.hidden = !open; $('#fbtn').setAttribute('aria-expanded', open); post(); };
+}
+
+/* filters apply to the test subsets only; OR within a facet, AND across facets */
+const tests = () => D.datasets.filter(d => d.role === 'test');
+const matches = d => F.every(f => { const s = sel.get(f.k); return !s.size || (d[f.k] || []).some(v => s.has(v)); });
+const vname = (k, v) => { const f = F.find(f => f.k === k); return ((f && f.values.find(x => x.v === v)) || {name: k === 'models' ? (MODELFULL[v] || v) : v}).name; };
+function filters() {
+  const T = tests();
+  $('#filters').innerHTML = F.map(f => {
+    const vs = f.values.filter(v => T.some(d => (d[f.k] || []).includes(v.v))); if (!vs.length) return '';
+    return `<div class="facet"><span>${esc(f.name)}${f.src === 'map4' ? '<small>Map 4 tag</small>' : f.src === 'examples' ? '<small>from the examples</small>' : ''}</span><div class="chips">${vs.map(v =>
+      `<button class="chip" type="button" aria-pressed="false" data-f="${f.k}" data-v="${v.v}">${esc(v.name)}<span class="n">${T.filter(d => (d[f.k] || []).includes(v.v)).length}</span></button>`).join('')}</div></div>`;
+  }).join('') + `<div class="fstatus"><span id="fcount"></span><button class="btn" id="clear" type="button" disabled>Clear</button></div>`;
+  $('#filters').onclick = e => {
+    const b = e.target.closest('.chip'); if (!b) return;
+    const s = sel.get(b.dataset.f); s.has(b.dataset.v) ? s.delete(b.dataset.v) : s.add(b.dataset.v);
+    b.setAttribute('aria-pressed', s.has(b.dataset.v)); applyFilters();
+  };
+  $('#clear').onclick = () => { sel.forEach(s => s.clear()); document.querySelectorAll('.chip').forEach(c => c.setAttribute('aria-pressed', 'false')); applyFilters(); };
+  applyFilters();
+}
+function applyFilters() {
+  const T = tests(), on = T.filter(matches), active = [...sel.values()].some(s => s.size);
+  T.forEach(d => $('#t-' + d.id).classList.toggle('dim', !matches(d)));
+  $('#clear').disabled = !active;
+  $('#fcount').innerHTML = active ? `<b>${on.length}</b> of ${T.length} test subsets match${on.length ? ': ' + on.map(d => esc(d.abbr)).join(', ') : ''}` : 'Pick values to dim the test subsets that don’t match.';
+  const fb = $('#fbtn'); fb.textContent = active ? `Filter (${[...sel.values()].reduce((a, s) => a + s.size, 0)}) ▾` : 'Filter ▾';
+}
+
+/* ---------- the selected dataset ---------- */
+const keyOf = (t, i, ex) => { const m = /msg (\d+)/.exec(t.q); if (m) return 'm' + m[1];
+  const role = t.role.split(' ')[0]; return role + ':' + ex.turns.slice(0, i).filter(x => x.role.split(' ')[0] === role).length; };
+function rows(pos, neg, belief) {
+  const R = new Map();
+  const add = (ex, side) => ex && ex.turns.forEach((t, i) => { const k = keyOf(t, i, ex); if (!R.has(k)) R.set(k, {role: t.role, q: t.q}); R.get(k)[side] = t; });
+  add(belief, 'b'); add(pos, 'd'); add(neg, 'h'); return [...R.values()];
+}
+/* word-level diff (LCS) between two literal turns */
+function diff(a, b) {
+  const A = a.split(/(\s+)/), B = b.split(/(\s+)/);
+  if (A.length * B.length > 4e6) return [esc(a), esc(b)];
+  const n = A.length, m = B.length, L = Array.from({length: n + 1}, () => new Uint16Array(m + 1));
+  for (let i = n - 1; i >= 0; i--) for (let j = m - 1; j >= 0; j--) L[i][j] = A[i] === B[j] ? L[i + 1][j + 1] + 1 : Math.max(L[i + 1][j], L[i][j + 1]);
+  let i = 0, j = 0, oa = '', ob = '';
+  const wrap = (s, c) => /^\s+$/.test(s) ? s : `<mark class="${c}">${esc(s)}</mark>`;
+  while (i < n && j < m) {
+    if (A[i] === B[j]) { oa += esc(A[i]); ob += esc(B[j]); i++; j++; }
+    else if (L[i + 1][j] >= L[i][j + 1]) oa += wrap(A[i++], 'xd'); else ob += wrap(B[j++], 'xh');
+  }
+  while (i < n) oa += wrap(A[i++], 'xd'); while (j < m) ob += wrap(B[j++], 'xh');
+  return [oa, ob];
+}
+const isSameRef = t => t && t.ref && /^(identical|same)/i.test(t.text);
+function cells(r) {
+  let d = r.d, h = r.h, hSame = false;
+  if (isSameRef(h) && d) { h = d; hSame = true; }
+  let hd = d ? esc(d.text) : '', hh = h ? esc(h.text) : '';
+  if (d && h && !d.ref && !h.ref && !hSame && d.text !== h.text) {
+    const [a, b] = diff(d.text, h.text), words = x => (x.match(/\S+/g) || []).length, marked = x => (x.match(/<mark/g) || []).length;
+    /* two different items (e.g. two scenarios): highlighting nearly every word says nothing, so show them plain */
+    if ((marked(a) + marked(b)) / Math.max(1, words(d.text) + words(h.text)) < .6) [hd, hh] = [a, b];
+  }
+  const cell = (t, html, same) => !t ? `<div class="msg empty">Same fixed prefix; the source does not repeat it</div>`
+    : `${same ? '<span class="same">Same as the dishonest example</span>' : ''}<div class="msg${t.ref ? ' ref' : ''}">${html}</div>`;
+  return [cell(d, hd), cell(h, hh, hSame)];
+}
+const nodot = s => String(s || '—').replace(/\.+\s*$/, '');
+
+function pairFigure(d) {
+  const two = !!d.pos, three = two && !!d.belief, R = rows(d.pos, d.neg, three ? d.belief : null);
+  const sub = x => x && x.head ? `<small>${esc(x.head)}</small>` : '';
+  const head = `<div class="hd blank"></div>${three ? `<div class="hd b">Belief check${sub(d.belief)}<small>${esc(d.belief.label)}</small></div>` : ''}${two ? `<div class="hd d">Dishonest${sub(d.pos)}<small>label ${esc(d.pos.label)}</small></div>` : ''}<div class="hd h">Honest${sub(d.neg)}<small>label ${esc(d.neg ? d.neg.label : '—')}</small></div>`;
+  /* with three columns the template differs per column, so it is tagged in each cell rather than in the role column */
+  const tag = t => three && t && t.q ? `<span class="same">${esc(t.q)}</span>` : '';
+  /* stacked on phones, a cell no longer sits under its column heading, so it carries its own label there */
+  const mc = (c, n) => three ? `<span class="mcol ${c}">${n}</span>` : '';
+  const bcell = t => !t ? '<div class="msg empty">—</div>' : `${tag(t)}<div class="msg${t.ref ? ' ref' : ''}">${esc(t.text)}</div>`;
+  const body = R.map(r => { const [cd, ch] = cells(r);
+    return `<div class="role">${esc(r.role)}${r.q && !three ? `<small>${esc(r.q)}</small>` : ''}</div>${three ? `<div>${mc('b', 'Belief check')}${bcell(r.b)}</div>` : ''}${two ? `<div>${mc('d', 'Dishonest')}${tag(r.d)}${cd}</div>` : ''}<div>${mc('h', 'Honest')}${tag(r.h)}${ch}</div>`; }).join('');
+  const claim = d.pairClaim ? esc(d.pairClaim)
+    : d.role === 'train' ? 'In a training pair, only the instruction differs; the reply is the same true statement, prefilled.'
+    : d.role === 'threshold' ? 'A control response: a benign instruction, an honest answer, no lie anywhere.'
+    : `What separates a lie from an honest answer in ${esc(d.name)}.`;
+  const how = (three ? 'The Belief check column shows the neutral wording used to set the belief; it is not a row of the dataset. ' : '')
+    + (two ? 'Words that differ between the dishonest and honest transcripts are highlighted on each side; italic text is our description where the source was not copied verbatim. ' : '');
+  const src = (three ? `Belief check: ${md(nodot(d.belief.source))}. ` : '')
+    + (two ? `Dishonest: ${md(nodot(d.pos.source))}. Honest: ${md(nodot(d.neg && d.neg.source))}.` : `Source: ${md(nodot(d.neg && d.neg.source))}.`);
+  return `<figure class="fig" data-pattern="P3" data-width="page"><div class="pair ${three ? 'three' : two ? 'two' : 'one'}" role="table" aria-label="Example, turn by turn">${head}${body}</div>
+    <figcaption><b>${claim}</b> ${how}${src}</figcaption></figure>`;
+}
+
+/* ---------- detector results (paper Figure 2, per model) as a forest plot ---------- */
+const NS = 'http://www.w3.org/2000/svg';
+function shape(s, x, y, r, attrs) {
+  const a = Object.entries(attrs).map(([k, v]) => `${k}="${v}"`).join(' ');
+  if (s === 'circle') return `<circle cx="${x}" cy="${y}" r="${r}" ${a}/>`;
+  if (s === 'square') return `<rect x="${x - r * .85}" y="${y - r * .85}" width="${r * 1.7}" height="${r * 1.7}" ${a}/>`;
+  if (s === 'triangle') return `<path d="M${x},${y - r}L${x + r},${y + r * .8}L${x - r},${y + r * .8}Z" ${a}/>`;
+  return `<path d="M${x},${y - r * 1.1}L${x + r * 1.1},${y}L${x},${y + r * 1.1}L${x - r * 1.1},${y}Z" ${a}/>`;
+}
+const mcol = m => m.focus ? 'var(--subject)' : 'var(--context)';
+const legend = () => `<div class="lg">${METHODS.map(m => `<span><svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">${shape(m.shape, 7, 7, 5, {fill: mcol(m)})}</svg>${esc(m.name)}</span>`).join('')}</div>`;
+function forest(dsList) {
+  const R = RES.results, W = 1000, LW = 74, GAP = 26, PW = (W - LW - 2 * GAP) / 3, ROW = 13, GROUP = METHODS.length * ROW + 14, TOP = 58;
+  const H = TOP + dsList.length * GROUP + 22;
+  let s = `<div class="figscroll"><svg viewBox="0 0 ${W} ${H}" role="img" aria-labelledby="ft"><title id="ft">Detector results per subset: balanced accuracy, AUROC and recall, mean over models with each model as a dot</title>`;
+  METRICS.forEach((mt, pi) => {
+    const x0 = LW + pi * (PW + GAP), X = v => x0 + v * PW;
+    s += `<text x="${x0}" y="14" class="pt">${esc(mt.name)}</text>${mt.note ? `<text x="${x0}" y="31" class="pn">${esc(mt.note)}</text>` : ''}`;
+    [0, .25, .5, .75, 1].forEach(t => s += `<line x1="${X(t)}" x2="${X(t)}" y1="${TOP - 8}" y2="${H - 22}" stroke="var(--hairline)"/>` + `<text x="${X(t)}" y="${H - 6}" class="tk" text-anchor="${t === 0 ? 'start' : t === 1 ? 'end' : 'middle'}">${t === 0 || t === 1 ? t : t.toFixed(2).replace(/^0/, '')}</text>`);
+    if (mt.chance != null) s += `<line x1="${X(mt.chance)}" x2="${X(mt.chance)}" y1="${TOP - 8}" y2="${H - 22}" stroke="var(--ink-3)" stroke-dasharray="var(--dash)"/><text x="${X(mt.chance) + 4}" y="${TOP - 10}" class="tk">chance</text>`;
+    dsList.forEach((ds, gi) => {
+      const gy = TOP + gi * GROUP;
+      if (gi) s += `<line x1="${x0}" x2="${x0 + PW}" y1="${gy - 7}" y2="${gy - 7}" stroke="var(--rule)"/>`;
+      METHODS.forEach((m, mi) => {
+        const y = gy + mi * ROW + ROW / 2, rows = R[m.k][mt.k], mean = rows.avg[ds], c = mcol(m);
+        const per = Object.keys(MODELN).map(k => [k, rows[k][ds]]).filter(([, v]) => v != null);
+        if (per.length > 1) { const lo = Math.min(...per.map(p => p[1])), hi = Math.max(...per.map(p => p[1]));
+          s += `<line x1="${X(lo)}" x2="${X(hi)}" y1="${y}" y2="${y}" stroke="${c}" stroke-width="1.5" opacity=".45"/>`; }
+        per.forEach(([, v]) => s += `<circle cx="${X(v)}" cy="${y}" r="2.2" fill="${c}" opacity=".55"/>`);
+        if (mean != null) s += shape(m.shape, X(mean), y, m.focus ? 5 : 4.5, {fill: c, stroke: 'var(--bg)', 'stroke-width': 1});
+        const tip = `${m.name} · ${ds} · ${mt.name}${mt.note ? ' ' + mt.note : ''}|mean ${mean == null ? '—' : mean.toFixed(2)}${per.length ? ' · ' + per.map(([k, v]) => `${MODELN[k]} ${v.toFixed(2)}`).join(' · ') : ''}`;
+        s += `<rect class="hit" x="${x0}" y="${y - ROW / 2}" width="${PW}" height="${ROW}" fill="transparent" data-tip="${esc(tip)}" tabindex="0"><title>${esc(tip.replace('|', ': '))}</title></rect>`;
+      });
+    });
+  });
+  dsList.forEach((ds, gi) => { const gy = TOP + gi * GROUP;
+    s += `<text x="0" y="${gy + METHODS.length * ROW / 2 + 4}" class="gl"${ds === 'Average' ? ' font-weight="700"' : ''}>${esc(ds)}</text>`; });
+  return s + '</svg></div>';
+}
+function wireTips(root) {
+  const tip = document.getElementById('tip');
+  root.querySelectorAll('.hit').forEach(h => {
+    const show = e => { const [a, b] = h.dataset.tip.split('|'); tip.innerHTML = `<b>${esc(a)}</b><br>${esc(b)}`; tip.hidden = false;
+      const r = (e.clientX != null && e.type !== 'focus') ? {x: e.clientX, y: e.clientY} : (() => { const b2 = h.getBoundingClientRect(); return {x: b2.left + b2.width / 2, y: b2.top}; })();
+      tip.style.left = Math.min(r.x + 12, innerWidth - 300) + 'px'; tip.style.top = (r.y + 14) + 'px'; };
+    h.addEventListener('pointermove', show); h.addEventListener('focus', show);
+    h.addEventListener('pointerleave', () => tip.hidden = true); h.addEventListener('blur', () => tip.hidden = true);
+  });
+}
+function subsetClaim(abbr) {
+  const R = RES.results, b = METHODS.map(m => [m, R[m.k].bacc.avg[abbr]]).filter(x => x[1] != null);
+  const top = Math.max(...b.map(x => x[1])), best = b.filter(x => x[1] === top).map(x => x[0].name), probe = R['mean-probe'].bacc.avg[abbr];
+  const pr = `the mean probe ${probe == null ? 'has no result' : probe <= .5 ? 'stays at chance (' + probe.toFixed(2) + ')' : 'reaches ' + probe.toFixed(2)}`;
+  if (top < .56) return `On ${abbr}, no detector does much better than chance: the best balanced accuracy is ${top.toFixed(2)} (${best.join(', ')}), and ${pr}.`;
+  return `On ${abbr}, ${best.join(' and ')} ${best.length > 1 ? 'reach' : 'reaches'} ${top.toFixed(2)} balanced accuracy; ${pr}.`;
+}
+const ENC = 'The large mark is the mean over models as reported in the paper; small dots are the individual models and the line spans them. Balanced accuracy and recall use the threshold that flags at most 1% of Alpaca responses. Hover a row for the per-model values.';
+
+function resultsView() {
+  const rows = [
+    ['LLM-as-a-Judge', 'Black-box (no access to the model’s internals): reads the transcript', 'Not trained. An independent large language model (Claude) scores the transcript 0–100'],
+    ['Self-Evaluation', 'Black-box: asks the model itself', 'Not trained. The model that wrote the reply scores its own message 0–100'],
+    ['Unrelated Question Classifier', 'Black-box: 39 yes/no follow-up questions', 'Logistic regression per base model, trained on instructed lies and honest answers to 80 questions from the datasets of [Pacchiardi et al. 2023](https://arxiv.org/abs/2309.15840)'],
+    ['Mean probe', 'White-box (reads the model’s activations) at one layer', 'Logistic regression on the probe training pairs (see “Train the probe”)'],
+  ];
+  return `<p class="k">Results</p><h2>How four lie detectors did on each subset</h2>
+    <p class="ptext">The main results of <a href="https://arxiv.org/abs/2511.16035" target="_blank" rel="noopener">Liars' Bench</a> (its Figure 2), redrawn with every model shown. <b>Balanced accuracy</b> is the average of the share of lies caught and the share of honest answers passed. <b>Recall</b> is the share of lies caught. Both use the cutoff that flags at most 1% of Alpaca responses. <b>AUROC</b> (area under the receiver operating characteristic curve) needs no cutoff: it is the chance that a random lie scores above a random honest answer. System prompts are hidden from the text-based detectors, and probes are not scored on system-prompt tokens, because Instructed-Deception and Convincing-Game put the instruction to lie there.</p>
+    <table class="dt"><thead><tr><th>Detector</th><th>Access</th><th>What it is trained on</th></tr></thead><tbody>${rows.map(r => `<tr><td>${esc(r[0])}</td><td>${esc(r[1])}</td><td>${md(r[2])}</td></tr>`).join('')}</tbody></table>
+    <figure class="fig" data-pattern="P2" data-width="page">${legend()}${forest([...RES.datasets, 'Average'])}
+      <figcaption><b>The mean probe, the only white-box detector, stays at chance balanced accuracy on four of the seven subsets.</b> Each row is one detector on one subset. ${ENC} Source: ${esc(RES.source)}.</figcaption></figure>`;
+}
+
+function probeResultsView() {
+  const T = D.resultsTable;
+  return `<p class="k">Results</p><h2>How the probe did</h2>
+    <p class="ptext"><b>AUROC</b> (area under the receiver operating characteristic curve) here compares deceptive with honest responses from the same test set and needs no cutoff: it is the chance that a random deceptive response scores above a random honest one. Ambiguous responses are left out.</p>
+    <table class="rt"><thead><tr><th>Test set</th><th>AUROC, deceptive vs honest</th><th>Where</th></tr></thead><tbody>${T.rows.map(r => `<tr><td>${esc(r.set)}</td><td class="num">${r.auroc.toFixed(3)}</td><td>${esc(r.where)}</td></tr>`).join('')}</tbody></table>
+    <p class="ptext" style="margin-top:var(--s-4)">${md(T.recall)}</p>`;
+}
+
+/* "What the model is lying about?": one annotation per example, quotes copied verbatim from the turns shown above */
+function lieBox(d, i) {
+  const fixed = d.role === 'train' ? ['None. Both replies are the same true statement, written for the model (prefilled).', 'No lie. The two examples differ only in the instruction to be honest or dishonest.']
+    : d.role === 'threshold' ? ['None. An ordinary request and an honest answer.', 'No lie. Control responses are used only to set the cutoff that decides which scores count as lies.'] : null;
+  const head = '<p class="k">What the model is lying about?</p>';
+  if (fixed) return `<div class="lie">${head}<dl><dt>Claim</dt><dd>${esc(fixed[0])}</dd><dt>Verdict</dt><dd class="v">${esc(fixed[1])}</dd></dl></div>`;
+  const a = (ANN[d.id] || []).find(x => x.i === i); if (!a) return '';
+  const ex = {dishonest: d.pos, honest: d.neg};
+  const where = r => { const t = ex[r.side] && ex[r.side].turns[r.turn]; return t ? `${r.side === 'dishonest' ? 'Dishonest' : 'Honest'} example · ${esc(t.role)}${t.q ? ', ' + esc(t.q) : ''}` : ''; };
+  const quote = r => r.quote != null ? `<q class="${r.side === 'dishonest' ? 'd' : 'h'}">${esc(r.quote)}</q><span class="where">${where(r)}</span>` : `<span class="ev">${md(r.text)}</span>`;
+  return `<div class="lie">${head}<dl>
+    <dt>Claim</dt><dd>${a.claim ? quote(a.claim) : '<span class="ev">No false statement in the dishonest reply.</span>'}</dd>
+    <dt>Evidence of belief</dt><dd>${quote(a.evidence)}${a.evNote ? `<span class="where">${esc(a.evNote)}</span>` : ''}</dd>
+    <dt>Verdict</dt><dd class="v">${esc(a.verdict)}</dd>
+    <dt>Honest reply says</dt><dd>${quote(a.honest)}${a.honestNote ? `<span class="where">${esc(a.honestNote)}</span>` : ''}</dd></dl></div>`;
+}
+
+function maskResultsView() {
+  const T = D.resultsTable, f = v => v == null ? '—' : typeof v === 'number' ? v.toFixed(1) : esc(v);
+  const tbl = (head, rows, mark) => `<div class="figscroll"><table class="rt"><thead><tr>${head.map(h => `<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${rows.map(r =>
+    `<tr${mark && mark.includes(r[0]) ? ' class="mk"' : ''}>${r.map((v, i) => i ? `<td class="num">${f(v)}</td>` : `<td>${esc(v)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+  return `<p class="k">Results</p><h2>${esc(T.title)}</h2><p class="ptext">${md(T.intro)}</p>${tbl(T.head, T.rows, T.mark)}
+    <p class="ptext" style="font-size:var(--fs-ui);color:var(--ink-2);margin-top:var(--s-2)">${md(T.markNote)}</p>
+    <p class="k" style="margin-top:var(--s-6)">${esc(T.title2)}</p><p class="ptext">${md(T.intro2)}</p>${tbl(T.head2, T.rows2)}`;
+}
+
+function select(id, user) {
+  const d = D.datasets.find(x => x.id === id); cur = id; write('dl-bench-sel-' + P.id, id);
+  document.querySelectorAll('.tab').forEach(t => t.setAttribute('aria-selected', t.dataset.id === id));
+  if (d.role === 'results') { $('#view').innerHTML = RES ? resultsView() : D.resultsTable.kind === 'mask' ? maskResultsView() : probeResultsView(); wireTips($('#view')); post(); return; }
+  const stage = (D.stageNames || {})[d.role] || STAGES.find(s => s.role === d.role).name;
+  let sample = '', exI = 0;
+  if (d.trainFile && d.pairs) {
+    Object.assign(d, natPair(d, trainFact));
+    sample = `<div class="sampler"><span class="sc">Random fact <b>${trainFact.k + 1}</b> of the ${TF.nTrue} true facts · line ${trainFact.line} of <code>${esc(TF.source.file)}</code> · pair: <b>${esc((d.pairs.find(x => x.k === (PK[d.id] || d.pairs[0].k)) || {}).name)}</b></span>
+      <button class="shuffle" id="another" type="button">Show another fact <span aria-hidden="true">→</span></button></div>`;
+  } else if (d.trainFile) {
+    Object.assign(d, trainPair(trainFact));
+    const k = trainFact.k + 1;
+    sample = `<div class="sampler"><span class="sc">Random training fact <b>${k}</b> of ${TF.nTrain} (the last ${TF.nVal} of ${TF.nTrue} are held out for validation) · line ${trainFact.line} of <code>${esc(TF.source.file)}</code>${trainFact.inID && P.id === 'liars-bench' ? ' · <b>this statement also appears in ID</b>' : ''}</span>
+      <button class="shuffle" id="another" type="button">Show another example <span aria-hidden="true">→</span></button></div>`;
+  } else if (d.samples) {
+    const n = d.samples.length, i = (SI[d.id] || 0) % n; exI = i;
+    Object.assign(d, {pos: d.samples[i].pos, neg: d.samples[i].neg});
+    sample = `<div class="sampler"><span class="sc">Example <b>${i + 1}</b> of ${n}${D.sampleNote ? ': ' + esc(D.sampleNote) : ', drawn at random from the paper’s data' + (d.pos ? ' (dishonest and honest each drawn at random)' : '')}</span>
+      <span class="dots" role="group" aria-label="Jump to an example">${d.samples.map((_, j) => `<button type="button" class="dot${j === i ? ' on' : ''}" data-j="${j}" aria-label="Example ${j + 1}"${j === i ? ' aria-current="true"' : ''}></button>`).join('')}</span>
+      <button class="shuffle" id="another" type="button">Show another example <span aria-hidden="true">→</span></button></div>`;
+  }
+  const meta = [];
+  if (d.role !== 'train') ['object', 'reason', 'context'].forEach(k => (d[k] || []).forEach(v => meta.push(esc(vname(k, v)) + (k === 'context' ? ' belief' : ''))));
+  if ((d.finetuned || []).includes('ft')) meta.push('fine-tuned to lie');
+  if (d.models) meta.push(d.models.length === 4 ? 'all 4 models' : d.models.map(m => esc(vname('models', m))).join(', '));
+  if (d.honest != null && d.ambiguous != null) meta.push(`<span class="c-h">${fmt(d.honest)} honest</span> / ${fmt(d.ambiguous)} ambiguous / <span class="c-d">${fmt(d.lies)} deceptive</span>`);
+  else if (d.honest != null && d.role === 'threshold' && !d.lies) meta.push(`${fmt(d.honest)} control responses`);
+  else if (d.honest != null) meta.push(`<span class="c-h">${fmt(d.honest)} honest</span> / <span class="c-d">${fmt(d.lies)} lies</span>`);
+  if (d.metaExtra) d.metaExtra.forEach(m => meta.push(md(m)));
+  if (d.realism) meta.push(`realism: ${esc(d.realism.toLowerCase())} (Table 1)`);
+  if (d.result) meta.push(`probe AUROC ${d.result.auroc.toFixed(3)}${d.result.note ? ' (' + esc(d.result.note) + ')' : ''}`);
+  const tags = F.filter(f => f.src === 'map4' && (d[f.k] || []).length).map(f =>
+    `<div class="tagrow"><div class="k2">${esc(f.name)}</div><div>${(d[f.k]).map(v => esc(vname(f.k, v))).join(', ')}${d.tagUncertain ? '<span class="unc" title="Map 4 marks this subset’s tags as uncertain">UNCERTAIN</span>' : ''}</div><div class="why">${esc(d.why && d.why[f.k] || '')}</div></div>`).join('');
+  const verify = (d.note || (d.corrections && d.corrections.length)) ? `<details><summary>Verification notes${d.status ? ` · ${esc(d.status.split(' (')[0])}` : ''}</summary>${d.samples ? '<p class="ptext" style="font-size:var(--fs-ui);color:var(--ink-2)">From our Map 4 check of this dataset. Remarks about a specific row refer to the example verified there, not to the random examples above.</p>' : ''}
+      ${d.note ? `<p class="ptext">${md(d.note)}</p>` : ''}
+      ${d.corrections && d.corrections.length ? `<ul class="corr">${d.corrections.map(c => `<li class="${c.d > 1 ? 'd2' : ''}">${md(c.t)}</li>`).join('')}</ul>` : ''}</details>` : '';
+  setTimeout(() => { wireTips($('#view'));
+    const a = $('#another'); if (a) a.onclick = () => { if (d.trainFile) newTrainFact(); else SI[d.id] = ((SI[d.id] || 0) + 1) % d.samples.length; select(cur, true); };
+    document.querySelectorAll('.dots .dot').forEach(b => b.onclick = () => { SI[d.id] = +b.dataset.j; select(cur, true); });
+    document.querySelectorAll('select.dd').forEach(el => el.onchange = () => { PS[el.dataset.d] = el.value; select(cur, true); const n = document.querySelector('select.dd'); if (n) n.focus({preventScroll: true}); });
+    const a2 = $('#another2'); if (a2) a2.onclick = () => { PSI[a2.dataset.key] = ((PSI[a2.dataset.key] || 0) + 1) % +a2.dataset.n; select(cur, true); };
+    document.querySelectorAll('tr.pk').forEach(r => { const go = () => { PK[d.id] = r.dataset.k; select(cur, true); const t = document.querySelector(`tr.pk[data-k="${r.dataset.k}"]`); if (t) t.focus({preventScroll: true}); };
+      r.onclick = go; r.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } }; }); });
+  if (d.toc) { $('#view').innerHTML = tocView(d, stage, meta, sample, exI); post(); requestAnimationFrame(tocUpdate); return; }
+  const showAbbr = (d.role === 'test' || d.role === 'appendix') && d.abbr !== d.name;
+  $('#view').innerHTML = `<p class="k">${esc(stage)}${d.role === 'test' ? ' · ' + esc(d.abbr) : ''}</p><h2>${esc(d.name)}${showAbbr ? ` <span style="color:var(--ink-2);font-weight:400">(${esc(d.abbr)})</span>` : ''}</h2>
+    <div class="meta">${meta.map(m => `<span>${m}</span>`).join('')}</div>
+    ${sample}
+    ${pairFigure(d)}
+    ${lieBox(d, exI)}
+    <p class="ptext" style="margin-top:var(--s-5)">${md(d.how)}</p>
+    ${d.labelNotes ? `<div class="labelnotes"><p class="k">${esc(d.notesTitle || 'What the labels mean')}</p><ul>${d.labelNotes.map(n => `<li><b>${esc(n.title)}</b><span>${md(n.text)}</span></li>`).join('')}</ul></div>` : ''}
+    ${d.table ? `<div class="tblock"><p class="k">${esc(d.table.title)}</p><div class="figscroll"><table class="rt"><thead><tr>${d.table.head.map(h => `<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${d.table.rows.map(r => `<tr>${r.map((v, i) => i ? `<td class="num">${esc(v)}</td>` : `<td>${esc(v)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>${d.table.note ? `<p class="ptext">${md(d.table.note)}</p>` : ''}</div>` : ''}
+    ${d.layerNote ? `<p class="ptext" style="font-size:var(--fs-ui);color:var(--ink-2)">${esc(d.layerNote)} Source: <code>${esc(TF.source.config)}</code> in <a href="https://github.com/${TF.source.repo}/tree/${TF.source.commit}" target="_blank" rel="noopener">${esc(TF.source.repo)} @ ${esc(TF.source.commit.slice(0, 7))}</a>, pinned as a submodule by <a href="https://github.com/Cadenza-Labs/liars-bench" target="_blank" rel="noopener">Cadenza-Labs/liars-bench</a>.</p>` : ''}
+    ${d.flag ? `<p class="flag">${md(d.flag)}</p>` : ''}${d.redaction ? `<p class="flag">${md(d.redaction)}${d.pairNote ? ' ' + md(d.pairNote) : ''}</p>` : d.pairNote ? `<p class="flag">${md(d.pairNote)}</p>` : ''}
+    ${d.role === 'test' && RES ? `<figure class="fig" data-pattern="P2" data-width="page"><p class="k" style="margin-bottom:var(--s-2)">How the detectors did on ${esc(d.abbr)}</p>${legend()}${forest([d.abbr])}
+      <figcaption><b>${esc(subsetClaim(d.abbr))}</b> ${ENC} All subsets are in the Results tab.</figcaption></figure>` : ''}
+    ${tags ? `<details><summary>Our tags (Map 4)</summary>${tags}</details>` : ''}
+    ${verify}
+    ${d.personalNote ? `<div class="mynote"><p class="k">My note · ${esc(d.personalNote.date)}</p><p class="mytext">${md(d.personalNote.text)}</p><p class="k" style="margin-top:var(--s-3)">${esc(d.personalNote.reasonsTitle || 'Why')}</p><ul>${d.personalNote.reasons.map(r => `<li>${md(r)}</li>`).join('')}</ul></div>` : ''}`;
+  post();
+}
+
+/* the Deception Lab shell hosts this page in an iframe and sizes it from this message */
+function post() { try { parent.postMessage({benchh: document.documentElement.scrollHeight}, '*'); } catch (e) {} }
+if (window.ResizeObserver) new ResizeObserver(post).observe(document.body);
+</script>
+</body></html>

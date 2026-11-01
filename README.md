@@ -22,6 +22,7 @@ To point it at your Obsidian vault instead of `./notes`, symlink: `ln -s ~/vault
 - **Gaps**: the hand-ranked priorities from `notes/matrix.md`, drawn as scientific value × monitoring value. Dashed points are not yet identifiable.
 - **Reading**: the paper queue by status. Status buttons write to the file.
 - **Projects**: work, as opposed to knowledge. One folder per project under `projects/`; `project.md` is the description, other `.md` files beside it are project notes, and `experiments/` holds experiment write-ups (same frontmatter as `notes/experiments/`; their `fills:` count toward matrix cells). Click to open in the panel; `+ New note` / `+ New experiment` create files in the project folder.
+- **Interactive figures in notes**: a paragraph of its own reading `:::embed embeds/<file>.html [height]` renders that page from `app/embeds/` in an iframe (the page can post `{embedH: <px>}` to its parent to size itself). Plain notes only pass inline `<svg>` through.
 
 ## Files
 

@@ -1,0 +1,409 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Locating the answer variable</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&family=JetBrains+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="../tokens.css">
+<style>
+/* Embedded in an experiment note: one reading column, figures at full embed width, hairlines instead of boxes (docs/BRAND.md). */
+[hidden]{display:none!important}
+html,body{margin:0;background:var(--bg);color:var(--ink)}
+body{font-family:var(--font);font-size:var(--fs-body);line-height:var(--lh-body)}
+.wrap{display:flex;flex-direction:column;gap:var(--s-7);padding-block:var(--s-2) var(--s-6);padding-left:2px;padding-right:2px}
+h2{font-size:var(--fs-h2);line-height:1.25;font-weight:600;margin:0;padding-bottom:var(--s-2);border-bottom:var(--border);text-wrap:balance}
+h3{font-size:var(--fs-h3);line-height:1.4;font-weight:700;margin:0}
+p{margin:0;max-width:70ch}
+.k{font-family:var(--mono);font-size:var(--fs-label);font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2)}
+.mono{font-family:var(--mono);font-size:.88em}
+section{display:flex;flex-direction:column;gap:var(--s-4)}
+figure{margin:0;display:flex;flex-direction:column;gap:var(--s-3)}
+figcaption{font-size:var(--fs-caption);line-height:1.5;color:var(--ink-2);max-width:70ch}
+figcaption b{color:var(--ink);font-weight:600}
+.tag{font-family:var(--mono);font-size:var(--fs-label);font-weight:500;letter-spacing:.08em;text-transform:uppercase;border:1px dashed var(--ink-2);color:var(--ink-2);border-radius:var(--radius);padding:1px 6px;white-space:nowrap}
+.hint{font-style:italic;color:var(--interact-ink);font-size:var(--fs-caption)}
+.ui{font-size:var(--fs-ui);line-height:var(--lh-ui)}
+.claim{border-left:2px solid var(--ink);padding-left:var(--s-3);display:flex;flex-direction:column;gap:2px;font-size:var(--fs-ui)}
+/* runs */
+.runs{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:var(--s-3)}
+.run{border:var(--border);border-radius:var(--radius);padding:var(--s-3);display:flex;flex-direction:column;gap:4px;min-width:0;font-size:var(--fs-ui);line-height:var(--lh-ui)}
+.run .id{font-family:var(--mono);font-size:12px;font-weight:500}
+.run .sys,.run .sfx{font-family:var(--mono);font-size:11.5px;color:var(--ink-2)}
+.run .opts{font-family:var(--mono);font-size:11.5px;color:var(--ink-2)}
+.run .opts b{color:var(--ink);font-weight:500;text-decoration:underline;text-underline-offset:2px}
+.run .role{font-size:var(--fs-caption);color:var(--ink-2)}
+.c-h{color:var(--honest-ink)} .c-l{color:var(--deceptive-ink)} .c-c{color:var(--ink-2)}
+/* 2x2 */
+.grid2{display:grid;grid-template-columns:auto 1fr 1fr;gap:var(--s-2);align-items:stretch;font-size:var(--fs-ui)}
+.grid2 .hdr{font-family:var(--mono);font-size:var(--fs-label);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);display:flex;align-items:end;padding:0 var(--s-2)}
+.grid2 .rh{writing-mode:vertical-rl;transform:rotate(180deg);text-align:center;justify-content:center;align-items:center}
+.cellbtn{all:unset;box-sizing:border-box;border:var(--border);border-radius:var(--radius);padding:var(--s-3);display:flex;flex-direction:column;gap:var(--s-2);cursor:pointer;min-width:0;background:var(--surface);transition:background var(--dur) var(--ease)}
+.cellbtn:hover{background:var(--surface-sunk)}
+.cellbtn[aria-pressed="true"]{border-color:var(--ink);background:var(--surface-sunk)}
+.cellbtn:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.cellbtn .role{font-weight:600}
+.cellbtn .why{font-size:var(--fs-caption);color:var(--ink-2);line-height:1.45}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:var(--s-3)}
+.mini{display:flex;flex-direction:column;gap:2px;min-width:0}
+.mini .lab{font-family:var(--mono);font-size:10.5px;color:var(--ink-2)}
+.mbars{display:grid;grid-template-columns:repeat(4,1fr);gap:3px;align-items:end;height:34px}
+.mbars i{display:block;background:var(--ink);border-radius:1px 1px 0 0;min-height:1px}
+.mletters{display:grid;grid-template-columns:repeat(4,1fr);gap:3px;font-family:var(--mono);font-size:10px;color:var(--ink-3);text-align:center}
+.sep{font-family:var(--mono);font-size:var(--fs-label);letter-spacing:.06em;text-transform:uppercase;border-radius:var(--radius-pill);border:1px solid var(--hairline);padding:1px 8px;align-self:flex-start}
+.sep.yes{color:var(--ink);border-color:var(--ink)}
+.sep.no{color:var(--ink-2);border-style:dashed}
+/* controls */
+.controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:var(--s-4) var(--s-5)}
+fieldset{border:0;margin:0;padding:0;min-width:0;display:flex;flex-direction:column;gap:6px}
+legend{font-family:var(--mono);font-size:var(--fs-label);font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);padding:0;margin-bottom:6px}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg label{border:var(--border);border-radius:var(--radius);padding:4px 10px;font-size:var(--fs-ui);line-height:var(--lh-ui);cursor:pointer;background:var(--surface);user-select:none;transition:background var(--dur) var(--ease)}
+.seg label:hover{background:var(--surface-sunk)}
+.seg input:checked+label{background:var(--surface-sunk);border-color:var(--ink)}
+.seg input:focus-visible+label{outline:2px solid var(--ink);outline-offset:2px}
+.slider{display:flex;align-items:center;gap:var(--s-3)}
+.slider input{flex:1;accent-color:var(--interact)}
+.slider output{font-family:var(--mono);font-size:13px;min-width:6ch;text-align:right;font-variant-numeric:tabular-nums}
+/* apparatus */
+.scroll{overflow-x:auto}
+.scroll svg{display:block;width:100%;height:auto;min-width:440px}
+.outs{display:grid;grid-template-columns:1fr 1.4fr;gap:var(--s-5)}
+@media (max-width:620px){.outs{grid-template-columns:1fr}}
+.outcol{display:flex;flex-direction:column;gap:var(--s-2);min-width:0}
+.bars{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--s-2);align-items:end}
+.bar{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:0}
+.bar .col{position:relative;width:100%;max-width:44px;height:104px;background:var(--surface-sunk);border-radius:2px;overflow:hidden}
+.bar .fill{position:absolute;left:0;right:0;bottom:0;transition:height var(--dur-layout) var(--ease)}
+.bar .ghost{position:absolute;left:3px;right:3px;bottom:0;border:1.5px solid var(--context);border-bottom:0;border-radius:2px 2px 0 0}
+.bar .p{font-family:var(--mono);font-size:11px;font-variant-numeric:tabular-nums}
+.bar .lab{font-family:var(--mono);font-size:10.5px;color:var(--ink-2);text-align:center;line-height:1.25;overflow-wrap:anywhere}
+.small .col{height:52px}
+.legend{display:flex;flex-wrap:wrap;gap:var(--s-2) var(--s-4);font-size:var(--fs-caption);color:var(--ink-2)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:14px;height:10px;border-radius:2px;display:inline-block}
+.sw.ghost{border:1.5px solid var(--context);background:transparent}
+.verdict{border-left:2px solid var(--subject);padding:2px 0 2px var(--s-3);display:flex;flex-direction:column;gap:4px;font-size:var(--fs-ui);line-height:1.55}
+.verdict .k{color:var(--subject-ink)}
+.fit{display:grid;grid-template-columns:max-content 1fr max-content;gap:4px var(--s-3);align-items:center;font-size:var(--fs-ui)}
+.fit .nm{color:var(--ink-2)}
+.fit .nm.best{color:var(--ink);font-weight:600}
+.fit .track{height:8px;background:var(--surface-sunk);border-radius:2px;overflow:hidden}
+.fit .track i{display:block;height:100%;background:var(--context);transition:width var(--dur-layout) var(--ease)}
+.fit .track i.best{background:var(--subject)}
+.fit .v{font-family:var(--mono);font-size:12px;font-variant-numeric:tabular-nums}
+.warnline{font-size:var(--fs-caption);color:var(--ink);border:1px dashed var(--ink-2);border-radius:var(--radius);padding:6px 10px}
+/* chart */
+#chartBox svg{cursor:crosshair}
+/* lists, tables */
+ol.steps{margin:0;padding-left:1.4em;display:flex;flex-direction:column;gap:var(--s-2);max-width:70ch;font-size:var(--fs-body)}
+ol.steps li::marker{font-family:var(--mono);font-size:13px;color:var(--ink-2)}
+.tablebox{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:600px;font-size:var(--fs-ui);line-height:var(--lh-ui)}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--rule);vertical-align:top}
+thead th{font-family:var(--mono);font-size:var(--fs-label);font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);background:var(--surface-sunk)}
+td.m{font-family:var(--mono);font-size:12px;white-space:nowrap}
+/* step 2 */
+.cells{display:grid;grid-template-columns:repeat(48,1fr);gap:2px}
+.cell{height:18px;border-radius:2px;border:1px solid var(--hairline);background:var(--surface)}
+.cell.src{background:var(--subject);border-color:var(--subject)}
+@media (max-width:560px){.cells{grid-template-columns:repeat(24,1fr)}.cell:nth-child(n+25){display:none}}
+.stages{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s-2)}
+@media (max-width:560px){.stages{grid-template-columns:1fr}}
+.stage{all:unset;box-sizing:border-box;border:var(--border);border-radius:var(--radius);padding:var(--s-2) var(--s-3);cursor:pointer;display:flex;flex-direction:column;gap:2px;font-size:var(--fs-ui);transition:background var(--dur) var(--ease)}
+.stage:hover{background:var(--surface-sunk)}
+.stage[aria-pressed="true"]{border-color:var(--ink);background:var(--surface-sunk)}
+.stage:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.stage .n{font-family:var(--mono);font-size:var(--fs-label);color:var(--ink-2)}
+.stage .t{font-weight:600}
+.stagebody{display:flex;flex-direction:column;gap:var(--s-2);font-size:var(--fs-ui);line-height:1.6}
+.toggle{display:inline-flex;align-items:center;gap:8px;font-size:var(--fs-ui);cursor:pointer}
+.toggle input{accent-color:var(--interact);width:16px;height:16px}
+.warn{border:1px solid var(--deceptive);border-radius:var(--radius);padding:var(--s-3);font-size:var(--fs-ui);line-height:1.6}
+.warn b{color:var(--deceptive-ink)}
+.note{font-size:var(--fs-caption);color:var(--ink-2)}
+</style></head><body>
+<div class="wrap">
+
+<div class="claim">
+  <span><b>Claim A.</b> There is an internal answer variable that causally influences both honest and dishonest responses.</span>
+  <span style="color:var(--ink-2)">Claim B, that the variable is a belief representation, is not tested here.</span>
+  <span><span class="tag">HYPOTHESIS</span> <span class="note">Every bar and curve below is a prediction derived from a hypothesis. None are measurements.</span></span>
+</div>
+
+<!-- ============ runs ============ -->
+<section>
+  <h2>The runs</h2>
+  <figure>
+    <div class="runs" id="runs"></div>
+    <figcaption><b>Five forward passes per item.</b> Every prompt ends in the same answer prefix, so the patched last token does the same job in every run. Prompt lengths may differ; matched-length pairs are a sensitivity check, not a requirement. Rome stays out of the France options, so "toward Lyon" is the prediction for a letter-coded variable. Across items the answer letters rotate so source and target letters differ.</figcaption>
+  </figure>
+</section>
+
+<!-- ============ 2x2 ============ -->
+<section>
+  <h2>Which cells can separate the hypotheses</h2>
+  <p>At late layers the last token may already hold the output, so a patch can move the answer by copying it. Answer-variable transfer and output copying make the same prediction in some cells and opposite predictions in others. Only cells where they differ count as evidence for Claim A.</p>
+  <figure>
+    <div class="grid2" id="grid2"></div>
+    <figcaption><b>Honest → lie is the primary test.</b> Each cell shows what answer-variable transfer (middle layers) and output copying (late layers) predict for the target. Honest → honest must pass but cannot separate them. Lie → lie separates them only when the source's lie is peaked on one letter; switch the lie shape in the explorer below to see it. <span class="hint">(click a cell to load it in the explorer)</span></figcaption>
+  </figure>
+</section>
+
+<!-- ============ step 1 explorer ============ -->
+<section>
+  <div class="k">Step 1 · find the layer</div>
+  <h2>Patch the full last-token vector, layer by layer</h2>
+  <figure>
+    <div class="controls">
+      <fieldset><legend>Patch from (source)</legend><div class="seg" id="srcSeg"></div></fieldset>
+      <fieldset><legend>Patch into (target)</legend><div class="seg" id="tgtSeg"></div></fieldset>
+      <fieldset><legend>If the truth is</legend><div class="seg" id="hypSeg"></div></fieldset>
+      <fieldset><legend>Shape of the source's lie (P4)</legend><div class="seg" id="shapeSeg"></div></fieldset>
+      <fieldset style="grid-column:1/-1"><legend>Patch layer ℓ, last token</legend><div class="slider"><input type="range" id="layer" min="0" max="61" value="30" aria-label="Patch layer"><output id="layerOut" for="layer">ℓ = 30</output></div><span class="hint">(drag to move the patch layer)</span></fieldset>
+    </div>
+    <div class="scroll" id="towers"></div>
+    <div class="outs">
+      <div class="outcol"><div class="k" id="srcOutTitle">Source output</div><div class="bars small" id="srcBars"></div></div>
+      <div class="outcol"><div class="k" id="tgtOutTitle">Target output after patch</div><div class="bars" id="tgtBars"></div>
+        <div class="legend"><span><i class="sw ghost"></i>unpatched target</span><span><i class="sw" id="fillSw"></i>after patch (predicted)</span></div></div>
+    </div>
+    <div class="verdict" id="verdict"></div>
+    <div class="outcol">
+      <div class="k">Fit to each prediction · full A–D distribution, Jensen–Shannon similarity</div>
+      <div class="fit" id="fit"></div>
+      <div id="fitWarn"></div>
+    </div>
+    <figcaption><b>Middle layers carry the answer variable; late layers carry the output.</b> In the primary cell the middle band makes the lie avoid D and lets Paris return, while the late band makes the lie say D. Scoring compares the whole distribution with each prediction, so a patch that flattens everything (disruption) fits "disruption", not "answer variable", even though Lyon drops and Paris rises.</figcaption>
+  </figure>
+
+  <h3>The sweep across layers</h3>
+  <figure>
+    <div class="scroll" id="chartBox"></div>
+    <div class="legend" id="chartLegend"></div>
+    <p class="ui" id="window"></p>
+    <figcaption><b>The candidate window is where all three readouts agree.</b> Honest P(D) high, lie P(D) near 0, lie P(A) near ⅓. The early / middle / late boundaries are placeholders; finding them is the point of the sweep. Drawn with 62 layers, as in Gemma-3-27B. <span class="hint">(click the chart to move the layer)</span></figcaption>
+  </figure>
+
+  <h3>Procedure</h3>
+  <ol class="steps">
+    <li>Build items so all prompts end in the same answer prefix. Rotate which letter holds each answer, and keep pairs whose source and target letters differ.</li>
+    <li>Validate the lie instruction before patching. Check its tokenization, and check behaviourally that the model produces false answers competently. Prepare two or three instruction styles (an explicit lie to a user, "pick an incorrect option", one goal-framed version), since "false option" may be read as a selection task rather than lying.</li>
+    <li>Run P1–P4 and the same-letter control. Cache the residual stream at every layer and position.</li>
+    <li>For each layer, copy the source's last-token residual into the target in all four source × target cells and the control. Record the full A–D distribution at the answer token.</li>
+    <li>Score every patched distribution against each prediction (no change, answer variable, output copy, disruption) by Jensen–Shannon similarity. Build the predictions from measured runs: copy = the source's measured output; exclusion = the target's lie behaviour with the forbidden letter moved, using position bias from the inverted items.</li>
+    <li>Read the cells by role: honest → lie is the primary test, lie → honest supports it, honest → honest is the positive control, and lie → lie counts only where the source's lies are peaked.</li>
+    <li>Controls at the candidate layers: the same-letter source should change nothing; compare matched- and unmatched-length pairs and different letter assignments; repeat the primary test under each instruction style.</li>
+    <li>If the last token shows nothing clean, patch at other positions aligned by semantic role (the final token of each entity name, comparing the first token for multi-token names), never by raw index.</li>
+  </ol>
+</section>
+
+<!-- ============ step 2 ============ -->
+<section>
+  <div class="k">Step 2 · find the subspace</div>
+  <h2>Isolate the variable inside the chosen layer</h2>
+  <p>The full residual carries more than the answer. Distributed alignment search learns a rotation <span class="mono">R</span> of the residual at layer ℓ* and patches only the first <span class="mono">k</span> rotated dimensions from source to target; the rest stays from the target run.</p>
+  <figure>
+    <fieldset><legend>Subspace size k</legend><div class="seg" id="kSeg"></div></fieldset>
+    <div class="cells" id="cells"></div>
+    <div class="legend"><span><i class="sw" style="background:var(--subject)"></i>copied from source (answer subspace)</span><span><i class="sw" style="background:var(--surface);border:1px solid var(--hairline)"></i>kept from target</span></div>
+    <p class="ui" id="kText"></p>
+    <figcaption><b>Choose the smallest k that matches the full-vector patch on held-out honest items.</b> Cells stand for the 5,376 dimensions of the residual after rotation.</figcaption>
+  </figure>
+  <figure>
+    <div class="stages" role="group" aria-label="DAS stages">
+      <button class="stage" data-st="0" aria-pressed="true"><span class="n">stage 1</span><span class="t">Train on honest runs</span></button>
+      <button class="stage" data-st="1" aria-pressed="false"><span class="n">stage 2</span><span class="t">Freeze R and k</span></button>
+      <button class="stage" data-st="2" aria-pressed="false"><span class="n">stage 3</span><span class="t">Test on lie runs</span></button>
+    </div>
+    <div class="stagebody" id="stageBody"></div>
+    <label class="toggle"><input type="checkbox" id="lieTrain"> Show what goes wrong if R is trained on lie runs</label>
+    <div class="warn" id="lieWarn" hidden><b>Circular test.</b> Trained on lie runs with "avoid the transferred letter" as the target, the optimizer is rewarded for any subspace that makes the lie skip a letter, including a bare "forbidden letter" signal the honest answer never uses. Claim A would be confirmed by construction. A subspace learned only from honest behaviour that then also steers the lie cannot be explained this way.</div>
+  </figure>
+
+  <h3>What to report</h3>
+  <div class="tablebox"><table>
+    <thead><tr><th>Role</th><th>Pairs</th><th>Claim A predicts</th><th>Rules out</th></tr></thead>
+    <tbody>
+      <tr><td>Positive control</td><td class="m">honest → honest, held-out</td><td>Honest answer follows the source letter</td><td>Patch moved nothing; subspace overfit</td></tr>
+      <tr><td><b>Primary test</b></td><td class="m">honest → lie</td><td>Lie avoids the source letter; target truth returns at ≈ ⅓</td><td>Lie bypasses the variable; output copying (late)</td></tr>
+      <tr><td>Supporting</td><td class="m">lie → honest</td><td>Honest answer moves to the source letter</td><td>Variable absent in lie mode (a null here is ambiguous)</td></tr>
+      <tr><td>Conditional</td><td class="m">lie → lie</td><td>Even spread over the other letters</td><td>Copy of a chosen letter, only when the source's lies are peaked</td></tr>
+      <tr><td>Same-letter control</td><td class="m">control → honest / lie</td><td>No change</td><td>Patch merely disrupts</td></tr>
+      <tr><td>Random subspace</td><td class="m">random k-dim, any pair</td><td>No change</td><td>Effect from dimensionality alone (subspace illusion)</td></tr>
+      <tr><td>Instruction styles</td><td class="m">primary test × 2–3 phrasings</td><td>Same effect across phrasings</td><td>Result specific to "pick a false option"</td></tr>
+      <tr><td>Reference</td><td class="m">full vector at ℓ*</td><td>Upper bound for every row</td><td>—</td></tr>
+    </tbody>
+  </table></div>
+  <p class="note">Every row is scored against the full A–D distribution of each prediction, not only P(D).</p>
+</section>
+</div>
+
+<script>
+const L=62, LET=['A','B','C','D'];
+const S={src:'p2',tgt:'p3',hyp:'claimA',shape:'flat',layer:30,k:'4',stage:0};
+const LIE={flat:[1/3,1/3,1/3,0],peaked:[.08,.84,.08,0]};
+const SRC={
+  p2:{key:'p2',id:'P2 · honest Italy',cls:'h',sys:'Answer truthfully.',q:'What is the capital city of Italy?',opts:['Milan','Naples','Turin','Rome'],ans:3,out:()=>[0,0,0,1]},
+  p4:{key:'p4',id:'P4 · lie Italy',cls:'l',sys:'Answer with a false option.',q:'What is the capital city of Italy?',opts:['Milan','Naples','Turin','Rome'],ans:3,out:()=>LIE[S.shape]},
+  ctl:{key:'ctl',id:'Control · honest Germany',cls:'c',sys:'Answer truthfully.',q:'What is the capital city of Germany?',opts:['Berlin','Munich','Hamburg','Cologne'],ans:0,out:()=>[1,0,0,0]}
+};
+const TGT={
+  p1:{key:'p1',id:'P1 · honest France',cls:'h',mode:'honest',sys:'Answer truthfully.',q:'What is the capital city of France?',opts:['Paris','Marseille','Nice','Lyon'],ans:0,base:[1,0,0,0]},
+  p3:{key:'p3',id:'P3 · lie France',cls:'l',mode:'lie',sys:'Answer with a false option.',q:'What is the capital city of France?',opts:['Paris','Marseille','Nice','Lyon'],ans:0,base:[0,1/3,1/3,1/3]}
+};
+const HYP={claimA:'Claim A (lie excludes the answer)',h0:'Lie ignores the variable',disrupt:'Patch only disrupts'};
+const $=s=>document.querySelector(s);
+const sig=x=>1/(1+Math.exp(-x));
+function W(l){const a=sig((l-19.5)/1.4),b=sig((l-41.5)/1.4);const mid=a*(1-b),late=b;return{early:Math.max(0,1-mid-late),mid,late};}
+const onehot=i=>[0,1,2,3].map(j=>j===i?1:0);
+const excl=i=>[0,1,2,3].map(j=>j===i?0:1/3);
+const UNI=[.25,.25,.25,.25];
+function answerPred(src,tgt){return tgt.mode==='honest'?onehot(src.ans):excl(src.ans);}
+function midDist(src,tgt,hyp){if(hyp==='disrupt')return UNI;if(tgt.mode==='honest')return onehot(src.ans);if(hyp==='h0')return tgt.base.slice();return excl(src.ans);}
+function pred(src,tgt,hyp,l){const w=W(l),m=midDist(src,tgt,hyp),o=src.out();return[0,1,2,3].map(i=>w.early*tgt.base[i]+w.mid*m[i]+w.late*o[i]);}
+function band(l){const w=W(l);return w.mid>=w.early&&w.mid>=w.late?'middle':(w.late>w.early?'late':'early');}
+function jss(p,q){const lg=x=>x>0?Math.log2(x):0;let d=0;for(let i=0;i<4;i++){const m=(p[i]+q[i])/2;if(p[i]>0)d+=.5*p[i]*(lg(p[i])-lg(m));if(q[i]>0)d+=.5*q[i]*(lg(q[i])-lg(m));}return 1-d;}
+const pct=x=>Math.round(x*100)+'%';
+const f2=x=>x.toFixed(2);
+const col=c=>c==='h'?'--honest':c==='l'?'--deceptive':'--context';
+const ink=c=>c==='h'?'--honest-ink':c==='l'?'--deceptive-ink':'--ink-2';
+
+/* runs */
+function runCard(r,role){return `<div class="run"><span class="id c-${r.cls}">${r.id}</span><span class="sys">sys: "${r.sys}"</span><span>${r.q}</span><span class="opts">${r.opts.map((c,i)=>i===r.ans?`<b>(${LET[i]}) ${c}</b>`:`(${LET[i]}) ${c}`).join(' ')}</span><span class="sfx">… Answer: (</span><span class="role">${role}</span></div>`;}
+$('#runs').innerHTML=[runCard(TGT.p1,'Target. Truth at A.'),runCard(TGT.p3,'Target. Same item, lie instruction.'),runCard(SRC.p2,'Source. Truth at D.'),runCard(SRC.p4,'Source. Same item, lie instruction.'),runCard(SRC.ctl,'Control source. Truth at A, the target\'s letter.')].join('');
+
+/* segmented controls */
+function seg(id,name,items,cur,fn){$(id).innerHTML=items.map(([v,t])=>`<input type="radio" name="${name}" id="${name}-${v}" value="${v}" ${v===cur?'checked':''}><label for="${name}-${v}">${t}</label>`).join('');$(id).addEventListener('change',e=>fn(e.target.value));}
+function setRadio(name,v){const el=document.getElementById(name+'-'+v);if(el)el.checked=true;}
+seg('#srcSeg','src',[['p2','P2 · honest Italy'],['p4','P4 · lie Italy'],['ctl','Control · Germany']],S.src,v=>{S.src=v;render();});
+seg('#tgtSeg','tgt',[['p1','P1 · honest France'],['p3','P3 · lie France']],S.tgt,v=>{S.tgt=v;render();});
+seg('#hypSeg','hyp',Object.entries(HYP),S.hyp,v=>{S.hyp=v;render();});
+seg('#shapeSeg','shape',[['flat','Flat over A–C'],['peaked','Peaked on B']],S.shape,v=>{S.shape=v;render();});
+$('#layer').addEventListener('input',e=>{S.layer=+e.target.value;render();});
+
+/* 2x2 grid */
+const CELLS=[
+  {s:'p2',t:'p1',role:'Positive control',why:'Must pass, but both predictions say D.'},
+  {s:'p2',t:'p3',role:'Primary test',why:'Opposite predictions: avoid D vs say D.'},
+  {s:'p4',t:'p1',role:'Supporting',why:'A move to D is strong evidence; no move is ambiguous.'},
+  {s:'p4',t:'p3',role:'Conditional',why:'Separable only if the source\'s lie is peaked.'}
+];
+function mini(d,c,lab){return `<div class="mini"><span class="lab">${lab}</span><div class="mbars">${d.map(p=>`<i style="height:${Math.max(p*100,3)}%;background:var(${c})"></i>`).join('')}</div><div class="mletters">${LET.map(x=>`<span>${x}</span>`).join('')}</div></div>`;}
+function renderGrid(){
+  let h=`<div></div><div class="hdr">into honest (P1)</div><div class="hdr">into lie (P3)</div>`;
+  ['p2','p4'].forEach((s,ri)=>{h+=`<div class="hdr rh">${ri?'from lie (P4)':'from honest (P2)'}</div>`;
+    ['p1','p3'].forEach(t=>{const c=CELLS.find(x=>x.s===s&&x.t===t);const src=SRC[s],tgt=TGT[t];const a=answerPred(src,tgt),o=src.out();const separable=jss(a,o)<0.9;const on=S.src===s&&S.tgt===t;
+      h+=`<button class="cellbtn" data-s="${s}" data-t="${t}" aria-pressed="${on}"><span class="role">${c.role}</span><div class="pair">${mini(a,'--subject','answer variable')}${mini(o,'--context','output copy')}</div><span class="sep ${separable?'yes':'no'}">${separable?'separates them':'cannot separate'}</span><span class="why">${c.why}</span></button>`;});});
+  $('#grid2').innerHTML=h;
+  document.querySelectorAll('.cellbtn').forEach(b=>b.addEventListener('click',()=>{S.src=b.dataset.s;S.tgt=b.dataset.t;if(band(S.layer)!=='middle')S.layer=30;$('#layer').value=S.layer;setRadio('src',S.src);setRadio('tgt',S.tgt);render();}));
+}
+
+/* towers */
+function towers(){
+  const src=SRC[S.src],tgt=TGT[S.tgt],l=S.layer,top=34,bot=284,y=v=>bot-v*(bot-top)/(L-1),sx=70,tx=440,w=130;
+  const bands=x=>[[0,19.5,'--surface-sunk'],[19.5,41.5,'--bg'],[41.5,61,'--surface-sunk']].map(([a,b,c])=>`<rect x="${x}" y="${y(b)}" width="${w}" height="${y(a)-y(b)}" fill="var(${c})"/>`).join('');
+  const tower=(x,r)=>`${bands(x)}<rect x="${x}" y="${top}" width="${w}" height="${bot-top}" fill="none" stroke="var(--rule)"/>${[0,10,20,30,40,50,61].map(t=>`<line x1="${x}" x2="${x+6}" y1="${y(t)}" y2="${y(t)}" stroke="var(--ink-3)"/>`).join('')}<text x="${x+w/2}" y="${bot+22}" text-anchor="middle" font-size="12.5" font-family="var(--mono)" fill="var(${ink(r.cls)})">${r.id}</text>`;
+  const ly=y(l);
+  $('#towers').innerHTML=`<svg viewBox="0 0 650 326" role="img" aria-label="Patch at layer ${l} from ${src.id} into ${tgt.id}">
+    ${tower(sx,src)}${tower(tx,tgt)}
+    ${[0,20,42,61].map(t=>`<text x="${sx-8}" y="${y(t)+4}" text-anchor="end" font-size="11" font-family="var(--mono)" fill="var(--ink-3)">${t}</text>`).join('')}
+    <text x="${sx+w/2}" y="20" text-anchor="middle" font-size="12" fill="var(--ink-2)" font-family="var(--font)">source run</text>
+    <text x="${tx+w/2}" y="20" text-anchor="middle" font-size="12" fill="var(--ink-2)" font-family="var(--font)">target run</text>
+    ${[['early',9.75],['middle',30.5],['late',51.25]].map(([n,v])=>`<text x="${tx+w+8}" y="${y(v)+4}" font-size="10.5" fill="var(--ink-2)" font-family="var(--mono)">${n}</text>`).join('')}
+    <line x1="${sx}" x2="${sx+w}" y1="${ly}" y2="${ly}" stroke="var(--subject)" stroke-width="3"/>
+    <line x1="${tx}" x2="${tx+w}" y1="${ly}" y2="${ly}" stroke="var(--subject)" stroke-width="3"/>
+    <circle cx="${sx+w-8}" cy="${ly}" r="5" fill="var(--subject)"/>
+    <path d="M${sx+w+6},${ly} L${tx-12},${ly}" stroke="var(--subject)" stroke-width="2" fill="none"/>
+    <path d="M${tx-12},${ly-6} L${tx-2},${ly} L${tx-12},${ly+6} z" fill="var(--subject)"/>
+    <text x="${(sx+w+tx)/2}" y="${ly-10}" text-anchor="middle" font-size="12" fill="var(--subject-ink)" font-family="var(--font)">copy last-token residual, ℓ = ${l}</text>
+    <text x="${(sx+w+tx)/2}" y="${ly+20}" text-anchor="middle" font-size="11" fill="var(--ink-2)" font-family="var(--font)">target keeps its question and instruction</text>
+  </svg>`;
+}
+function bars(el,d,base,opts,c){el.innerHTML=d.map((p,i)=>`<div class="bar"><span class="p">${pct(p)}</span><div class="col">${base?`<div class="ghost" style="height:${base[i]*100}%"></div>`:''}<div class="fill" style="height:${p*100}%;background:var(${c})"></div></div><span class="lab">${LET[i]}<br>${opts[i]}</span></div>`).join('');}
+
+function verdict(src,tgt,hyp,b){
+  if(b==='early')return['Nothing written yet','At this depth the last token has not received the answer. The patched run behaves like the unpatched one.'];
+  if(b==='late'){const what=src.key==='p4'?(S.shape==='peaked'?'the source\'s chosen lie, B':'the source\'s spread over A–C'):LET[src.ans];
+    let t=`The last token already holds the output, so the patch transplants it: the target now produces ${what}. This is output copying, not the answer variable.`;
+    if(tgt.mode==='lie'&&src.key==='p2')t+=' The lie run says D, the opposite of what exclusion predicts, which is why this cell is the primary test.';
+    if(tgt.mode==='lie'&&src.key==='p4'&&S.shape==='flat')t+=' With a flat source lie this looks exactly like exclusion, which is why lie → lie is only conditional evidence.';
+    return['Output copied',t];}
+  if(src.key==='ctl')return hyp==='disrupt'?['Disruption caught','The control source also has its answer at A, so a real answer variable would change nothing. The output still flattens, exposing the patch as disruption.']:['Control: no change','The control source says "the answer is A", the target\'s own letter. Nothing changes, as a real answer variable predicts.'];
+  if(hyp==='disrupt')return['Disruption','Everything flattens toward 25%. In the lie run Lyon drops and Paris rises, which looks like exclusion, but the full distribution fits "disruption" best.'];
+  if(tgt.mode==='honest')return src.key==='p4'?['Lie run carried the variable','Patched from the lie run, the honest answer still moves to D. The lie run computed "the answer is D", supporting a shared variable.']:['Positive control passes','The honest run reports D (Lyon) although the France question is unchanged. Necessary for Claim A but not sufficient.'];
+  if(hyp==='h0')return['Lie ignores the variable','The same patch that moves the honest answer leaves the lie unchanged. The lie is not computed from this variable.'];
+  return['Correct-answer exclusion','The lie now avoids D, the transferred answer, and Paris comes back as a lie option at about ⅓. The same variable steers honest and dishonest answers: Claim A.'];
+}
+
+function render(){
+  const src=SRC[S.src],tgt=TGT[S.tgt],l=S.layer;
+  $('#layerOut').textContent='ℓ = '+l;
+  towers();
+  $('#srcOutTitle').textContent='Source output · '+src.id;
+  bars($('#srcBars'),src.out(),null,src.opts,col(src.cls));
+  const d=pred(src,tgt,S.hyp,l),c=col(tgt.cls);
+  $('#tgtOutTitle').textContent='Target output after patch · '+tgt.id;
+  $('#fillSw').style.background=`var(${c})`;
+  bars($('#tgtBars'),d,tgt.base,tgt.opts,c);
+  const b=band(l),[h,t]=verdict(src,tgt,S.hyp,b);
+  $('#verdict').innerHTML=`<span class="k">${b} band · ${HYP[S.hyp]}</span><b>${h}</b><span>${t}</span>`;
+  const T=[['No change',tgt.base],['Answer variable',answerPred(src,tgt)],['Output copy',src.out()],['Disruption',UNI]];
+  const sc=T.map(([n,q])=>jss(d,q)),best=sc.indexOf(Math.max(...sc));
+  $('#fit').innerHTML=T.map(([n],i)=>`<span class="nm${i===best?' best':''}">${n}</span><span class="track"><i class="${i===best?'best':''}" style="width:${Math.max(0,sc[i])*100}%"></i></span><span class="v">${f2(sc[i])}</span>`).join('');
+  const same=jss(T[1][1],T[2][1])>0.9;
+  $('#fitWarn').innerHTML=same?`<div class="warnline">In this cell answer-variable transfer and output copying predict nearly the same distribution, so it cannot separate them.</div>`:'';
+  renderGrid();chart();
+}
+
+/* sweep chart */
+function chart(){
+  const src=SRC[S.src],hyp=S.hyp,Wd=650,Ht=250,ml=44,mr=118,mt=14,mb=34;
+  const x=l=>ml+l*(Wd-ml-mr)/(L-1),y=p=>mt+(1-p)*(Ht-mt-mb);
+  const ser=[
+    {name:'Honest run · P(D, Lyon)',c:'--honest',ci:'--honest-ink',sw:2.4,f:l=>pred(src,TGT.p1,hyp,l)[3]},
+    {name:'Lie run · P(D, Lyon)',c:'--deceptive-ink',ci:'--deceptive-ink',sw:1.4,f:l=>pred(src,TGT.p3,hyp,l)[3]},
+    {name:'Lie run · P(A, Paris)',c:'--deceptive',ci:'--deceptive-ink',sw:2.8,f:l=>pred(src,TGT.p3,hyp,l)[0]}
+  ];
+  const pass=[];for(let l=0;l<L;l++)pass.push(ser[0].f(l)>.8&&ser[1].f(l)<.08&&ser[2].f(l)>.25);
+  const runs=[];let st=null;pass.forEach((p,i)=>{if(p&&st===null)st=i;if(!p&&st!==null){runs.push([st,i-1]);st=null;}});if(st!==null)runs.push([st,L-1]);
+  let s=`<svg viewBox="0 0 ${Wd} ${Ht}" id="chartSvg" role="img" aria-label="Predicted readouts across layers">`;
+  [[0,19.5,'--surface-sunk'],[41.5,61,'--surface-sunk']].forEach(([a,b,c])=>{s+=`<rect x="${x(a)}" y="${mt}" width="${x(b)-x(a)}" height="${Ht-mt-mb}" fill="var(${c})"/>`;});
+  [['early',9.75],['middle',30.5],['late',51.25]].forEach(([n,v])=>{s+=`<text x="${x(v)}" y="${mt+12}" text-anchor="middle" font-size="10.5" font-family="var(--mono)" fill="var(--ink-3)">${n}</text>`;});
+  runs.forEach(([a,b])=>{s+=`<rect x="${x(a)-3}" y="${mt}" width="${x(b)-x(a)+6}" height="${Ht-mt-mb}" fill="none" stroke="var(--subject)" stroke-width="1.5"/>`;});
+  [0,.25,1/3,.5,.75,1].forEach(p=>{const th=p===1/3;s+=`<line x1="${ml}" x2="${Wd-mr}" y1="${y(p)}" y2="${y(p)}" stroke="var(--hairline)" ${th?'stroke-dasharray="2 3"':''}/><text x="${ml-6}" y="${y(p)+4}" text-anchor="end" font-size="10.5" font-family="var(--mono)" fill="var(--ink-3)">${th?'⅓':p.toFixed(2)}</text>`;});
+  [0,10,20,30,40,50,61].forEach(t=>{s+=`<text x="${x(t)}" y="${Ht-mb+16}" text-anchor="middle" font-size="10.5" font-family="var(--mono)" fill="var(--ink-3)">${t}</text>`;});
+  s+=`<text x="${(ml+Wd-mr)/2}" y="${Ht-4}" text-anchor="middle" font-size="11" fill="var(--ink-2)" font-family="var(--font)">patch layer ℓ (last token)</text>`;
+  ser.forEach(se=>{let d='';for(let l=0;l<L;l++)d+=(l?'L':'M')+x(l).toFixed(1)+','+y(se.f(l)).toFixed(1);s+=`<path d="${d}" fill="none" stroke="var(${se.c})" stroke-width="${se.sw}"/>`;});
+  const ends=ser.map(se=>({se,v:se.f(L-1)}));ends.sort((a,b)=>b.v-a.v);let lastY=-99;ends.forEach(e=>{let yy=y(e.v)+4;if(yy-lastY<13)yy=lastY+13;lastY=yy;s+=`<text x="${x(L-1)+6}" y="${yy}" font-size="10.5" font-family="var(--font)" fill="var(${e.se.ci})">${e.se.name.replace('run · ','')}</text>`;});
+  s+=`<line x1="${x(S.layer)}" x2="${x(S.layer)}" y1="${mt}" y2="${Ht-mb}" stroke="var(--interact)" stroke-width="1.5"/>`;
+  ser.forEach(se=>{s+=`<circle cx="${x(S.layer)}" cy="${y(se.f(S.layer))}" r="3.5" fill="var(${se.c})"/>`;});
+  s+=`<rect x="${ml}" y="${mt}" width="${Wd-ml-mr}" height="${Ht-mt-mb}" fill="transparent"/></svg>`;
+  $('#chartBox').innerHTML=s;
+  $('#chartLegend').innerHTML=ser.map(se=>`<span><i class="sw" style="background:var(${se.c});height:${se.sw+1}px"></i>${se.name}</span>`).join('')+`<span><i class="sw" style="border:1.5px solid var(--subject)"></i>passes all three</span><span><i class="sw" style="background:var(--interact);width:2px"></i>current layer</span>`;
+  const msg=runs.length?`<b>Candidate window: layers ${runs.map(([a,b])=>a===b?a:a+'–'+b).join(', ')}.</b> Honest answer moves to D, the lie stops choosing D, Paris returns as a lie.`:
+    (S.src==='ctl'?'No layer passes, as intended: the control carries the target\'s own letter, so nothing should move.':hyp==='h0'?'No layer passes: the honest curve moves but the lie never avoids D.':hyp==='disrupt'?'No layer passes: the lie curves sit at 0.25 instead of reaching 0 and ⅓.':'No layer passes with this source.');
+  $('#window').innerHTML=msg+` <span style="color:var(--ink-2)">Source ${src.id}; ${HYP[hyp].toLowerCase()}.</span>`;
+  const svg=$('#chartSvg');svg.addEventListener('click',e=>{const r=svg.getBoundingClientRect(),px=(e.clientX-r.left)*Wd/r.width;S.layer=Math.max(0,Math.min(L-1,Math.round((px-ml)*(L-1)/(Wd-ml-mr))));$('#layer').value=S.layer;render();});
+}
+
+/* step 2 */
+const KT={'1':'One dimension: most specific and least prone to illusions, but four letters probably need more than one direction.','2':'Two dimensions: enough in principle if the four letters sit on a plane.','4':'A handful of dimensions. Pick the smallest k whose held-out honest accuracy comes close to the full-vector patch.','8':'More room. Check that a random subspace of the same k still does nothing.','16':'Large k gives the optimizer freedom to find dormant routes that produce the output without being the model\'s variable.','full':'All dimensions: exactly the Step 1 patch, the reference for every subspace.'};
+seg('#kSeg','k',[['1','1'],['2','2'],['4','4'],['8','8'],['16','16'],['full','full vector']],S.k,v=>{S.k=v;renderK();});
+function renderK(){const n=48,k=S.k==='full'?n:+S.k;$('#cells').innerHTML=Array.from({length:n},(_,i)=>`<div class="cell${i<k?' src':''}"></div>`).join('');$('#kText').textContent=KT[S.k];post();}
+const STG=[
+  '<p><b>Train R on honest → honest pairs only.</b> Many capital items, source and target letters differing and rotated. Target: the honest output equals the source\'s answer letter.</p><p class="note">That label assumes a letter-coded variable, which Claim A allows. Claim B would need entity-level labels.</p>',
+  '<p><b>Fix R, k and ℓ*.</b> k is the smallest size reaching near full-vector accuracy on held-out honest items. The optimizer has seen no lie run.</p>',
+  '<p><b>Apply the frozen subspace across modes.</b> Honest → lie is the primary test; lie → honest supports it; lie → lie counts only where the source\'s lies are peaked. Score each against the full distribution of every prediction.</p><p class="note">Then run the controls in the table: same-letter source, random subspace of the same k, each instruction style, and the full-vector reference.</p>'
+];
+function renderStage(){document.querySelectorAll('.stage').forEach(b=>b.setAttribute('aria-pressed',String(+b.dataset.st===S.stage)));$('#stageBody').innerHTML=STG[S.stage];post();}
+document.querySelectorAll('.stage').forEach(b=>b.addEventListener('click',()=>{S.stage=+b.dataset.st;renderStage();}));
+$('#lieTrain').addEventListener('change',e=>{$('#lieWarn').hidden=!e.target.checked;post();});
+
+/* height for the host note */
+function post(){try{parent.postMessage({embedH:document.documentElement.scrollHeight},'*');}catch(e){}}
+try{new ResizeObserver(post).observe(document.body);}catch(e){}
+addEventListener('load',post);
+
+render();renderK();renderStage();
+</script>
+</body></html>
